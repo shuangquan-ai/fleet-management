@@ -477,6 +477,110 @@
     .changelog-item { font-size:0.78rem; color:var(--text-secondary); padding:3px 0; display:flex; gap:8px; align-items:flex-start; }
     .changelog-item::before { content:'→'; color:var(--primary); font-weight:700; flex-shrink:0; margin-top:1px; }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    /* DAX MANAGEMENT */
+    .dax-score-ring { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; }
+    .dax-score-ring.excellent { background:#DCFCE7; color:#15803D; border:2px solid #10B981; }
+    .dax-score-ring.good { background:var(--primary-light); color:var(--primary-dark); border:2px solid var(--primary); }
+    .dax-score-ring.fair { background:#FEF3C7; color:#92400E; border:2px solid #F59E0B; }
+    .dax-score-ring.risk { background:#FEE2E2; color:#991B1B; border:2px solid #EF4444; }
+    .dax-tier-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:700; white-space:nowrap; }
+    .dax-tier-badge.excellent { background:#DCFCE7; color:#15803D; }
+    .dax-tier-badge.good { background:var(--primary-light); color:var(--primary-dark); }
+    .dax-tier-badge.fair { background:#FEF3C7; color:#92400E; }
+    .dax-tier-badge.risk { background:#FEE2E2; color:#991B1B; }
+    .score-mini { display:flex; align-items:center; gap:7px; }
+    .score-track { flex:1; height:5px; background:var(--border); border-radius:3px; overflow:hidden; min-width:70px; }
+    .score-fill { height:100%; border-radius:3px; }
+    .score-fill.excellent { background:#10B981; }
+    .score-fill.good { background:var(--primary); }
+    .score-fill.fair { background:#F59E0B; }
+    .score-fill.risk { background:#EF4444; }
+    .dax-dist-row { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .dax-dist-pill { background:white; border-radius:10px; padding:12px 18px; box-shadow:var(--card-shadow); display:flex; align-items:center; gap:10px; flex:1; min-width:130px; }
+    .dax-dist-pill-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dax-dist-pill-label { font-size:0.78rem; color:var(--text-secondary); }
+    .dax-dist-pill-val { font-size:1.15rem; font-weight:700; }
+    .dax-action-btn { padding:4px 10px; border:1.5px solid var(--border); border-radius:6px; background:white; font-size:0.72rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.12s; }
+    .dax-action-btn:hover { border-color:var(--primary); color:var(--primary); }
+
+    /* PAYMENT MANAGEMENT */
+    .pay-status-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:10px; font-size:0.7rem; font-weight:700; white-space:nowrap; }
+    .pay-status-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:0.7; }
+    .pay-status-badge.completed { background:#DCFCE7; color:#15803D; }
+    .pay-status-badge.pending { background:#FEF3C7; color:#92400E; }
+    .pay-status-badge.processing { background:#DBEAFE; color:#1E40AF; }
+    .pay-status-badge.failed { background:#FEE2E2; color:#991B1B; }
+    .pay-amount { font-weight:700; color:var(--text); }
+    .pay-method-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; color:var(--text-secondary); background:var(--bg); border:1px solid var(--border); padding:2px 7px; border-radius:4px; white-space:nowrap; }
+    .pay-summary-strip { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+    .pay-summary-pill { background:white; border-radius:10px; padding:10px 16px; box-shadow:var(--card-shadow); display:flex; align-items:center; gap:10px; flex:1; min-width:130px; }
+    .pay-summary-pill-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .pay-deduction-item { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); font-size:0.875rem; }
+    .pay-deduction-item:last-child { border-bottom:none; }
+    .pay-channel-bar { display:flex; gap:0; height:8px; border-radius:4px; overflow:hidden; margin:10px 0; }
+    .pay-channel-seg { height:100%; transition:width 0.4s; }
+    .pay-breakdown-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; font-size:0.82rem; }
+    .pay-breakdown-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    /* DAX ONBOARDING & PROFILE */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-field { display:flex; flex-direction:column; gap:5px; }
+    .form-field.full { grid-column:1/-1; }
+    .form-label { font-size:0.78rem; font-weight:600; color:var(--text); }
+    .form-input { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; transition:border-color 0.15s; width:100%; color:var(--text); background:white; }
+    .form-input:focus { border-color:var(--primary); }
+    .form-input.error { border-color:var(--red); }
+    .form-select { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; width:100%; background:white; color:var(--text); }
+    .form-select:focus { border-color:var(--primary); }
+    .form-section-title { font-size:0.72rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.08em; margin:14px 0 10px; padding-bottom:5px; border-bottom:2px solid var(--primary-light); }
+    .upload-area { border:2px dashed var(--border); border-radius:10px; padding:16px; text-align:center; cursor:pointer; transition:all 0.15s; background:var(--bg); }
+    .upload-area:hover { border-color:var(--primary); background:var(--primary-light); }
+    .upload-area-icon { font-size:1.6rem; margin-bottom:4px; }
+    .upload-area-label { font-size:0.82rem; font-weight:600; color:var(--text); }
+    .upload-area-hint { font-size:0.7rem; color:var(--text-secondary); margin-top:2px; }
+    .upload-done { border-color:var(--primary); background:var(--primary-light); }
+    .review-section { background:var(--bg); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+    .review-section-title { font-size:0.7rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+    .review-row { display:flex; justify-content:space-between; font-size:0.82rem; padding:3px 0; }
+    .review-row .rl { color:var(--text-secondary); }
+    .review-row .rv { font-weight:600; }
+    .onboard-modal { width:620px; max-width:96vw; }
+    /* Driver Profile Modal */
+    .dp-modal { width:720px; max-width:97vw; max-height:92vh; display:flex; flex-direction:column; }
+    .dp-header-card { display:flex; align-items:center; gap:18px; padding:20px 24px; background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+    .dp-avatar { width:68px; height:68px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:1.9rem; flex-shrink:0; border:3px solid rgba(255,255,255,0.5); }
+    .dp-header-info { flex:1; color:white; }
+    .dp-header-name { font-size:1.15rem; font-weight:700; }
+    .dp-header-sub { font-size:0.82rem; opacity:0.85; margin-top:2px; }
+    .dp-score-badge { background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.4); border-radius:10px; padding:8px 14px; text-align:center; flex-shrink:0; }
+    .dp-score-num { font-size:1.6rem; font-weight:700; color:white; line-height:1; }
+    .dp-score-lbl { font-size:0.62rem; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:0.06em; }
+    .dp-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); background:white; padding:0 20px; flex-shrink:0; }
+    .dp-tab { padding:12px 16px; font-size:0.82rem; font-weight:500; cursor:pointer; color:var(--text-secondary); border-bottom:2px solid transparent; transition:all 0.12s; white-space:nowrap; }
+    .dp-tab:hover { color:var(--primary); }
+    .dp-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+    .dp-body { flex:1; overflow-y:auto; padding:20px 24px; }
+    .dp-tab-content { display:none; }
+    .dp-tab-content.active { display:block; }
+    .dp-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .dp-info-item { background:var(--bg); border-radius:8px; padding:10px 14px; }
+    .dp-info-item.full { grid-column:1/-1; }
+    .dp-info-label { font-size:0.68rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+    .dp-info-value { font-size:0.9rem; font-weight:500; color:var(--text); }
+    .dp-doc-card { background:white; border:1.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; }
+    .dp-doc-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .dp-doc-icon { width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .dp-vehicle-card { background:var(--primary-light); border:1.5px solid #A7D9BB; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; margin-bottom:14px; }
+    .dp-vehicle-icon { width:52px; height:52px; border-radius:10px; background:white; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+    .dp-stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+    .dp-stat-card { background:white; border-radius:10px; padding:14px; box-shadow:var(--card-shadow); text-align:center; }
+    .dp-stat-val { font-size:1.25rem; font-weight:700; color:var(--primary); }
+    .dp-stat-lbl { font-size:0.7rem; color:var(--text-secondary); margin-top:3px; }
+    .status-tag { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700; }
+    .status-tag.valid { background:#DCFCE7; color:#15803D; }
+    .status-tag.expiring { background:#FEF3C7; color:#92400E; }
+    .status-tag.expired { background:#FEE2E2; color:#991B1B; }
   </style>
 </head>
 <body>
@@ -505,18 +609,22 @@
   <div class="nav-section">
     <div class="nav-label">Overview</div>
     <div class="nav-item active" onclick="showView('dashboard', this)"><span class="nav-icon">🗺️</span> Dashboard</div>
-    <div class="nav-label">Monitoring</div>
+    <div class="nav-label">Fleet Monitoring</div>
     <div class="nav-item" onclick="showView('vehicles', this)"><span class="nav-icon">🚗</span> Vehicles <span class="nav-badge" id="online-count">51,240</span></div>
-    <div class="nav-item" onclick="showView('iot-global', this)"><span class="nav-icon">📡</span> IoT Devices</div>
     <div class="nav-item" onclick="showView('livestream', this)"><span class="nav-icon">📹</span> Live Streams</div>
+    <div class="nav-item" onclick="showView('iot-global', this)"><span class="nav-icon">📡</span> IoT Devices</div>
     <div class="nav-item" onclick="showView('telematics', this)"><span class="nav-icon">⚡</span> Telematics <span class="nav-badge" id="tel-count-badge">12</span></div>
-    <div class="nav-label">Control</div>
+    <div class="nav-label">Operations</div>
+    <div class="nav-item" onclick="showView('dax', this)"><span class="nav-icon">🏅</span> DAX Management <span class="nav-badge" id="dax-alert-badge"></span></div>
+    <div class="nav-item" onclick="showView('payments', this)"><span class="nav-icon">💳</span> Payments <span class="nav-badge" id="pay-alert-badge"></span></div>
+    <div class="nav-label">Remote Control</div>
     <div class="nav-item" onclick="showView('immobilization', this)"><span class="nav-icon">🔒</span> Immobilization <span class="nav-badge" id="immob-count-badge">23</span></div>
+    <div class="nav-item" onclick="showView('geofence', this)"><span class="nav-icon">🏁</span> Geofences</div>
+    <div class="nav-label">Device Management</div>
     <div class="nav-item" onclick="showView('ota', this)"><span class="nav-icon">🔄</span> OTA Updates <span class="nav-badge" id="ota-count-badge"></span></div>
-    <div class="nav-item" onclick="showView('simdata', this)"><span class="nav-icon">📶</span> SIM Data <span class="nav-badge" id="sim-alert-badge"></span></div>
+    <div class="nav-item" onclick="showView('simdata', this)"><span class="nav-icon">📶</span> SIM Data Management <span class="nav-badge" id="sim-alert-badge"></span></div>
     <div class="nav-label">Analytics</div>
     <div class="nav-item" onclick="showView('history', this)"><span class="nav-icon">📊</span> History & Reports</div>
-    <div class="nav-item" onclick="showView('geofence', this)"><span class="nav-icon">🏁</span> Geofences</div>
   </div>
   <div class="sidebar-footer">
     <div class="sidebar-user">
@@ -1013,6 +1121,159 @@
   </div>
 </div>
 
+<!-- DAX MANAGEMENT VIEW -->
+<div class="view" id="view-dax">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🏅 DAX Management</div>
+      <div class="page-subtitle">Driver Activity Index · Performance, Compliance & Scoring</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none" id="dax-period-select" onchange="renderDaxView()">
+        <option value="may">May 2026</option>
+        <option value="apr">April 2026</option>
+        <option value="mar">March 2026</option>
+      </select>
+      <button class="btn btn-outline">📥 Export</button>
+      <button class="btn btn-outline">📋 Generate Report</button>
+      <button class="btn btn-primary" onclick="openDaxOnboard()">➕ Onboard Driver</button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="dax-kpi-grid"></div>
+
+  <!-- Tier distribution pills -->
+  <div class="dax-dist-row" id="dax-dist-row"></div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or plate…" oninput="filterDax(this.value)" /></div>
+      <button class="filter-btn active" id="dax-f-all"       onclick="setDaxFilter('all',this)">All</button>
+      <button class="filter-btn"        id="dax-f-excellent" onclick="setDaxFilter('excellent',this)">🏆 Excellent</button>
+      <button class="filter-btn"        id="dax-f-good"      onclick="setDaxFilter('good',this)">✅ Good</button>
+      <button class="filter-btn"        id="dax-f-fair"      onclick="setDaxFilter('fair',this)">⚠️ Fair</button>
+      <button class="filter-btn"        id="dax-f-risk"      onclick="setDaxFilter('risk',this)">🚨 At Risk</button>
+      <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem;padding:6px 12px">📥 Export</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Driver</th>
+          <th>City</th>
+          <th>DAX Score</th>
+          <th>Trips</th>
+          <th>Hours Online</th>
+          <th>Incidents</th>
+          <th>Avg Rating</th>
+          <th>Tier</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="dax-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAYMENT MANAGEMENT VIEW -->
+<div class="view" id="view-payments">
+  <div class="page-header">
+    <div>
+      <div class="page-title">💳 Payment Management</div>
+      <div class="page-subtitle">Driver payouts, deductions & disbursement tracking</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none" id="pay-period-select" onchange="renderPayView()">
+        <option value="may">May 2026</option>
+        <option value="apr">April 2026</option>
+        <option value="mar">March 2026</option>
+      </select>
+      <button class="btn btn-outline">📥 Export</button>
+      <button class="btn btn-primary" onclick="showToast('💳 Batch disbursement queued','#00B14F')">🚀 Disburse All Pending</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid" id="pay-kpi-grid"></div>
+
+  <!-- Summary strip -->
+  <div class="pay-summary-strip" id="pay-summary-strip"></div>
+
+  <!-- Sub tabs -->
+  <div class="tabs" style="margin-bottom:16px">
+    <div class="tab active" onclick="showPayTab('pay-tab-payouts',this)">💸 Driver Payouts</div>
+    <div class="tab" onclick="showPayTab('pay-tab-deductions',this)">✂️ Deductions</div>
+    <div class="tab" onclick="showPayTab('pay-tab-invoices',this)">🧾 Invoices</div>
+  </div>
+
+  <!-- PAYOUTS TAB -->
+  <div class="tab-content active" id="pay-tab-payouts">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or plate…" oninput="filterPayments(this.value)" /></div>
+        <button class="filter-btn active" id="pay-f-all"        onclick="setPayFilter('all',this)">All</button>
+        <button class="filter-btn"        id="pay-f-completed"  onclick="setPayFilter('completed',this)">✅ Completed</button>
+        <button class="filter-btn"        id="pay-f-pending"    onclick="setPayFilter('pending',this)">⏳ Pending</button>
+        <button class="filter-btn"        id="pay-f-processing" onclick="setPayFilter('processing',this)">🔄 Processing</button>
+        <button class="filter-btn"        id="pay-f-failed"     onclick="setPayFilter('failed',this)">❌ Failed</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Driver</th>
+            <th>Country</th>
+            <th>Period</th>
+            <th>Trips</th>
+            <th>Gross Earnings</th>
+            <th>Deductions</th>
+            <th>Net Payout</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pay-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DEDUCTIONS TAB -->
+  <div class="tab-content" id="pay-tab-deductions">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">✂️ Deduction Categories</div><span style="font-size:0.75rem;color:var(--primary);cursor:pointer;font-weight:500">Edit Rules</span></div>
+        <div class="card-body" id="pay-deduction-categories"></div>
+      </div>
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">📊 Deduction Breakdown</div><span style="font-size:0.75rem;color:var(--text-secondary)">This month</span></div>
+        <div class="card-body">
+          <div class="pay-channel-bar" id="pay-deduct-bar"></div>
+          <div id="pay-deduct-breakdown"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVOICES TAB -->
+  <div class="tab-content" id="pay-tab-invoices">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span style="font-size:0.875rem;font-weight:600">🧾 Fleet Invoices</span>
+        <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem">📥 Download All</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Invoice #</th><th>Driver</th><th>Period</th><th>Amount</th><th>Issued</th><th>Due Date</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="pay-invoice-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -1087,6 +1348,308 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- DAX ONBOARDING WIZARD MODAL -->
+<div class="modal-overlay" id="dax-onboard-modal">
+  <div class="modal onboard-modal">
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div class="modal-header-title">➕ Onboard New Driver</div>
+        <button class="modal-close" onclick="closeDaxOnboard()">✕</button>
+      </div>
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="ob-step-1"><div class="step-circle">1</div><div class="step-label">Personal</div></div>
+        <div class="wizard-step"        id="ob-step-2"><div class="step-circle">2</div><div class="step-label">Identity</div></div>
+        <div class="wizard-step"        id="ob-step-3"><div class="step-circle">3</div><div class="step-label">Vehicle</div></div>
+        <div class="wizard-step"        id="ob-step-4"><div class="step-circle">4</div><div class="step-label">Review</div></div>
+      </div>
+    </div>
+
+    <div class="modal-body" style="min-height:320px;max-height:65vh;overflow-y:auto">
+
+      <!-- STEP 1: PERSONAL INFO -->
+      <div class="step-content active" id="ob-modal-step-1">
+        <div class="form-section-title">👤 Personal Information</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label class="form-label">Full Legal Name <span class="req">*</span></label>
+            <input class="form-input" id="ob-name" type="text" placeholder="As per ID document" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Date of Birth <span class="req">*</span></label>
+            <input class="form-input" id="ob-dob" type="date" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Gender <span class="req">*</span></label>
+            <select class="form-select" id="ob-gender">
+              <option value="">Select…</option>
+              <option>Male</option><option>Female</option><option>Prefer not to say</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Nationality <span class="req">*</span></label>
+            <select class="form-select" id="ob-nationality">
+              <option value="">Select…</option>
+              <option>Singaporean</option><option>Malaysian</option><option>Indonesian</option>
+              <option>Thai</option><option>Vietnamese</option><option>Filipino</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phone Number <span class="req">*</span></label>
+            <input class="form-input" id="ob-phone" type="tel" placeholder="+65 9123 4567" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" id="ob-email" type="email" placeholder="driver@example.com" />
+          </div>
+          <div class="form-field full">
+            <label class="form-label">Residential Address <span class="req">*</span></label>
+            <input class="form-input" id="ob-address" type="text" placeholder="Street, City, Postal Code" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Emergency Contact Name</label>
+            <input class="form-input" id="ob-ec-name" type="text" placeholder="Full name" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Emergency Contact Phone</label>
+            <input class="form-input" id="ob-ec-phone" type="tel" placeholder="+65 9000 0000" />
+          </div>
+        </div>
+        <div class="form-section-title">📷 Driver Photo</div>
+        <div class="upload-area" id="ob-photo-area" onclick="markUpload('ob-photo-area','ob-photo-status')">
+          <div class="upload-area-icon">🤳</div>
+          <div class="upload-area-label">Upload Driver Photo</div>
+          <div class="upload-area-hint" id="ob-photo-status">JPG or PNG · Max 5MB · Click to upload</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: IDENTIFICATION -->
+      <div class="step-content" id="ob-modal-step-2">
+        <div class="form-section-title">🪪 Identity Document</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">ID Type <span class="req">*</span></label>
+            <select class="form-select" id="ob-id-type">
+              <option value="">Select…</option>
+              <option>NRIC (Singapore)</option><option>MyKad (Malaysia)</option>
+              <option>KTP (Indonesia)</option><option>National ID (Thailand)</option>
+              <option>CCCD (Vietnam)</option><option>PhilSys ID (Philippines)</option>
+              <option>Passport</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">ID Number <span class="req">*</span></label>
+            <input class="form-input" id="ob-id-num" type="text" placeholder="e.g. S8812345A" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">ID Issue Date</label>
+            <input class="form-input" id="ob-id-issued" type="date" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">ID Expiry Date <span class="req">*</span></label>
+            <input class="form-input" id="ob-id-expiry" type="date" />
+          </div>
+          <div class="form-field full">
+            <label class="form-label">Upload ID Document (Front) <span class="req">*</span></label>
+            <div class="upload-area" id="ob-id-front-area" onclick="markUpload('ob-id-front-area','ob-id-front-status')">
+              <div class="upload-area-icon">🪪</div>
+              <div class="upload-area-label">Front Side of ID</div>
+              <div class="upload-area-hint" id="ob-id-front-status">JPG, PNG or PDF · Max 10MB</div>
+            </div>
+          </div>
+          <div class="form-field full">
+            <label class="form-label">Upload ID Document (Back)</label>
+            <div class="upload-area" id="ob-id-back-area" onclick="markUpload('ob-id-back-area','ob-id-back-status')">
+              <div class="upload-area-icon">🪪</div>
+              <div class="upload-area-label">Back Side of ID</div>
+              <div class="upload-area-hint" id="ob-id-back-status">JPG, PNG or PDF · Max 10MB</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section-title">🚘 Driver's License</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">License Number <span class="req">*</span></label>
+            <input class="form-input" id="ob-lic-num" type="text" placeholder="e.g. S1234567" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">License Class <span class="req">*</span></label>
+            <select class="form-select" id="ob-lic-class">
+              <option value="">Select…</option>
+              <option>Class 3 / Class B</option><option>Class 3A / Class B Auto</option>
+              <option>Class 4 (Truck)</option><option>Class 5 (Bus)</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">License Issue Date</label>
+            <input class="form-input" id="ob-lic-issued" type="date" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">License Expiry Date <span class="req">*</span></label>
+            <input class="form-input" id="ob-lic-expiry" type="date" />
+          </div>
+          <div class="form-field full">
+            <label class="form-label">Upload Driver's License <span class="req">*</span></label>
+            <div class="upload-area" id="ob-lic-area" onclick="markUpload('ob-lic-area','ob-lic-status')">
+              <div class="upload-area-icon">🚘</div>
+              <div class="upload-area-label">Driver's License Photo</div>
+              <div class="upload-area-hint" id="ob-lic-status">Front of license card · JPG or PNG · Max 5MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: VEHICLE BINDING -->
+      <div class="step-content" id="ob-modal-step-3">
+        <div class="form-section-title">🚗 Assign Vehicle</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label class="form-label">Select Existing Vehicle</label>
+            <select class="form-select" id="ob-vehicle-select" onchange="obVehicleSelected()">
+              <option value="">— Assign later / no vehicle —</option>
+            </select>
+          </div>
+          <div id="ob-vehicle-preview" style="display:none;grid-column:1/-1">
+            <div class="dp-vehicle-card" style="margin-bottom:0">
+              <div class="dp-vehicle-icon">🚗</div>
+              <div>
+                <div style="font-weight:700;font-size:0.95rem" id="ob-veh-plate-preview">—</div>
+                <div style="font-size:0.8rem;color:var(--primary-dark);margin-top:2px" id="ob-veh-model-preview">—</div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px" id="ob-veh-city-preview">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin:14px 0;text-align:center;font-size:0.78rem;color:var(--text-secondary)">— or register a new vehicle —</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">License Plate Number</label>
+            <input class="form-input" id="ob-new-plate" type="text" placeholder="e.g. SGX9876Z" oninput="this.value=this.value.toUpperCase()" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Vehicle Make & Model</label>
+            <input class="form-input" id="ob-new-model" type="text" placeholder="e.g. Toyota Vios 2024" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Vehicle Color</label>
+            <input class="form-input" id="ob-new-color" type="text" placeholder="e.g. Silver" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Fuel Type</label>
+            <select class="form-select" id="ob-new-fueltype">
+              <option value="">Select…</option>
+              <option value="petrol">Petrol / ICE</option>
+              <option value="ev">Electric (EV)</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Vehicle Registration Expiry</label>
+            <input class="form-input" id="ob-new-reg-expiry" type="date" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Insurance Expiry</label>
+            <input class="form-input" id="ob-new-ins-expiry" type="date" />
+          </div>
+          <div class="form-field full">
+            <label class="form-label">Upload Vehicle Photos / Grant Card</label>
+            <div class="upload-area" id="ob-veh-photo-area" onclick="markUpload('ob-veh-photo-area','ob-veh-photo-status')">
+              <div class="upload-area-icon">📸</div>
+              <div class="upload-area-label">Vehicle Photos & Documents</div>
+              <div class="upload-area-hint" id="ob-veh-photo-status">Front, back, sides + grant card · Max 20MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW -->
+      <div class="step-content" id="ob-modal-step-4">
+        <div style="background:var(--primary-light);border:1px solid #A7D9BB;border-radius:8px;padding:10px 14px;font-size:0.82rem;color:var(--primary-dark);display:flex;gap:8px;margin-bottom:14px">
+          <span>✅</span><span>Please review all information before submitting. You can go back to edit any section.</span>
+        </div>
+        <div class="review-section" id="ob-review-personal">
+          <div class="review-section-title">👤 Personal Information</div>
+        </div>
+        <div class="review-section" id="ob-review-identity">
+          <div class="review-section-title">🪪 Identity & License</div>
+        </div>
+        <div class="review-section" id="ob-review-vehicle">
+          <div class="review-section-title">🚗 Vehicle Assignment</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="ob-back-btn" onclick="obWizardBack()" style="visibility:hidden">← Back</button>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeDaxOnboard()">Cancel</button>
+        <button class="btn btn-primary" id="ob-next-btn" onclick="obWizardNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVER PROFILE MODAL -->
+<div class="modal-overlay" id="dp-modal">
+  <div class="modal dp-modal">
+    <div class="dp-header-card">
+      <div class="dp-avatar" id="dp-avatar-icon">👤</div>
+      <div class="dp-header-info">
+        <div class="dp-header-name" id="dp-header-name">—</div>
+        <div class="dp-header-sub" id="dp-header-sub">—</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="dp-header-badges"></div>
+      </div>
+      <div class="dp-score-badge">
+        <div class="dp-score-num" id="dp-score-num">—</div>
+        <div class="dp-score-lbl">DAX Score</div>
+      </div>
+      <button class="modal-close" onclick="closeDpModal()" style="align-self:flex-start">✕</button>
+    </div>
+    <div class="dp-tabs">
+      <div class="dp-tab active" onclick="showDpTab('dp-tab-overview',this)">📋 Overview</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-personal',this)">👤 Personal Info</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-docs',this)">🪪 Documents</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-vehicle',this)">🚗 Vehicle</div>
+    </div>
+    <div class="dp-body">
+
+      <!-- OVERVIEW TAB -->
+      <div class="dp-tab-content active" id="dp-tab-overview">
+        <div class="dp-stat-row" id="dp-stat-row"></div>
+        <div style="background:white;border-radius:12px;padding:16px;box-shadow:var(--card-shadow);margin-bottom:14px">
+          <div style="font-size:0.82rem;font-weight:700;margin-bottom:12px">DAX Score Breakdown</div>
+          <div id="dp-score-breakdown"></div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="font-size:0.82rem;font-weight:700;margin-bottom:10px">Recent Activity</div>
+          <div id="dp-recent-activity"></div>
+        </div>
+      </div>
+
+      <!-- PERSONAL INFO TAB -->
+      <div class="dp-tab-content" id="dp-tab-personal">
+        <div class="dp-info-grid" id="dp-personal-grid"></div>
+      </div>
+
+      <!-- DOCUMENTS TAB -->
+      <div class="dp-tab-content" id="dp-tab-docs">
+        <div id="dp-docs-content"></div>
+      </div>
+
+      <!-- VEHICLE TAB -->
+      <div class="dp-tab-content" id="dp-tab-vehicle">
+        <div id="dp-vehicle-content"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer" style="justify-content:flex-end">
+      <button class="btn btn-outline" onclick="showToast('📥 Exporting driver profile…','#3B82F6')">📥 Export Profile</button>
+      <button class="btn btn-outline" onclick="showToast('✏️ Edit mode coming soon','#6B7280')">✏️ Edit</button>
+      <button class="btn btn-primary" onclick="closeDpModal()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -2467,6 +3030,8 @@ function showView(name, navEl) {
   if (name === 'livestream') renderStreams();
   if (name === 'ota') renderOtaView();
   if (name === 'simdata') renderSimView();
+  if (name === 'dax') renderDaxView();
+  if (name === 'payments') renderPayView();
 }
 
 // ─── TAB SWITCHER ─────────────────────────────────────────────────────────
@@ -3060,12 +3625,538 @@ function updateSimBadge() {
 
 document.getElementById('sim-limit-modal').addEventListener('click', function(e){if(e.target===this)closeSimModal();});
 
+// ─── DAX MANAGEMENT ────────────────────────────────────────────────────────
+const daxDrivers = [
+  { id:'D001', name:'Ahmad Bin Hassan',  plate:'SGX1234A', vid:'V001', city:'Singapore',   country:'Singapore',  flag:'🇸🇬', daxScore:94, trips:212, hoursOnline:348, incidents:0, rating:4.9, status:'active',
+    dob:'1988-03-15', gender:'Male', nationality:'Malaysian PR', phone:'+65 9123 4567', email:'ahmad.hassan@grab.com', address:'Blk 123 Ang Mo Kio Ave 3, Singapore 560123', ecName:'Fatimah Hassan', ecPhone:'+65 9888 1234',
+    idType:'NRIC', idNumber:'S8812345A', idExpiry:'2030-03-15', idIssued:'2010-03-15',
+    licenseNumber:'S1234567', licenseClass:'Class 3A', licenseIssued:'2010-06-01', licenseExpiry:'2028-06-30',
+    onboardedDate:'2023-01-15', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D002', name:'Rajan Pillai',      plate:'WKL7823B', vid:'V002', city:'Kuala Lumpur', country:'Malaysia',   flag:'🇲🇾', daxScore:88, trips:195, hoursOnline:310, incidents:1, rating:4.8, status:'active',
+    dob:'1990-07-22', gender:'Male', nationality:'Malaysian', phone:'+60 12-345 6789', email:'rajan.pillai@grab.com', address:'No 45, Jalan Ampang, 50450 Kuala Lumpur', ecName:'Priya Pillai', ecPhone:'+60 12-999 0000',
+    idType:'MyKad', idNumber:'900722-14-5678', idExpiry:'2040-07-22', idIssued:'2010-07-22',
+    licenseNumber:'MY5678901', licenseClass:'Class B (Auto)', licenseIssued:'2012-03-10', licenseExpiry:'2027-03-10',
+    onboardedDate:'2023-02-20', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D003', name:'Budi Santoso',      plate:'BJB3921C', vid:'V003', city:'Jakarta',      country:'Indonesia',  flag:'🇮🇩', daxScore:76, trips:167, hoursOnline:278, incidents:2, rating:4.6, status:'active',
+    dob:'1992-11-08', gender:'Male', nationality:'Indonesian', phone:'+62 812-3456-7890', email:'budi.santoso@grab.com', address:'Jl. Gatot Subroto No. 88, Jakarta Selatan 12930', ecName:'Sari Santoso', ecPhone:'+62 812-0000-1111',
+    idType:'KTP', idNumber:'3174011108920001', idExpiry:'2027-11-08', idIssued:'2012-11-08',
+    licenseNumber:'ID8765432', licenseClass:'SIM A', licenseIssued:'2013-05-15', licenseExpiry:'2026-05-15',
+    onboardedDate:'2023-04-10', onboardedBy:'Regional Admin', photoUploaded:true, idUploaded:true, licUploaded:false },
+  { id:'D004', name:'Somchai Wongsri',   plate:'BKK4421D', vid:'V004', city:'Bangkok',      country:'Thailand',   flag:'🇹🇭', daxScore:62, trips:130, hoursOnline:201, incidents:4, rating:4.3, status:'active',
+    dob:'1985-05-30', gender:'Male', nationality:'Thai', phone:'+66 81-234-5678', email:'somchai.w@grab.com', address:'99/2 Sukhumvit Soi 22, Khlong Toei, Bangkok 10110', ecName:'Nong Wongsri', ecPhone:'+66 81-999-8888',
+    idType:'National ID (Thailand)', idNumber:'3-1001-12345-67-8', idExpiry:'2035-05-30', idIssued:'2005-05-30',
+    licenseNumber:'TH2345678', licenseClass:'Class 2 (Auto)', licenseIssued:'2008-09-01', licenseExpiry:'2026-09-01',
+    onboardedDate:'2023-06-05', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D005', name:'Nguyen Van An',     plate:'HCM8812E', vid:'V005', city:'Ho Chi Minh',  country:'Vietnam',    flag:'🇻🇳', daxScore:41, trips: 88, hoursOnline:145, incidents:7, rating:3.9, status:'suspended',
+    dob:'1993-09-12', gender:'Male', nationality:'Vietnamese', phone:'+84 90 123 4567', email:'nguyen.vanan@grab.com', address:'45 Nguyen Hue, Quan 1, TP.HCM', ecName:'Nguyen Thi Mai', ecPhone:'+84 90 000 1111',
+    idType:'CCCD (Vietnam)', idNumber:'079093012345', idExpiry:'2033-09-12', idIssued:'2021-09-12',
+    licenseNumber:'VN3456789', licenseClass:'B1 (Auto)', licenseIssued:'2015-03-20', licenseExpiry:'2025-03-20',
+    onboardedDate:'2023-07-18', onboardedBy:'Regional Admin', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D006', name:'Juan dela Cruz',    plate:'MNL2233G', vid:'V006', city:'Manila',       country:'Philippines',flag:'🇵🇭', daxScore:85, trips:178, hoursOnline:295, incidents:1, rating:4.7, status:'active',
+    dob:'1991-02-14', gender:'Male', nationality:'Filipino', phone:'+63 917 123 4567', email:'juan.delacruz@grab.com', address:'123 EDSA, Mandaluyong, Metro Manila', ecName:'Maria dela Cruz', ecPhone:'+63 917 000 9999',
+    idType:'PhilSys ID', idNumber:'1234-5678-9012', idExpiry:'2031-02-14', idIssued:'2021-02-14',
+    licenseNumber:'PH4567890', licenseClass:'Non-Pro', licenseIssued:'2013-08-01', licenseExpiry:'2027-08-01',
+    onboardedDate:'2023-03-25', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D007', name:'Li Wei Lim',        plate:'SGX5512F', vid:'V007', city:'Singapore',    country:'Singapore',  flag:'🇸🇬', daxScore:91, trips:204, hoursOnline:330, incidents:0, rating:4.9, status:'active',
+    dob:'1989-12-03', gender:'Female', nationality:'Singaporean', phone:'+65 8765 4321', email:'liwei.lim@grab.com', address:'Blk 45 Toa Payoh Lorong 1, Singapore 310045', ecName:'Lim Ah Kow', ecPhone:'+65 9111 2222',
+    idType:'NRIC', idNumber:'S8912345B', idExpiry:'2029-12-03', idIssued:'2009-12-03',
+    licenseNumber:'S9876543', licenseClass:'Class 3A', licenseIssued:'2011-04-10', licenseExpiry:'2029-04-10',
+    onboardedDate:'2022-11-10', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D008', name:'Prakash Kumar',     plate:'PNP9988H', vid:'V008', city:'Singapore',    country:'Singapore',  flag:'🇸🇬', daxScore:79, trips:152, hoursOnline:255, incidents:2, rating:4.6, status:'active',
+    dob:'1987-06-20', gender:'Male', nationality:'Singaporean PR', phone:'+65 8234 5678', email:'prakash.kumar@grab.com', address:'Blk 88 Jurong West St 21, Singapore 640088', ecName:'Kavitha Kumar', ecPhone:'+65 8234 0000',
+    idType:'NRIC', idNumber:'S8712348C', idExpiry:'2027-06-20', idIssued:'2007-06-20',
+    licenseNumber:'S7654321', licenseClass:'Class 3', licenseIssued:'2009-10-15', licenseExpiry:'2027-10-15',
+    onboardedDate:'2023-05-02', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:false, licUploaded:true },
+  { id:'D009', name:'Siti Rahma',        plate:'WXY3312J', vid:null,   city:'Kuala Lumpur', country:'Malaysia',   flag:'🇲🇾', daxScore:55, trips:110, hoursOnline:182, incidents:5, rating:4.1, status:'active',
+    dob:'1994-04-18', gender:'Female', nationality:'Malaysian', phone:'+60 11-2345 6789', email:'siti.rahma@grab.com', address:'No 12, Jalan Duta, 50480 Kuala Lumpur', ecName:'Ahmad Rahma', ecPhone:'+60 11-0000 1234',
+    idType:'MyKad', idNumber:'940418-14-1234', idExpiry:'2040-04-18', idIssued:'2012-04-18',
+    licenseNumber:'MY3456789', licenseClass:'Class B (Auto)', licenseIssued:'2014-07-01', licenseExpiry:'2026-07-01',
+    onboardedDate:'2023-08-12', onboardedBy:'Regional Admin', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D010', name:'Arief Gunawan',     plate:'B2241KLX', vid:null,   city:'Jakarta',      country:'Indonesia',  flag:'🇮🇩', daxScore:97, trips:230, hoursOnline:375, incidents:0, rating:5.0, status:'active',
+    dob:'1986-08-25', gender:'Male', nationality:'Indonesian', phone:'+62 811-2345-6789', email:'arief.gunawan@grab.com', address:'Jl. Sudirman No. 55, Jakarta Pusat 10220', ecName:'Dewi Gunawan', ecPhone:'+62 811-0000-2222',
+    idType:'KTP', idNumber:'3171012508860001', idExpiry:'2026-08-25', idIssued:'2006-08-25',
+    licenseNumber:'ID6543210', licenseClass:'SIM A', licenseIssued:'2010-01-10', licenseExpiry:'2028-01-10',
+    onboardedDate:'2022-09-01', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D011', name:'Malee Siriporn',    plate:'กข1234',   vid:null,   city:'Bangkok',      country:'Thailand',   flag:'🇹🇭', daxScore:83, trips:174, hoursOnline:284, incidents:1, rating:4.7, status:'active',
+    dob:'1995-01-09', gender:'Female', nationality:'Thai', phone:'+66 82-345-6789', email:'malee.s@grab.com', address:'22 Siam Sq, Pathum Wan, Bangkok 10330', ecName:'Somsak Siriporn', ecPhone:'+66 82-111-0000',
+    idType:'National ID (Thailand)', idNumber:'3-1001-23456-78-9', idExpiry:'2035-01-09', idIssued:'2015-01-09',
+    licenseNumber:'TH3456789', licenseClass:'Class 2 (Auto)', licenseIssued:'2015-06-01', licenseExpiry:'2027-06-01',
+    onboardedDate:'2023-01-30', onboardedBy:'Fleet Manager', photoUploaded:true, idUploaded:true, licUploaded:true },
+  { id:'D012', name:'Maria Santos',      plate:'MNL8841K', vid:null,   city:'Manila',       country:'Philippines',flag:'🇵🇭', daxScore:38, trips: 72, hoursOnline:118, incidents:9, rating:3.7, status:'suspended',
+    dob:'1997-03-27', gender:'Female', nationality:'Filipino', phone:'+63 918 234 5678', email:'maria.santos@grab.com', address:'45 Commonwealth Ave, Quezon City, Metro Manila', ecName:'Jose Santos', ecPhone:'+63 918 000 0001',
+    idType:'PhilSys ID', idNumber:'9876-5432-1098', idExpiry:'2031-03-27', idIssued:'2021-03-27',
+    licenseNumber:'PH5678901', licenseClass:'Non-Pro', licenseIssued:'2018-05-10', licenseExpiry:'2026-05-10',
+    onboardedDate:'2023-09-14', onboardedBy:'Regional Admin', photoUploaded:true, idUploaded:true, licUploaded:false },
+];
+
+function getDaxTier(score) {
+  if (score >= 90) return 'excellent';
+  if (score >= 75) return 'good';
+  if (score >= 55) return 'fair';
+  return 'risk';
+}
+function getDaxTierLabel(tier) {
+  return { excellent:'🏆 Excellent', good:'✅ Good', fair:'⚠️ Fair', risk:'🚨 At Risk' }[tier];
+}
+
+let daxFilter = 'all';
+let daxSearch = '';
+
+function renderDaxView() {
+  const drivers = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+
+  // KPI
+  const total = drivers.length;
+  const activeToday = drivers.filter(d => d.status === 'active').length;
+  const avgScore = Math.round(drivers.reduce((s, d) => s + d.daxScore, 0) / total);
+  const atRisk = drivers.filter(d => d.tier === 'risk').length;
+  document.getElementById('dax-kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon blue">👤</div><div class="kpi-label">Total Drivers</div><div class="kpi-value">${total}</div><div class="kpi-change">Across <span>${[...new Set(drivers.map(d=>d.country))].length} countries</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Active Today</div><div class="kpi-value green">${activeToday}</div><div class="kpi-change"><span>+3</span> vs yesterday</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">🏅</div><div class="kpi-label">Avg DAX Score</div><div class="kpi-value">${avgScore}</div><div class="kpi-change"><span>+2.1</span> vs last month</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">🚨</div><div class="kpi-label">At-Risk Drivers</div><div class="kpi-value red">${atRisk}</div><div class="kpi-change" style="color:#EF4444">Requires intervention</div></div>
+  `;
+
+  // Tier distribution
+  const tiers = ['excellent','good','fair','risk'];
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  const tierCounts = {};
+  tiers.forEach(t => tierCounts[t] = drivers.filter(d => d.tier === t).length);
+  document.getElementById('dax-dist-row').innerHTML = tiers.map(t => `
+    <div class="dax-dist-pill">
+      <div class="dax-dist-pill-dot" style="background:${tierColors[t]}"></div>
+      <div><div class="dax-dist-pill-label">${getDaxTierLabel(t)}</div><div class="dax-dist-pill-val" style="color:${tierColors[t]}">${tierCounts[t]}</div></div>
+      <div style="margin-left:auto;font-size:0.72rem;color:var(--text-secondary)">${Math.round(tierCounts[t]/total*100)}%</div>
+    </div>
+  `).join('');
+
+  // Badge
+  const badge = document.getElementById('dax-alert-badge');
+  if (badge) { badge.textContent = atRisk > 0 ? atRisk : ''; badge.style.display = atRisk > 0 ? '' : 'none'; }
+
+  renderDaxTable();
+}
+
+function renderDaxTable() {
+  const tier = daxFilter;
+  const q = daxSearch.toLowerCase();
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  const rows = daxDrivers
+    .map(d => ({ ...d, tier: getDaxTier(d.daxScore) }))
+    .filter(d => (tier === 'all' || d.tier === tier))
+    .filter(d => !q || d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q));
+  document.getElementById('dax-tbody').innerHTML = rows.map(d => `
+    <tr onclick="openDpModal('${d.id}')" style="cursor:pointer">
+      <td><div class="vehicle-info">
+        <div class="dax-score-ring ${d.tier}">${d.daxScore}</div>
+        <div><div class="vehicle-plate">${d.name}</div><div class="vehicle-model">${d.plate}</div></div>
+      </div></td>
+      <td><span>${d.flag}</span> ${d.city}</td>
+      <td><div class="score-mini">
+        <div class="score-track"><div class="score-fill ${d.tier}" style="width:${d.daxScore}%"></div></div>
+        <span style="font-size:0.8rem;font-weight:700;color:${tierColors[d.tier]}">${d.daxScore}</span>
+      </div></td>
+      <td>${d.trips.toLocaleString()}</td>
+      <td>${d.hoursOnline.toLocaleString()} h</td>
+      <td><span style="color:${d.incidents>4?'#EF4444':d.incidents>1?'#F97316':'#10B981'};font-weight:700">${d.incidents}</span></td>
+      <td>${'⭐'.repeat(Math.round(d.rating))} <span style="font-size:0.78rem;color:var(--text-secondary)">${d.rating}</span></td>
+      <td><span class="dax-tier-badge ${d.tier}">${getDaxTierLabel(d.tier)}</span></td>
+      <td><span class="status-badge ${d.status === 'active' ? 'online' : 'offline'}">${d.status === 'active' ? 'Active' : 'Suspended'}</span></td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();openDpModal('${d.id}')">View Profile</button></td>
+    </tr>
+  `).join('') || `<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-secondary)">No drivers match filter</td></tr>`;
+}
+
+function setDaxFilter(f, el) {
+  daxFilter = f;
+  document.querySelectorAll('[id^="dax-f-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDaxTable();
+}
+
+function filterDax(q) { daxSearch = q; renderDaxTable(); }
+// ─── DAX ONBOARDING WIZARD ───────────────────────────────────────────────────
+let obStep = 1;
+
+function openDaxOnboard() {
+  obStep = 1;
+  setObStep(1);
+  const sel = document.getElementById('ob-vehicle-select');
+  sel.innerHTML = '<option value="">— Assign later / no vehicle —</option>' +
+    vehicles.map(v => `<option value="${v.id}">${v.plate} · ${v.model} · ${v.city}</option>`).join('');
+  document.getElementById('ob-vehicle-preview').style.display = 'none';
+  ['ob-photo-area','ob-id-front-area','ob-id-back-area','ob-lic-area','ob-veh-photo-area'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('upload-done');
+  });
+  document.getElementById('ob-photo-status').textContent = 'JPG or PNG · Max 5MB · Click to upload';
+  document.getElementById('ob-id-front-status').textContent = 'JPG, PNG or PDF · Max 10MB';
+  document.getElementById('ob-id-back-status').textContent = 'JPG, PNG or PDF · Max 10MB';
+  document.getElementById('ob-lic-status').textContent = 'Front of license card · JPG or PNG · Max 5MB';
+  document.getElementById('ob-veh-photo-status').textContent = 'Front, back, sides + grant card · Max 20MB';
+  document.getElementById('dax-onboard-modal').classList.add('open');
+}
+
+function closeDaxOnboard() { document.getElementById('dax-onboard-modal').classList.remove('open'); }
+
+function setObStep(n) {
+  obStep = n;
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById(`ob-step-${i}`);
+    el.className = 'wizard-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    el.querySelector('.step-circle').textContent = i < n ? '✓' : i;
+    document.getElementById(`ob-modal-step-${i}`).className = 'step-content' + (i === n ? ' active' : '');
+  });
+  document.getElementById('ob-back-btn').style.visibility = n > 1 ? 'visible' : 'hidden';
+  document.getElementById('ob-next-btn').textContent = n === 4 ? '✅ Submit & Onboard' : 'Next →';
+}
+
+function markUpload(areaId, statusId) {
+  document.getElementById(areaId).classList.add('upload-done');
+  document.getElementById(statusId).textContent = '✅ File selected — ready to upload';
+}
+
+function obVehicleSelected() {
+  const sel = document.getElementById('ob-vehicle-select');
+  const vid = sel.value;
+  const preview = document.getElementById('ob-vehicle-preview');
+  if (!vid) { preview.style.display = 'none'; return; }
+  const v = vehicles.find(x => x.id === vid);
+  if (!v) return;
+  document.getElementById('ob-veh-plate-preview').textContent = v.plate;
+  document.getElementById('ob-veh-model-preview').textContent = `${v.model} · ${v.color}`;
+  document.getElementById('ob-veh-city-preview').textContent = `${v.flag} ${v.city}, ${v.country}`;
+  preview.style.display = '';
+}
+
+function obWizardNext() {
+  if (obStep === 1) {
+    const name = document.getElementById('ob-name').value.trim();
+    const phone = document.getElementById('ob-phone').value.trim();
+    const address = document.getElementById('ob-address').value.trim();
+    if (!name || !phone || !address) { showToast('⚠️ Please fill in required fields (Name, Phone, Address)', '#F97316'); return; }
+    setObStep(2);
+  } else if (obStep === 2) {
+    const idType = document.getElementById('ob-id-type').value;
+    const idNum = document.getElementById('ob-id-num').value.trim();
+    const licNum = document.getElementById('ob-lic-num').value.trim();
+    const licClass = document.getElementById('ob-lic-class').value;
+    if (!idType || !idNum || !licNum || !licClass) { showToast('⚠️ Please fill in required identity & license fields', '#F97316'); return; }
+    setObStep(3);
+  } else if (obStep === 3) {
+    setObStep(4); buildObReview();
+  } else if (obStep === 4) {
+    closeDaxOnboard();
+    showToast('✅ Driver onboarded successfully! DAX profile created.', '#00B14F');
+  }
+}
+
+function obWizardBack() { if (obStep > 1) setObStep(obStep - 1); }
+
+function buildObReview() {
+  const g = id => document.getElementById(id)?.value || '—';
+  document.getElementById('ob-review-personal').innerHTML = `
+    <div class="review-section-title">👤 Personal Information</div>
+    ${[['Full Name',g('ob-name')],['DOB',g('ob-dob')],['Gender',g('ob-gender')],
+       ['Nationality',g('ob-nationality')],['Phone',g('ob-phone')],['Email',g('ob-email')],
+       ['Address',g('ob-address')],['Emergency Contact',g('ob-ec-name')+' · '+g('ob-ec-phone')]
+    ].map(([l,v])=>`<div class="review-row"><span class="rl">${l}</span><span class="rv">${v||'—'}</span></div>`).join('')}`;
+  document.getElementById('ob-review-identity').innerHTML = `
+    <div class="review-section-title">🪪 Identity & License</div>
+    ${[['ID Type',g('ob-id-type')],['ID Number',g('ob-id-num')],['ID Expiry',g('ob-id-expiry')],
+       ['License No.',g('ob-lic-num')],['License Class',g('ob-lic-class')],['License Expiry',g('ob-lic-expiry')]
+    ].map(([l,v])=>`<div class="review-row"><span class="rl">${l}</span><span class="rv">${v||'—'}</span></div>`).join('')}`;
+  const selVid = document.getElementById('ob-vehicle-select').value;
+  const selV = selVid ? vehicles.find(x => x.id === selVid) : null;
+  const newPlate = document.getElementById('ob-new-plate').value;
+  const vehicleInfo = selV ? `${selV.plate} · ${selV.model} · ${selV.city}` : newPlate ? `New: ${newPlate} · ${g('ob-new-model')}` : 'Assign later';
+  document.getElementById('ob-review-vehicle').innerHTML = `
+    <div class="review-section-title">🚗 Vehicle Assignment</div>
+    <div class="review-row"><span class="rl">Vehicle</span><span class="rv">${vehicleInfo}</span></div>
+    ${newPlate?`<div class="review-row"><span class="rl">Fuel Type</span><span class="rv">${g('ob-new-fueltype')||'—'}</span></div>`:''}`;
+}
+
+document.getElementById('dax-onboard-modal').addEventListener('click', function(e) { if (e.target===this) closeDaxOnboard(); });
+
+// ─── DRIVER PROFILE MODAL ────────────────────────────────────────────────────
+function openDpModal(driverId) {
+  const d = daxDrivers.find(x => x.id === driverId);
+  if (!d) return;
+  const tier = getDaxTier(d.daxScore);
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  document.getElementById('dp-avatar-icon').textContent = d.gender === 'Female' ? '👩' : '👨';
+  document.getElementById('dp-header-name').textContent = d.name;
+  document.getElementById('dp-header-sub').textContent = `${d.flag} ${d.city}, ${d.country} · Onboarded ${d.onboardedDate}`;
+  document.getElementById('dp-score-num').textContent = d.daxScore;
+  document.getElementById('dp-header-badges').innerHTML = `
+    <span class="dax-tier-badge ${tier}" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white">${getDaxTierLabel(tier)}</span>
+    <span class="status-badge ${d.status==='active'?'online':'offline'}" style="background:rgba(255,255,255,0.15);color:white">${d.status==='active'?'Active':'Suspended'}</span>
+    ${d.vid?`<span style="background:rgba(255,255,255,0.15);color:white;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:600">🚗 ${d.plate}</span>`:'<span style="background:rgba(239,68,68,0.3);color:white;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:600">⚠️ No Vehicle</span>'}`;
+  // Reset to overview tab
+  document.querySelectorAll('#dp-modal .dp-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('.dp-tab-content').forEach((t,i) => t.classList.toggle('active', i===0));
+  // Overview
+  document.getElementById('dp-stat-row').innerHTML = `
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.trips}</div><div class="dp-stat-lbl">Total Trips</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.hoursOnline}h</div><div class="dp-stat-lbl">Hours Online</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.rating}</div><div class="dp-stat-lbl">Avg Rating</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val" style="color:${d.incidents>4?'#EF4444':d.incidents>1?'#F97316':'#10B981'}">${d.incidents}</div><div class="dp-stat-lbl">Incidents</div></div>`;
+  const scoreFactors = [
+    { label:'Trip Completion Rate', score:Math.min(100,d.trips/2.3|0) },
+    { label:'Safety Score',          score:Math.max(0,100-d.incidents*12) },
+    { label:'Customer Rating',       score:Math.round((d.rating/5)*100) },
+    { label:'Online Hours',          score:Math.min(100,(d.hoursOnline/3.75)|0) },
+  ];
+  document.getElementById('dp-score-breakdown').innerHTML = scoreFactors.map(f => {
+    const c = tierColors[getDaxTier(f.score)];
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+        <span>${f.label}</span><span style="font-weight:700;color:${c}">${f.score}</span>
+      </div><div class="score-track" style="height:7px"><div class="score-fill" style="width:${f.score}%;background:${c}"></div></div>
+    </div>`;}).join('');
+  document.getElementById('dp-recent-activity').innerHTML = [
+    {icon:'🚗',text:'Completed trip — '+d.city+' city center',time:'Today, 09:14 AM'},
+    {icon:'⭐',text:'Received 5-star rating from passenger',time:'Today, 08:50 AM'},
+    {icon:'📱',text:'Logged in to Grab Driver app',time:'Today, 07:30 AM'},
+    {icon:'✅',text:'DAX score updated: '+d.daxScore,time:'Yesterday'},
+  ].map(a=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:1.1rem">${a.icon}</span>
+    <div><div style="font-size:0.82rem">${a.text}</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">${a.time}</div></div>
+  </div>`).join('');
+  // Personal Info
+  document.getElementById('dp-personal-grid').innerHTML = [
+    ['Full Name',d.name],['Date of Birth',d.dob],['Gender',d.gender],['Nationality',d.nationality],
+    ['Phone',d.phone],['Email',d.email],['Residential Address',d.address,true],
+    ['Emergency Contact',d.ecName+' · '+d.ecPhone,true],
+    ['City',`${d.flag} ${d.city}`],['Country',d.country],['Onboarded',d.onboardedDate],['Onboarded By',d.onboardedBy],
+  ].map(([lbl,val,full])=>`<div class="dp-info-item${full?' full':''}"><div class="dp-info-label">${lbl}</div><div class="dp-info-value">${val||'—'}</div></div>`).join('');
+  // Documents
+  const idExp = new Date(d.idExpiry), licExp = new Date(d.licenseExpiry), now = new Date('2026-05-09');
+  const mId = Math.round((idExp-now)/(1000*60*60*24*30)), mLic = Math.round((licExp-now)/(1000*60*60*24*30));
+  const docSt = m => m<0?'expired':m<3?'expiring':'valid';
+  const docLbl = m => m<0?'❌ Expired':m<3?`⚠️ Exp. in ${m}m`:'✅ Valid';
+  document.getElementById('dp-docs-content').innerHTML = `
+    <div class="dp-doc-card">
+      <div class="dp-doc-header">
+        <div class="dp-doc-icon" style="background:#DBEAFE">🪪</div>
+        <div style="flex:1"><div style="font-weight:700">${d.idType}</div><div style="font-size:0.78rem;color:var(--text-secondary)">Government-issued identification</div></div>
+        <span class="status-tag ${docSt(mId)}">${docLbl(mId)}</span>
+      </div>
+      <div class="dp-info-grid">
+        ${[['ID Number',d.idNumber],['Issue Date',d.idIssued],['Expiry Date',d.idExpiry],['Document',d.idUploaded?'✅ Uploaded':'❌ Missing']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="dp-doc-card">
+      <div class="dp-doc-header">
+        <div class="dp-doc-icon" style="background:#DCFCE7">🚘</div>
+        <div style="flex:1"><div style="font-weight:700">Driver's License</div><div style="font-size:0.78rem;color:var(--text-secondary)">${d.licenseClass}</div></div>
+        <span class="status-tag ${docSt(mLic)}">${docLbl(mLic)}</span>
+      </div>
+      <div class="dp-info-grid">
+        ${[['License Number',d.licenseNumber],['Class',d.licenseClass],['Issue Date',d.licenseIssued],['Expiry Date',d.licenseExpiry],['License Doc',d.licUploaded?'✅ Uploaded':'❌ Missing'],['Driver Photo',d.photoUploaded?'✅ Uploaded':'❌ Missing']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}
+      </div>
+    </div>`;
+  // Vehicle
+  const bv = d.vid ? vehicles.find(v => v.id === d.vid) : null;
+  document.getElementById('dp-vehicle-content').innerHTML = bv ? `
+    <div class="dp-vehicle-card">
+      <div class="dp-vehicle-icon">${bv.type==='ev'?'⚡':bv.type==='hybrid'?'🔋':'🚗'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:1rem">${bv.plate}</div>
+        <div style="font-size:0.82rem;color:var(--primary-dark);margin-top:2px">${bv.model} · ${bv.color}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:3px">${bv.flag} ${bv.city}, ${bv.country}</div>
+      </div>
+      <span class="status-badge ${bv.status}">${bv.status}</span>
+    </div>
+    <div class="dp-info-grid">
+      ${[['Plate',bv.plate],['Model',bv.model],['Color',bv.color],['Type',bv.type.toUpperCase()],['City',`${bv.flag} ${bv.city}`],['Mileage',bv.mileage.toLocaleString()+' km'],['Speed',bv.speed+' km/h'],['Signal',['—','Weak','Fair','Good','Excellent'][bv.signal]||'—']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-outline" style="font-size:0.82rem" onclick="showToast('🔄 Rebinding coming soon','#6B7280')">🔄 Rebind Vehicle</button>
+      <button class="btn btn-outline" style="font-size:0.82rem;color:#EF4444;border-color:#FECACA" onclick="showToast('⚠️ Vehicle unbound from driver','#EF4444')">🔗 Unbind</button>
+    </div>` :
+    `<div style="text-align:center;padding:40px;color:var(--text-secondary)">
+      <div style="font-size:3rem;margin-bottom:10px">🚗</div>
+      <div style="font-weight:600">No Vehicle Assigned</div>
+      <div style="font-size:0.8rem;margin-top:6px">This driver has not been assigned a vehicle yet.</div>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="showToast('🚗 Vehicle assignment flow coming soon','#00B14F')">➕ Assign Vehicle</button>
+    </div>`;
+  document.getElementById('dp-modal').classList.add('open');
+}
+
+function closeDpModal() { document.getElementById('dp-modal').classList.remove('open'); }
+
+function showDpTab(tabId, el) {
+  document.querySelectorAll('#dp-modal .dp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dp-tab-content').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+document.getElementById('dp-modal').addEventListener('click', function(e) { if (e.target===this) closeDpModal(); });
+
+
+// ─── PAYMENT MANAGEMENT ─────────────────────────────────────────────────────
+const paymentData = [
+  { id:'PAY001', driver:'Ahmad Bin Hassan',  plate:'SGX1234A', country:'Singapore',  flag:'🇸🇬', trips:212, gross:3180.50, deductions:318.05, period:'May 2026', method:'Bank Transfer', status:'completed', date:'2026-05-07' },
+  { id:'PAY002', driver:'Rajan Pillai',      plate:'WKL7823B', country:'Malaysia',   flag:'🇲🇾', trips:195, gross:2210.00, deductions:221.00, period:'May 2026', method:'GrabPay Wallet', status:'completed', date:'2026-05-07' },
+  { id:'PAY003', driver:'Budi Santoso',      plate:'BJB3921C', country:'Indonesia',  flag:'🇮🇩', trips:167, gross:1875.00, deductions:187.50, period:'May 2026', method:'Bank Transfer', status:'processing', date:'2026-05-08' },
+  { id:'PAY004', driver:'Somchai Wongsri',   plate:'BKK4421D', country:'Thailand',   flag:'🇹🇭', trips:130, gross:1450.00, deductions:145.00, period:'May 2026', method:'PromptPay',     status:'pending',    date:'—' },
+  { id:'PAY005', driver:'Nguyen Van An',     plate:'HCM8812E', country:'Vietnam',    flag:'🇻🇳', trips: 88, gross: 892.00, deductions:133.80, period:'May 2026', method:'MoMo Wallet',  status:'failed',     date:'2026-05-06' },
+  { id:'PAY006', driver:'Juan dela Cruz',    plate:'MNL2233G', country:'Philippines',flag:'🇵🇭', trips:178, gross:2080.00, deductions:208.00, period:'May 2026', method:'GCash',        status:'completed',  date:'2026-05-07' },
+  { id:'PAY007', driver:'Li Wei Lim',        plate:'SGX5512F', country:'Singapore',  flag:'🇸🇬', trips:204, gross:3060.00, deductions:306.00, period:'May 2026', method:'Bank Transfer', status:'completed',  date:'2026-05-07' },
+  { id:'PAY008', driver:'Prakash Kumar',     plate:'PNP9988H', country:'Singapore',  flag:'🇸🇬', trips:152, gross:2280.00, deductions:228.00, period:'May 2026', method:'Bank Transfer', status:'pending',    date:'—' },
+  { id:'PAY009', driver:'Siti Rahma',        plate:'WXY3312J', country:'Malaysia',   flag:'🇲🇾', trips:110, gross:1243.00, deductions:124.30, period:'May 2026', method:'GrabPay Wallet', status:'pending',   date:'—' },
+  { id:'PAY010', driver:'Arief Gunawan',     plate:'B2241KLX', country:'Indonesia',  flag:'🇮🇩', trips:230, gross:2590.00, deductions:259.00, period:'May 2026', method:'Bank Transfer', status:'processing', date:'2026-05-08' },
+  { id:'PAY011', driver:'Malee Siriporn',    plate:'กข1234',   country:'Thailand',   flag:'🇹🇭', trips:174, gross:1940.00, deductions:194.00, period:'May 2026', method:'PromptPay',    status:'completed',  date:'2026-05-07' },
+  { id:'PAY012', driver:'Maria Santos',      plate:'MNL8841K', country:'Philippines',flag:'🇵🇭', trips: 72, gross: 728.00, deductions:109.20, period:'May 2026', method:'GCash',        status:'failed',     date:'2026-05-05' },
+];
+
+const deductionCategories = [
+  { name:'Platform Commission (10%)', pct:10, color:'#00B14F', icon:'💼' },
+  { name:'Insurance Premium',         pct:3,  color:'#3B82F6', icon:'🛡️' },
+  { name:'Vehicle Lease Repayment',   pct:5,  color:'#8B5CF6', icon:'🚗' },
+  { name:'Traffic Fines',             pct:1,  color:'#EF4444', icon:'🚦' },
+  { name:'Cash Advance Repayment',    pct:1,  color:'#F97316', icon:'💵' },
+];
+
+let payFilter = 'all';
+let paySearch = '';
+
+function renderPayView() {
+  const data = paymentData;
+  const totalGross    = data.reduce((s,p) => s + p.gross, 0);
+  const totalNet      = data.reduce((s,p) => s + (p.gross - p.deductions), 0);
+  const totalPending  = data.filter(p => p.status === 'pending').reduce((s,p) => s + (p.gross - p.deductions), 0);
+  const failedCount   = data.filter(p => p.status === 'failed').length;
+  const completedCount= data.filter(p => p.status === 'completed').length;
+
+  document.getElementById('pay-kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon green">💰</div><div class="kpi-label">Total Gross Earnings</div><div class="kpi-value">$${totalGross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change"><span>+8.4%</span> vs last month</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Disbursed (Net)</div><div class="kpi-value green">$${data.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.gross-p.deductions),0).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change"><span>${completedCount}</span> drivers paid</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⏳</div><div class="kpi-label">Pending Disbursement</div><div class="kpi-value yellow">$${totalPending.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change">${data.filter(p=>p.status==='pending').length} payouts queued</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">❌</div><div class="kpi-label">Failed Transactions</div><div class="kpi-value red">${failedCount}</div><div class="kpi-change" style="color:#EF4444">Requires retry or review</div></div>
+  `;
+
+  // Summary strip by payment method
+  const methods = {};
+  data.forEach(p => { methods[p.method] = (methods[p.method]||0) + (p.gross - p.deductions); });
+  const methodIcons = { 'Bank Transfer':'🏦', 'GrabPay Wallet':'💚', 'GCash':'💙', 'PromptPay':'🇹🇭', 'MoMo Wallet':'🩷' };
+  document.getElementById('pay-summary-strip').innerHTML = Object.entries(methods).map(([m, amt]) => `
+    <div class="pay-summary-pill">
+      <div class="pay-summary-pill-icon" style="background:var(--primary-light)">${methodIcons[m]||'💳'}</div>
+      <div><div style="font-size:0.72rem;color:var(--text-secondary)">${m}</div><div style="font-size:0.95rem;font-weight:700">$${amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+    </div>
+  `).join('');
+
+  // Badge for failed
+  const badge = document.getElementById('pay-alert-badge');
+  if (badge) { badge.textContent = failedCount > 0 ? failedCount : ''; badge.style.display = failedCount > 0 ? '' : 'none'; }
+
+  renderPayTable();
+  renderDeductionsTab();
+  renderInvoicesTab();
+}
+
+function renderPayTable() {
+  const q = paySearch.toLowerCase();
+  const rows = paymentData
+    .filter(p => payFilter === 'all' || p.status === payFilter)
+    .filter(p => !q || p.driver.toLowerCase().includes(q) || p.plate.toLowerCase().includes(q));
+  const statusIcons = { completed:'✅', pending:'⏳', processing:'🔄', failed:'❌' };
+  document.getElementById('pay-tbody').innerHTML = rows.map(p => {
+    const net = p.gross - p.deductions;
+    return `<tr onclick="showToast('💳 ${p.driver} — $${net.toFixed(2)} net','#00B14F')">
+      <td><div class="vehicle-info">
+        <div class="vehicle-avatar" style="font-size:0.9rem">${p.flag}</div>
+        <div><div class="vehicle-plate">${p.driver}</div><div class="vehicle-model">${p.plate}</div></div>
+      </div></td>
+      <td>${p.country}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${p.period}</td>
+      <td>${p.trips}</td>
+      <td class="pay-amount">$${p.gross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="color:#EF4444;font-size:0.875rem">−$${p.deductions.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="pay-amount" style="color:var(--primary)">$${net.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td><span class="pay-method-badge">${p.method}</span></td>
+      <td><span class="pay-status-badge ${p.status}">${statusIcons[p.status]} ${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
+      <td style="font-size:0.78rem;color:var(--text-secondary)">${p.date}</td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();showToast('${p.status==='failed'?'🔄 Retrying payment…':'📄 Opening payment detail…'}','${p.status==='failed'?'#F97316':'#3B82F6'}')">${p.status==='failed'?'Retry':'Detail'}</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text-secondary)">No payments match filter</td></tr>`;
+}
+
+function renderDeductionsTab() {
+  const totalDeductions = paymentData.reduce((s, p) => s + p.deductions, 0);
+  document.getElementById('pay-deduction-categories').innerHTML = deductionCategories.map(d => `
+    <div class="pay-deduction-item">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span>${d.icon}</span>
+        <div><div style="font-weight:600;font-size:0.875rem">${d.name}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${d.pct}% of gross</div></div>
+      </div>
+      <div style="text-align:right"><div style="font-weight:700;color:var(--text)">$${(totalDeductions * d.pct / 20).toFixed(2)}</div></div>
+    </div>
+  `).join('');
+
+  document.getElementById('pay-deduct-bar').innerHTML = deductionCategories.map(d => `
+    <div class="pay-channel-seg" style="width:${d.pct/20*100}%;background:${d.color}"></div>
+  `).join('');
+
+  document.getElementById('pay-deduct-breakdown').innerHTML = deductionCategories.map(d => `
+    <div class="pay-breakdown-row">
+      <div style="display:flex;align-items:center;gap:8px"><div class="pay-breakdown-dot" style="background:${d.color}"></div>${d.name}</div>
+      <div style="font-weight:600">${d.pct}%</div>
+    </div>
+  `).join('');
+}
+
+function renderInvoicesTab() {
+  const invoices = paymentData.map((p, i) => ({
+    id: `INV-2026-${String(i+1001).padStart(4,'0')}`,
+    driver: p.driver, period: p.period,
+    amount: p.gross - p.deductions,
+    issued: '2026-05-01',
+    due: '2026-05-15',
+    status: p.status === 'completed' ? 'paid' : p.status === 'failed' ? 'overdue' : 'unpaid'
+  }));
+  const invStatusColors = { paid:'#15803D', unpaid:'#92400E', overdue:'#991B1B' };
+  const invStatusBg = { paid:'#DCFCE7', unpaid:'#FEF3C7', overdue:'#FEE2E2' };
+  document.getElementById('pay-invoice-tbody').innerHTML = invoices.map(inv => `
+    <tr onclick="showToast('🧾 Invoice ${inv.id} — $${inv.amount.toFixed(2)}','#00B14F')">
+      <td style="font-size:0.82rem;font-weight:600;color:var(--primary)">${inv.id}</td>
+      <td>${inv.driver}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.period}</td>
+      <td class="pay-amount">$${inv.amount.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.issued}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.due}</td>
+      <td><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;background:${invStatusBg[inv.status]};color:${invStatusColors[inv.status]}">${inv.status.charAt(0).toUpperCase()+inv.status.slice(1)}</span></td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();showToast('📥 Downloading invoice…','#3B82F6')">📥 PDF</button></td>
+    </tr>
+  `).join('');
+}
+
+function setPayFilter(f, el) {
+  payFilter = f;
+  document.querySelectorAll('[id^="pay-f-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPayTable();
+}
+
+function filterPayments(q) { paySearch = q; renderPayTable(); }
+
+function showPayTab(tabId, el) {
+  document.querySelectorAll('#view-payments .tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#view-payments .tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────
 renderDashboardKPIs();
 setTimeout(initFleetMap, 100);
 updateImmobBadge();
 updateOtaBadge();
 updateSimBadge();
+renderDaxView();
+renderPayView();
 </script>
 </body>
 </html>
