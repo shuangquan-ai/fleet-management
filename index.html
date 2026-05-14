@@ -678,7 +678,7 @@
           <div class="user-dropdown-name" id="dropdown-name">Fleet Manager</div>
           <div class="user-dropdown-email" id="dropdown-email">admin@grab.com</div>
         </div>
-        <div class="user-dropdown-item" onclick="showView('profile',null);closeUserDropdown()">👤 My Profile</div>
+        <div class="user-dropdown-item" onclick="showView('profile', document.querySelector('.nav-item[onclick*=\'profile\']'));closeUserDropdown()">👤 My Profile</div>
         <div class="user-dropdown-item" onclick="showToast('⚙️ Settings coming soon','#3B82F6');closeUserDropdown()">⚙️ Settings</div>
         <div class="user-dropdown-divider"></div>
         <div class="user-dropdown-item danger" onclick="doLogout()">🚪 Sign Out</div>
@@ -710,9 +710,11 @@
     <div class="nav-item" onclick="showView('simdata', this)"><span class="nav-icon">📶</span> SIM Data Management <span class="nav-badge" id="sim-alert-badge"></span></div>
     <div class="nav-label">Analytics</div>
     <div class="nav-item" onclick="showView('history', this)"><span class="nav-icon">📊</span> History & Reports</div>
+    <div class="nav-label">Account</div>
+    <div class="nav-item" onclick="showView('profile', this)"><span class="nav-icon">👤</span> My Profile</div>
   </div>
   <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="showView('profile',null)" style="cursor:pointer;border-radius:8px;padding:6px 8px;transition:background 0.12s" onmouseenter="this.style.background='var(--sidebar-hover)'" onmouseleave="this.style.background=''">
+    <div class="sidebar-user" onclick="showView('profile', document.querySelector('.nav-item[onclick*=\'profile\']'))" style="cursor:pointer;border-radius:8px;padding:6px 8px;transition:background 0.12s" onmouseenter="this.style.background='var(--sidebar-hover)'" onmouseleave="this.style.background=''">
       <div class="avatar" id="sidebar-avatar">FM</div>
       <div style="flex:1;min-width:0">
         <div id="sidebar-username" style="font-size:0.8rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Fleet Manager</div>
@@ -1744,6 +1746,7 @@
 
 <!-- PROFILE VIEW -->
 <div class="view" id="view-profile">
+  <div class="detail-back" onclick="showView('dashboard', document.querySelector('.nav-item[onclick*=\'dashboard\']'))">← Back to Dashboard</div>
   <div class="page-header">
     <div><div class="page-title">My Profile</div><div class="page-subtitle">Manage your account information and preferences</div></div>
     <button class="btn btn-outline" onclick="doLogout()">🚪 Sign Out</button>
