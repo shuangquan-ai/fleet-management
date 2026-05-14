@@ -654,7 +654,7 @@
     </div>
     <div class="login-error" id="login-error">Invalid email or password. Please try again.</div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-hint">Demo credentials: <strong>admin@grab.com</strong> / <strong>admin123</strong></div>
+    <div class="login-hint">Demo mode — click Sign In to continue</div>
   </div>
 </div>
 
@@ -4294,19 +4294,11 @@ const USERS = [
 let currentUser = null;
 
 function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
-  const user = USERS.find(u => u.email === email && u.password === password);
-  if (!user) {
-    errEl.style.display = 'block';
-    document.getElementById('login-email').classList.add('error');
-    document.getElementById('login-password').classList.add('error');
-    return;
-  }
   errEl.style.display = 'none';
   document.getElementById('login-email').classList.remove('error');
   document.getElementById('login-password').classList.remove('error');
+  const user = USERS[0];
   currentUser = user;
   // Update UI with user info
   document.getElementById('topbar-avatar').textContent = user.initials;
