@@ -713,16 +713,6 @@
     <div class="nav-label">Account</div>
     <div class="nav-item" onclick="showView('profile', this)"><span class="nav-icon">👤</span> My Profile</div>
   </div>
-  <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="showView('profile', document.querySelector('.nav-item[onclick*=\'profile\']'))" style="cursor:pointer;border-radius:8px;padding:6px 8px;transition:background 0.12s" onmouseenter="this.style.background='var(--sidebar-hover)'" onmouseleave="this.style.background=''">
-      <div class="avatar" id="sidebar-avatar">FM</div>
-      <div style="flex:1;min-width:0">
-        <div id="sidebar-username" style="font-size:0.8rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Fleet Manager</div>
-        <div style="font-size:0.7rem;color:var(--text-secondary)">Super Admin</div>
-      </div>
-      <div onclick="event.stopPropagation();doLogout()" title="Sign out" style="font-size:1rem;cursor:pointer;color:var(--text-secondary);padding:2px 4px;border-radius:4px;transition:color 0.12s" onmouseenter="this.style.color='var(--red)'" onmouseleave="this.style.color='var(--text-secondary)'">🚪</div>
-    </div>
-  </div>
 </aside>
 
 <!-- MAIN -->
@@ -4302,8 +4292,6 @@ function doLogin() {
   currentUser = user;
   // Update UI with user info
   document.getElementById('topbar-avatar').textContent = user.initials;
-  document.getElementById('sidebar-avatar').textContent = user.initials;
-  document.getElementById('sidebar-username').textContent = user.name;
   document.getElementById('dropdown-name').textContent = user.name;
   document.getElementById('dropdown-email').textContent = user.email;
   document.getElementById('profile-avatar-big').textContent = user.initials;
