@@ -110,7 +110,7 @@
     .map-card { background: white; border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
     .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
     .card-title { font-size: 0.9rem; font-weight: 700; letter-spacing: -0.1px; }
-    #fleet-map { height: 400px; }
+    #fleet-map { height: 440px; }
     .card-body { padding: 18px 20px; }
     .recent-events { display: flex; flex-direction: column; gap: 14px; }
     .event-item { display: flex; gap: 12px; align-items: flex-start; }
@@ -632,6 +632,40 @@
     .profile-edit-btn { padding:5px 14px; border:1.5px solid var(--border); border-radius:6px; background:white; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.12s; }
     .profile-edit-btn:hover { border-color:var(--primary); color:var(--primary); }
 
+    /* STAT TILES */
+    .stat-tiles { display:flex; gap:14px; margin-bottom:18px; }
+    .stat-tile { flex:1; background:white; border-radius:12px; padding:16px 18px; box-shadow:var(--card-shadow); display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:box-shadow 0.15s; min-width:0; }
+    .stat-tile:hover { box-shadow:0 4px 14px rgba(0,0,0,0.10); }
+    .stat-tile-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0; }
+    .stat-tile-body { flex:1; min-width:0; }
+    .stat-tile-label { font-size:0.65rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:5px; }
+    .stat-tile-main { font-size:1.55rem; font-weight:700; color:var(--text); line-height:1; margin-bottom:7px; }
+    .stat-tile-subs { display:flex; flex-direction:column; gap:3px; }
+    .stat-tile-sub { font-size:0.71rem; color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
+    .stat-tile-sub b { font-weight:600; }
+    .stat-tile-sub.ok b   { color:#10B981; }
+    .stat-tile-sub.warn b { color:#F97316; }
+    .stat-tile-sub.bad b  { color:#EF4444; }
+    .stat-tile-divider { width:1px; background:var(--border); align-self:stretch; margin:0 2px; flex-shrink:0; }
+    /* DASH TABS (sidebar) */
+    .dash-tab-bar { display:flex; gap:2px; }
+    .dash-tab { padding:5px 12px; border-radius:6px; border:none; background:none; font-family:inherit; font-size:0.78rem; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:all 0.12s; white-space:nowrap; }
+    .dash-tab:hover { background:var(--bg); color:var(--text); }
+    .dash-tab.active { background:var(--primary); color:white; font-weight:600; }
+    .dash-tab-pane { display:none; }
+    .dash-tab-pane.active { display:block; }
+    /* SIDEBAR CONTENT */
+    .sidebar-map-pane { padding:18px 20px; max-height:430px; overflow-y:auto; }
+    .dax-mini-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); }
+    .dax-mini-row:last-child { border-bottom:none; }
+    .dax-mini-score { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; flex-shrink:0; }
+    .dax-mini-score.excellent { background:#DCFCE7; color:#15803D; }
+    .dax-mini-score.good      { background:#DBEAFE; color:#1D4ED8; }
+    .dax-mini-score.fair      { background:#FEF3C7; color:#92400E; }
+    .dax-mini-score.risk      { background:#FEE2E2; color:#991B1B; }
+    .pay-mini-item { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+    .pay-mini-item:last-child { border-bottom:none; }
+    .pay-mini-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
     /* DASHBOARD ENHANCEMENTS */
     .dash-section-label { font-size:0.72rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 12px; display:flex; align-items:center; gap:8px; }
     .dash-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
@@ -824,48 +858,42 @@
       <button class="btn btn-primary" data-hide-viewer>➕ Add Vehicle</button>
     </div>
   </div>
-  <!-- Row 1: Fleet composition -->
-  <div class="dash-section-label">🚗 Fleet</div>
-  <div class="kpi-grid" id="dash-kpi-fleet"></div>
-  <!-- Row 2: Vehicle status (5 columns) -->
-  <div class="kpi-grid" id="dash-kpi-status" style="grid-template-columns:repeat(5,1fr);margin-top:-4px"></div>
+  <!-- Stat tiles -->
+  <div class="stat-tiles" id="dash-stat-tiles"></div>
 
-  <!-- Row 3: DAX KPIs -->
-  <div class="dash-section-label">🏅 DAX — Driver Performance</div>
-  <div class="kpi-grid" id="dash-kpi-dax"></div>
-
-  <!-- Row 4: Payment KPIs -->
-  <div class="dash-section-label">💳 Payments — May 2026 MTD</div>
-  <div class="kpi-grid" id="dash-kpi-pay"></div>
-
+  <!-- Map + tabbed sidebar -->
   <div class="map-grid">
     <div class="map-card">
-      <div class="card-header"><div class="card-title">📍 Live Vehicle Map</div><div style="display:flex;gap:8px"><button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">🔄 Refresh</button><button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">⛶ Fullscreen</button></div></div>
+      <div class="card-header">
+        <div class="card-title">📍 Live Vehicle Map</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">🔄 Refresh</button>
+          <button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">⛶ Fullscreen</button>
+        </div>
+      </div>
       <div id="fleet-map"></div>
     </div>
-    <div class="map-card">
-      <div class="card-header"><div class="card-title">⚡ Recent Events</div><span style="font-size:0.75rem;color:var(--grab-green);cursor:pointer;font-weight:500">View all</span></div>
-      <div class="card-body">
-        <div class="recent-events" id="dash-events"></div>
+    <div class="map-card" style="display:flex;flex-direction:column">
+      <div class="card-header" style="padding:12px 16px">
+        <div class="dash-tab-bar">
+          <button class="dash-tab active" onclick="showDashTab('events',this)">⚡ Events</button>
+          <button class="dash-tab" onclick="showDashTab('dax',this)">🏅 DAX</button>
+          <button class="dash-tab" onclick="showDashTab('pay',this)">💳 Payments</button>
+        </div>
+        <span style="font-size:0.72rem;color:var(--primary);cursor:pointer;font-weight:600" onclick="showDashTabDetail()">Details →</span>
+      </div>
+      <div style="flex:1;overflow:hidden">
+        <div id="dash-tab-pane-events" class="dash-tab-pane active">
+          <div class="sidebar-map-pane"><div class="recent-events" id="dash-events"></div></div>
+        </div>
+        <div id="dash-tab-pane-dax" class="dash-tab-pane">
+          <div class="sidebar-map-pane" id="dash-sidebar-dax"></div>
+        </div>
+        <div id="dash-tab-pane-pay" class="dash-tab-pane">
+          <div class="sidebar-map-pane" id="dash-sidebar-pay"></div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Row 3: Monthly Operations KPIs -->
-  <div class="dash-section-label">📅 May 2026 — Month-to-Date</div>
-  <div class="kpi-grid" id="dash-kpi-ops" style="grid-template-columns:repeat(4,1fr)"></div>
-
-  <!-- Row 4: DAX snapshot · Payment snapshot · Fleet health -->
-  <div class="dash-3col" id="dash-row4">
-    <div class="info-card" id="dash-dax-card"></div>
-    <div class="info-card" id="dash-pay-card"></div>
-    <div class="info-card" id="dash-health-card"></div>
-  </div>
-
-  <!-- Row 5: Driver leaderboard · Payment activity -->
-  <div class="dash-2col-wide" id="dash-row5">
-    <div class="info-card" id="dash-leaderboard-card"></div>
-    <div class="info-card" id="dash-pay-activity-card"></div>
   </div>
 </div>
 
@@ -3033,395 +3061,208 @@ const dashEvents = [
 
 function renderDashboardKPIs() {
   const s = fleetStats;
-  const icePct  = Math.round(s.ice  / s.total * 100);
-  const evPct   = Math.round(s.ev   / s.total * 100);
-  const hybPct  = Math.round(s.hybrid / s.total * 100);
-  const actPct  = Math.round(s.online / s.total * 100);
+  const actPct = Math.round(s.online / s.total * 100);
 
-  // Row 1 — Fleet composition
-  document.getElementById('dash-kpi-fleet').innerHTML = `
-    <div class="kpi-card">
-      <div class="kpi-icon blue">🚗</div>
-      <div class="kpi-label">Total Vehicles</div>
-      <div class="kpi-value">${fn(s.total)}</div>
-      <div class="kpi-change">Across <span>${s.cities} cities</span> · ${s.countries} countries</div>
+  // ── Compute DAX stats ─────────────────────────────────────────────────
+  const drivers     = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+  const dAvg        = Math.round(drivers.reduce((a,d) => a + d.daxScore, 0) / drivers.length);
+  const dActive     = drivers.filter(d => d.status === 'active').length;
+  const dAtRisk     = drivers.filter(d => d.tier === 'risk').length;
+  const dExcellent  = drivers.filter(d => d.tier === 'excellent').length;
+  const dGood       = drivers.filter(d => d.tier === 'good').length;
+  const dFair       = drivers.filter(d => d.tier === 'fair').length;
+  const dSuspended  = drivers.filter(d => d.status === 'suspended').length;
+  const dTrips      = drivers.reduce((a,d) => a + d.trips, 0);
+  const dIncidents  = drivers.reduce((a,d) => a + d.incidents, 0);
+  const topDriver   = [...drivers].sort((a,b) => b.daxScore - a.daxScore)[0];
+  const riskDrivers = [...drivers].filter(d => d.tier === 'risk' || d.status === 'suspended');
+
+  // ── Compute Payment stats ─────────────────────────────────────────────
+  const pd          = paymentData;
+  const payGross    = pd.reduce((a,p) => a + p.gross, 0);
+  const payDisbursed= pd.filter(p=>p.status==='completed').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payPending  = pd.filter(p=>p.status==='pending').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payProc     = pd.filter(p=>p.status==='processing').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payFailed   = pd.filter(p=>p.status==='failed').length;
+  const payFmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  // ── Stat tiles ────────────────────────────────────────────────────────
+  const tilesEl = document.getElementById('dash-stat-tiles');
+  if (tilesEl) tilesEl.innerHTML = `
+    <div class="stat-tile" onclick="showView('vehicles',document.querySelector('[onclick*=\\'vehicles\\']'))">
+      <div class="stat-tile-icon" style="background:var(--grab-light-green)">🚗</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">Fleet</div>
+        <div class="stat-tile-main">${fn(s.online)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>${actPct}% active</b> of ${fn(s.total)} total</div>
+          <div class="stat-tile-sub warn"><b>${fn(s.idle)} idle</b> · <b class-style="color:#5B21B6">${fn(s.charging)} charging</b></div>
+          <div class="stat-tile-sub bad"><b>${fn(s.offline)} offline</b> · ${fn(s.immobilized)} immobilized</div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#F1F5F9">⛽</div>
-      <div class="kpi-label">ICE Fleet</div>
-      <div class="kpi-value" style="color:#475569">${fn(s.ice)}</div>
-      <div class="kpi-change">Petrol · <span>${icePct}%</span> of fleet</div>
+    <div class="stat-tile" onclick="showView('vehicles',document.querySelector('[onclick*=\\'vehicles\\']"))">
+      <div class="stat-tile-icon" style="background:#EDE9FE">⚡</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">EV / Hybrid</div>
+        <div class="stat-tile-main">${fn(s.ev + s.hybrid)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>${fn(s.ev)} EV</b> · ${fn(s.hybrid)} hybrid</div>
+          <div class="stat-tile-sub warn"><b>${fn(s.lowBattery)} low SoC</b> (&lt;20%)</div>
+          <div class="stat-tile-sub"><b>${fn(s.charging)}</b> at charger now</div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#EDE9FE">⚡</div>
-      <div class="kpi-label">EV Fleet</div>
-      <div class="kpi-value" style="color:#5B21B6">${fn(s.ev)}</div>
-      <div class="kpi-change">Electric · <span>${evPct}%</span> of fleet</div>
+    <div class="stat-tile" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
+      <div class="stat-tile-icon" style="background:#FEF3C7">🏅</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">DAX Score</div>
+        <div class="stat-tile-main">${dAvg}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>${dExcellent} excellent</b> · ${dGood} good</div>
+          <div class="stat-tile-sub warn"><b>${dFair} fair</b> need coaching</div>
+          <div class="stat-tile-sub bad"><b>${dAtRisk} at-risk</b> · ${dSuspended} suspended</div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#DCFCE7">🔋</div>
-      <div class="kpi-label">Hybrid Fleet</div>
-      <div class="kpi-value" style="color:#15803D">${fn(s.hybrid)}</div>
-      <div class="kpi-change">Fuel + electric · <span>${hybPct}%</span> of fleet</div>
+    <div class="stat-tile" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
+      <div class="stat-tile-icon" style="background:#DCFCE7">💳</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">Payments — MTD</div>
+        <div class="stat-tile-main">${payFmt(payGross)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>${payFmt(payDisbursed)} disbursed</b></div>
+          <div class="stat-tile-sub warn"><b>${payFmt(payPending + payProc)} pending</b></div>
+          <div class="stat-tile-sub ${payFailed>0?'bad':'ok'}"><b>${payFailed} failed</b> transaction${payFailed!==1?'s':''}</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-tile" onclick="showView('history',document.querySelector('[onclick*=\\'history\\']'))">
+      <div class="stat-tile-icon" style="background:#DBEAFE">📊</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">This Month</div>
+        <div class="stat-tile-main">${fn(dTrips)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub"><b>trips</b> across ${drivers.length} drivers</div>
+          <div class="stat-tile-sub warn"><b>${dIncidents} incidents</b> reported</div>
+          <div class="stat-tile-sub ok"><b>⭐ ${(drivers.reduce((a,d)=>a+d.rating,0)/drivers.length).toFixed(1)}</b> avg rating</div>
+        </div>
+      </div>
     </div>`;
 
-  // Row 2 — Vehicle status (5 columns)
-  document.getElementById('dash-kpi-status').innerHTML = `
-    <div class="kpi-card">
-      <div class="kpi-icon green">🟢</div>
-      <div class="kpi-label">Online Now</div>
-      <div class="kpi-value green">${fn(s.online)}</div>
-      <div class="kpi-change"><span>${actPct}%</span> fleet active</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon yellow">⏸️</div>
-      <div class="kpi-label">Idle / Parked</div>
-      <div class="kpi-value yellow">${fn(s.idle)}</div>
-      <div class="kpi-change">Avg idle <span>22 min</span></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#EDE9FE">🔌</div>
-      <div class="kpi-label">Charging</div>
-      <div class="kpi-value" style="color:#5B21B6">${fn(s.charging)}</div>
-      <div class="kpi-change"><span>${fn(s.charging)}</span> EVs at charger</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#FEF3C7">🪫</div>
-      <div class="kpi-label">Low Battery &lt;20%</div>
-      <div class="kpi-value" style="color:var(--red)">${fn(s.lowBattery)}</div>
-      <div class="kpi-change"><span>${fn(s.lowBattery)}</span> need charging</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon red">🔒</div>
-      <div class="kpi-label">Offline / Immobilized</div>
-      <div class="kpi-value red">${fn(s.offline + s.immobilized)}</div>
-      <div class="kpi-change">${fn(s.offline)} offline · <span>${fn(s.immobilized)} locked</span></div>
-    </div>`;
-
+  // ── Recent events (Events tab) ────────────────────────────────────────
   const evts = document.getElementById('dash-events');
   if (evts) evts.innerHTML = dashEvents.map(e => `
     <div class="event-item"><div class="event-dot ${e.dot}"></div><div><div class="event-text">${e.text}</div><div class="event-time">${e.time}</div></div></div>`).join('');
 
-  // ── Row 3: DAX KPIs ─────────────────────────────────────────────────────
-  const daxKpi = document.getElementById('dash-kpi-dax');
-  if (daxKpi) {
-    const drivers    = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
-    const dTotal     = drivers.length;
-    const dActive    = drivers.filter(d => d.status === 'active').length;
-    const dSuspended = drivers.filter(d => d.status === 'suspended').length;
-    const dAtRisk    = drivers.filter(d => d.tier === 'risk').length;
-    const dAvg       = Math.round(drivers.reduce((a,d) => a + d.daxScore, 0) / dTotal);
-    const dExcellent = drivers.filter(d => d.tier === 'excellent').length;
-    const topDriver  = [...drivers].sort((a,b) => b.daxScore - a.daxScore)[0];
-    const dTotalTrips = drivers.reduce((a,d) => a + d.trips, 0);
-    const dAvgRating  = (drivers.reduce((a,d) => a + d.rating, 0) / dTotal).toFixed(1);
-    const tierColor = { excellent:'#10B981', good:'#3B82F6', fair:'#F97316', risk:'#EF4444' };
-    daxKpi.innerHTML = `
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
-        <div class="kpi-icon green">🏅</div>
-        <div class="kpi-label">Avg DAX Score</div>
-        <div class="kpi-value">${dAvg}</div>
-        <div class="kpi-change"><span>▲ +2.1</span> vs last month · ${dExcellent} excellent</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
-        <div class="kpi-icon blue">👤</div>
-        <div class="kpi-label">Active Drivers</div>
-        <div class="kpi-value">${dActive}</div>
-        <div class="kpi-change">${dTotalTrips.toLocaleString()} trips · <span>⭐ ${dAvgRating}</span> avg rating</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
-        <div class="kpi-icon red">🚨</div>
-        <div class="kpi-label">At-Risk Drivers</div>
-        <div class="kpi-value red">${dAtRisk}</div>
-        <div class="kpi-change" style="color:#EF4444">${dSuspended} suspended · needs coaching</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
-        <div class="kpi-icon green">🏆</div>
-        <div class="kpi-label">Top Performer</div>
-        <div class="kpi-value" style="font-size:1.3rem;color:${tierColor[topDriver.tier]}">${topDriver.daxScore}</div>
-        <div class="kpi-change">${topDriver.flag} <span>${topDriver.name.split(' ')[0]}</span> · ${topDriver.trips} trips</div>
-      </div>`;
-  }
-
-  // ── Row 4: Payment KPIs ─────────────────────────────────────────────────
-  const payKpi = document.getElementById('dash-kpi-pay');
-  if (payKpi) {
-    const pd          = paymentData;
-    const gross       = pd.reduce((a,p) => a + p.gross, 0);
-    const disbursed   = pd.filter(p=>p.status==='completed').reduce((a,p)=>a+(p.gross-p.deductions),0);
-    const pending     = pd.filter(p=>p.status==='pending').reduce((a,p)=>a+(p.gross-p.deductions),0);
-    const processing  = pd.filter(p=>p.status==='processing').reduce((a,p)=>a+(p.gross-p.deductions),0);
-    const failedCount = pd.filter(p=>p.status==='failed').length;
-    const commission  = gross * 0.10;
-    const fmt = v => '$' + v.toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
-    payKpi.innerHTML = `
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
-        <div class="kpi-icon green">💵</div>
-        <div class="kpi-label">Gross Earnings (MTD)</div>
-        <div class="kpi-value">${fmt(gross)}</div>
-        <div class="kpi-change"><span>+8.4%</span> vs Apr · commission ${fmt(commission)}</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
-        <div class="kpi-icon green">✅</div>
-        <div class="kpi-label">Disbursed (Net)</div>
-        <div class="kpi-value green">${fmt(disbursed)}</div>
-        <div class="kpi-change"><span>${pd.filter(p=>p.status==='completed').length}</span> drivers paid out</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
-        <div class="kpi-icon yellow">⏳</div>
-        <div class="kpi-label">Pending + Processing</div>
-        <div class="kpi-value yellow">${fmt(pending + processing)}</div>
-        <div class="kpi-change">${pd.filter(p=>p.status==='pending').length} queued · ${pd.filter(p=>p.status==='processing').length} processing</div>
-      </div>
-      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
-        <div class="kpi-icon red">❌</div>
-        <div class="kpi-label">Failed Transactions</div>
-        <div class="kpi-value red">${failedCount}</div>
-        <div class="kpi-change" style="color:#EF4444">Requires retry or review</div>
-      </div>`;
-  }
-
-  // ── Row 5: Monthly Operations KPIs ─────────────────────────────────────
-  const totalTrips   = daxDrivers.reduce((s,d) => s + d.trips, 0);
-  const totalHours   = daxDrivers.reduce((s,d) => s + d.hoursOnline, 0);
-  const totalIncidents = daxDrivers.reduce((s,d) => s + d.incidents, 0);
-  const avgRating    = (daxDrivers.reduce((s,d) => s + d.rating, 0) / daxDrivers.length).toFixed(2);
-  const totalGross   = paymentData.reduce((s,p) => s + p.gross, 0);
-  const kpiOps = document.getElementById('dash-kpi-ops');
-  if (kpiOps) kpiOps.innerHTML = `
-    <div class="kpi-card">
-      <div class="kpi-icon green">🛣️</div>
-      <div class="kpi-label">Total Trips (MTD)</div>
-      <div class="kpi-value">${fn(totalTrips)}</div>
-      <div class="kpi-change">Avg <span>${Math.round(totalTrips/daxDrivers.length)}</span> trips/driver</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon blue">⏱️</div>
-      <div class="kpi-label">Driver Hours Online</div>
-      <div class="kpi-value">${fn(totalHours)}</div>
-      <div class="kpi-change">Avg <span>${Math.round(totalHours/daxDrivers.length)}h</span> per driver</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#FEF3C7">⚠️</div>
-      <div class="kpi-label">Safety Incidents (MTD)</div>
-      <div class="kpi-value" style="color:${totalIncidents>10?'var(--red)':'var(--yellow)'}">${totalIncidents}</div>
-      <div class="kpi-change"><span style="color:var(--text-secondary)">Avg rating</span> <span>⭐ ${avgRating}</span></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background:#DCFCE7">💼</div>
-      <div class="kpi-label">Platform Commission</div>
-      <div class="kpi-value" style="color:#15803D">$${(totalGross*0.10/1000).toFixed(1)}K</div>
-      <div class="kpi-change">10% of <span>$${(totalGross/1000).toFixed(1)}K</span> gross</div>
-    </div>`;
-
-  // ── Row 4a: DAX Snapshot ────────────────────────────────────────────────
-  const daxCard = document.getElementById('dash-dax-card');
-  if (daxCard) {
-    const drivers = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
-    const excellent = drivers.filter(d => d.tier === 'excellent').length;
-    const good      = drivers.filter(d => d.tier === 'good').length;
-    const fair      = drivers.filter(d => d.tier === 'fair').length;
-    const risk      = drivers.filter(d => d.tier === 'risk').length;
-    const total     = drivers.length;
-    const avgScore  = Math.round(drivers.reduce((s,d) => s + d.daxScore, 0) / total);
-    const suspended = drivers.filter(d => d.status === 'suspended').length;
+  // ── DAX sidebar tab ───────────────────────────────────────────────────
+  const daxPane = document.getElementById('dash-sidebar-dax');
+  if (daxPane) {
+    const total = drivers.length;
     const pct = n => Math.round(n/total*100);
-    daxCard.innerHTML = `
-      <div class="info-card-header">
-        <div class="info-card-title">🏅 DAX Performance — May 2026</div>
-        <span class="info-card-link" onclick="showView('dax', document.querySelector('[onclick*=\'dax\']'))">View DAX →</span>
-      </div>
-      <div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:4px">
-        <div style="font-size:2.2rem;font-weight:700;line-height:1;color:var(--text)">${avgScore}</div>
-        <div style="font-size:0.78rem;color:var(--text-secondary);padding-bottom:4px">avg score<br><span style="color:#10B981;font-weight:600">▲ +2.1</span> vs Apr</div>
-      </div>
-      <div class="dax-dist-track">
-        <div class="dax-dist-seg" style="width:${pct(excellent)}%;background:#10B981"></div>
-        <div class="dax-dist-seg" style="width:${pct(good)}%;background:#3B82F6"></div>
-        <div class="dax-dist-seg" style="width:${pct(fair)}%;background:#F97316"></div>
-        <div class="dax-dist-seg" style="width:${pct(risk)}%;background:#EF4444"></div>
-      </div>
-      <div class="dax-dist-legend">
-        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#10B981"></div>Excellent ${excellent} (${pct(excellent)}%)</div>
-        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#3B82F6"></div>Good ${good} (${pct(good)}%)</div>
-        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#F97316"></div>Fair ${fair} (${pct(fair)}%)</div>
-        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#EF4444"></div>At-Risk ${risk} (${pct(risk)}%)</div>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700">${total}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Total Drivers</div></div>
-        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#10B981">${total - suspended}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Active</div></div>
-        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#EF4444">${suspended}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Suspended</div></div>
-        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#F97316">${totalIncidents}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Incidents</div></div>
-      </div>`;
-  }
-
-  // ── Row 4b: Payment Snapshot ────────────────────────────────────────────
-  const payCard = document.getElementById('dash-pay-card');
-  if (payCard) {
-    const pd = paymentData;
-    const gross      = pd.reduce((s,p) => s + p.gross, 0);
-    const netDisbursed = pd.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.gross-p.deductions),0);
-    const pendingAmt = pd.filter(p=>p.status==='pending').reduce((s,p)=>s+(p.gross-p.deductions),0);
-    const failedN    = pd.filter(p=>p.status==='failed').length;
-    const completedN = pd.filter(p=>p.status==='completed').length;
-    const processingN= pd.filter(p=>p.status==='processing').length;
-    const pendingN   = pd.filter(p=>p.status==='pending').length;
-    const fmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
-    payCard.innerHTML = `
-      <div class="info-card-header">
-        <div class="info-card-title">💳 Payments — May 2026</div>
-        <span class="info-card-link" onclick="showView('payments', document.querySelector('[onclick*=\'payments\']'))">View All →</span>
-      </div>
-      <div class="pay-stat-2col">
-        <div class="pay-stat-box">
-          <div class="pay-stat-label">Gross Earnings</div>
-          <div class="pay-stat-val">${fmt(gross)}</div>
-        </div>
-        <div class="pay-stat-box">
-          <div class="pay-stat-label">Disbursed (Net)</div>
-          <div class="pay-stat-val" style="color:#10B981">${fmt(netDisbursed)}</div>
-        </div>
-        <div class="pay-stat-box">
-          <div class="pay-stat-label">Pending</div>
-          <div class="pay-stat-val" style="color:#F97316">${fmt(pendingAmt)}</div>
-        </div>
-        <div class="pay-stat-box">
-          <div class="pay-stat-label">Failed Txns</div>
-          <div class="pay-stat-val" style="color:${failedN>0?'#EF4444':'#10B981'}">${failedN}</div>
-        </div>
-      </div>
-      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:7px">Payout Status</div>
-      <div class="pay-status-row">
-        <div class="pay-status-pill completed">Completed ${completedN}</div>
-        <div class="pay-status-pill processing">Processing ${processingN}</div>
-        <div class="pay-status-pill pending">Pending ${pendingN}</div>
-        <div class="pay-status-pill failed">Failed ${failedN}</div>
-      </div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:0.78rem;color:var(--text-secondary)">
-        Platform commission collected: <strong style="color:var(--text)">$${(gross*0.10).toLocaleString('en',{minimumFractionDigits:0})}</strong>
-        &nbsp;·&nbsp; Avg earnings/driver: <strong style="color:var(--text)">$${Math.round(gross/pd.length).toLocaleString()}</strong>
-      </div>`;
-  }
-
-  // ── Row 4c: Fleet Health ────────────────────────────────────────────────
-  const healthCard = document.getElementById('dash-health-card');
-  if (healthCard) {
-    const utilPct = Math.round(s.online / s.total * 100);
-    const licExpiring = daxDrivers.filter(d => {
-      const exp = new Date(d.licenseExpiry);
-      const now = new Date('2026-05-17');
-      const diff = (exp - now) / (1000*60*60*24);
-      return diff >= 0 && diff <= 90;
-    }).length;
-    const idExpiring = daxDrivers.filter(d => {
-      const exp = new Date(d.idExpiry);
-      const now = new Date('2026-05-17');
-      const diff = (exp - now) / (1000*60*60*24);
-      return diff >= 0 && diff <= 90;
-    }).length;
-    healthCard.innerHTML = `
-      <div class="info-card-header">
-        <div class="info-card-title">🔧 Fleet Health</div>
-        <span class="info-card-link" onclick="showView('history', document.querySelector('[onclick*=\'history\']'))">Reports →</span>
-      </div>
+    const sorted = [...drivers].sort((a,b) => b.daxScore - a.daxScore);
+    daxPane.innerHTML = `
       <div style="margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px">
-          <span style="color:var(--text-secondary)">Fleet Utilisation</span>
-          <span style="font-weight:700;color:${utilPct>70?'#10B981':utilPct>50?'#F97316':'#EF4444'}">${utilPct}%</span>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em">Score Distribution</div>
+          <div style="font-size:1.3rem;font-weight:700">${dAvg} <span style="font-size:0.75rem;color:#10B981;font-weight:600">▲+2.1</span></div>
         </div>
-        <div class="util-bar-track"><div class="util-bar-fill" style="width:${utilPct}%;background:${utilPct>70?'#10B981':utilPct>50?'#F97316':'#EF4444'}"></div></div>
-      </div>
-      <div class="alert-row">
-        <div class="alert-icon yellow">📋</div>
-        <div class="alert-label"><strong>License Expiring ≤ 90d</strong><span>${licExpiring} driver${licExpiring!==1?'s':''}</span></div>
-        <div class="alert-badge ${licExpiring>0?'yellow':'green'}">${licExpiring>0?licExpiring+' expiring':'All valid'}</div>
-      </div>
-      <div class="alert-row">
-        <div class="alert-icon yellow">🪪</div>
-        <div class="alert-label"><strong>ID Doc Expiring ≤ 90d</strong><span>${idExpiring} driver${idExpiring!==1?'s':''}</span></div>
-        <div class="alert-badge ${idExpiring>0?'yellow':'green'}">${idExpiring>0?idExpiring+' expiring':'All valid'}</div>
-      </div>
-      <div class="alert-row">
-        <div class="alert-icon red">🔒</div>
-        <div class="alert-label"><strong>Immobilized Vehicles</strong><span>Requires review</span></div>
-        <div class="alert-badge red">${fn(s.immobilized)} locked</div>
-      </div>
-      <div class="alert-row">
-        <div class="alert-icon green">⚡</div>
-        <div class="alert-label"><strong>EVs Online & Healthy</strong><span>SoC ≥ 20%</span></div>
-        <div class="alert-badge green">${fn(s.ev - s.lowBattery)} vehicles</div>
-      </div>`;
-  }
-
-  // ── Row 5a: Driver Leaderboard ──────────────────────────────────────────
-  const lbCard = document.getElementById('dash-leaderboard-card');
-  if (lbCard) {
-    const sorted = [...daxDrivers].sort((a,b) => b.daxScore - a.daxScore);
-    const top5   = sorted.slice(0, 5);
-    const atRisk = [...daxDrivers].filter(d => getDaxTier(d.daxScore) === 'risk').slice(0, 3);
-    const tierColors = { excellent:'#10B981', good:'#3B82F6', fair:'#F97316', risk:'#EF4444' };
-    lbCard.innerHTML = `
-      <div class="info-card-header">
-        <div class="info-card-title">🏆 Driver Leaderboard — DAX Score</div>
-        <span class="info-card-link" onclick="showView('dax', document.querySelector('[onclick*=\\'dax\\']'))">Full List →</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-        <div>
-          <div style="font-size:0.7rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Top Performers</div>
-          ${top5.map((d,i) => {
-            const tier = getDaxTier(d.daxScore);
-            return `<div class="mini-driver-row">
-              <div class="mini-rank">${['🥇','🥈','🥉','4','5'][i]}</div>
-              <div style="flex:1;min-width:0">
-                <div class="mini-driver-name">${d.name}</div>
-                <div class="mini-driver-meta">${d.flag} ${d.city} · ${d.trips} trips</div>
-              </div>
-              <div class="mini-score ${tier}">${d.daxScore}</div>
-            </div>`;
-          }).join('')}
+        <div class="dax-dist-track">
+          <div class="dax-dist-seg" style="width:${pct(dExcellent)}%;background:#10B981"></div>
+          <div class="dax-dist-seg" style="width:${pct(dGood)}%;background:#3B82F6"></div>
+          <div class="dax-dist-seg" style="width:${pct(dFair)}%;background:#F97316"></div>
+          <div class="dax-dist-seg" style="width:${pct(dAtRisk)}%;background:#EF4444"></div>
         </div>
-        <div>
-          <div style="font-size:0.7rem;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Needs Attention</div>
-          ${atRisk.map(d => {
-            const tier = getDaxTier(d.daxScore);
-            return `<div class="mini-driver-row">
-              <div class="mini-rank">🚨</div>
-              <div style="flex:1;min-width:0">
-                <div class="mini-driver-name">${d.name}</div>
-                <div class="mini-driver-meta">${d.flag} ${d.city} · ${d.incidents} incidents</div>
-              </div>
-              <div class="mini-score ${tier}">${d.daxScore}</div>
-            </div>`;
-          }).join('')}
-          <div style="margin-top:14px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:0.78rem;color:var(--text-secondary);line-height:1.5">
-            <strong style="color:var(--text)">${daxDrivers.filter(d=>getDaxTier(d.daxScore)==='fair').length} fair</strong> + <strong style="color:#EF4444">${daxDrivers.filter(d=>getDaxTier(d.daxScore)==='risk').length} at-risk</strong> drivers require coaching this month.
-          </div>
+        <div class="dax-dist-legend" style="margin-top:6px">
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#10B981"></div>Exc ${dExcellent}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#3B82F6"></div>Good ${dGood}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#F97316"></div>Fair ${dFair}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#EF4444"></div>Risk ${dAtRisk}</div>
         </div>
-      </div>`;
-  }
-
-  // ── Row 5b: Recent Payment Activity ────────────────────────────────────
-  const paCard = document.getElementById('dash-pay-activity-card');
-  if (paCard) {
-    const recent = [...paymentData].slice(0, 7);
-    const statusDot = { completed:'#10B981', processing:'#3B82F6', pending:'#F97316', failed:'#EF4444' };
-    paCard.innerHTML = `
-      <div class="info-card-header">
-        <div class="info-card-title">💰 Recent Payouts</div>
-        <span class="info-card-link" onclick="showView('payments', document.querySelector('[onclick*=\\'payments\\']'))">View All →</span>
       </div>
-      ${recent.map(p => {
-        const net = p.gross - p.deductions;
-        return `<div class="mini-pay-row">
-          <div class="mini-pay-dot" style="background:${statusDot[p.status]}"></div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Top Drivers</div>
+      ${sorted.slice(0,4).map((d,i) => `
+        <div class="dax-mini-row">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);width:16px">${i+1}</div>
           <div style="flex:1;min-width:0">
-            <div class="mini-pay-name">${p.flag} ${p.driver}</div>
-            <div class="mini-pay-meta">${p.trips} trips · ${p.method} · ${p.status}</div>
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${d.flag} ${d.city} · ${d.trips} trips</div>
           </div>
-          <div class="mini-pay-amt">$${net.toFixed(0)}</div>
-        </div>`;
-      }).join('')}`;
+          <div class="dax-mini-score ${d.tier}">${d.daxScore}</div>
+        </div>`).join('')}
+      ${riskDrivers.length > 0 ? `
+      <div style="font-size:0.72rem;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.06em;margin:12px 0 8px">Needs Attention</div>
+      ${riskDrivers.slice(0,3).map(d => `
+        <div class="dax-mini-row">
+          <div style="font-size:0.9rem;width:16px">🚨</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${d.incidents} incidents · score ${d.daxScore}</div>
+          </div>
+          <span style="font-size:0.68rem;background:#FEE2E2;color:#991B1B;padding:2px 7px;border-radius:8px;font-weight:700">${d.status==='suspended'?'Suspended':'At-Risk'}</span>
+        </div>`).join('')}` : ''}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="info-card-link" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">View full DAX report →</span>
+      </div>`;
   }
+
+  // ── Payments sidebar tab ──────────────────────────────────────────────
+  const payPane = document.getElementById('dash-sidebar-pay');
+  if (payPane) {
+    const statusDot = { completed:'#10B981', processing:'#3B82F6', pending:'#F97316', failed:'#EF4444' };
+    const statusLabel = { completed:'Paid', processing:'Processing', pending:'Pending', failed:'Failed' };
+    payPane.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Gross MTD</div>
+          <div style="font-size:1rem;font-weight:700">${payFmt(payGross)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Disbursed</div>
+          <div style="font-size:1rem;font-weight:700;color:#10B981">${payFmt(payDisbursed)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Pending</div>
+          <div style="font-size:1rem;font-weight:700;color:#F97316">${payFmt(payPending + payProc)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Failed</div>
+          <div style="font-size:1rem;font-weight:700;color:${payFailed>0?'#EF4444':'#10B981'}">${payFailed}</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Recent Payouts</div>
+      ${pd.slice(0,6).map(p => {
+        const net = p.gross - p.deductions;
+        return `<div class="pay-mini-item">
+          <div class="pay-mini-dot" style="background:${statusDot[p.status]}"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.flag} ${p.driver}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${p.trips} trips · ${statusLabel[p.status]}</div>
+          </div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--primary);flex-shrink:0">$${net.toFixed(0)}</div>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="info-card-link" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">View all payments →</span>
+      </div>`;
+  }
+}
+
+function showDashTab(name, el) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-tab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dash-tab-pane-' + name).classList.add('active');
+}
+
+function showDashTabDetail() {
+  const activeTab = document.querySelector('.dash-tab.active');
+  if (!activeTab) return;
+  const name = activeTab.textContent.includes('DAX') ? 'dax'
+             : activeTab.textContent.includes('Pay') ? 'payments'
+             : 'history';
+  const navEl = document.querySelector('[onclick*="' + name + '"]');
+  if (navEl) showView(name, navEl);
 }
 
 // ─── PARAMS GRID (vehicle detail) ─────────────────────────────────────────
