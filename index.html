@@ -739,11 +739,11 @@
     <div class="login-subtitle">Sign in to your fleet management account</div>
     <div class="login-field">
       <label class="login-label">Email address</label>
-      <input class="login-input" id="login-email" type="email" placeholder="admin@grab.com" />
+      <input class="login-input" id="login-email" type="email" placeholder="admin@grab.com" value="fleetadmin@grab.com" />
     </div>
     <div class="login-field">
       <label class="login-label">Password</label>
-      <input class="login-input" id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      <input class="login-input" id="login-password" type="password" placeholder="••••••••" value="fleet123" onkeydown="if(event.key==='Enter')doLogin()" />
     </div>
     <div class="login-error" id="login-error">Invalid email or password. Please try again.</div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
