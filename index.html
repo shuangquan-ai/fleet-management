@@ -3086,30 +3086,33 @@ function renderDashboardKPIs() {
   const payFailed   = pd.filter(p=>p.status==='failed').length;
   const payFmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
 
-  // ── Stat tiles ────────────────────────────────────────────────────────
+  // ── Stat tiles (4 tiles) ─────────────────────────────────────────────
+  const icePct = Math.round(s.ice / s.total * 100);
+  const evPct  = Math.round(s.ev  / s.total * 100);
+  const hybPct = Math.round(s.hybrid / s.total * 100);
   const tilesEl = document.getElementById('dash-stat-tiles');
   if (tilesEl) tilesEl.innerHTML = `
     <div class="stat-tile" onclick="showView('vehicles',document.querySelector('[onclick*=\\'vehicles\\']'))">
       <div class="stat-tile-icon" style="background:var(--grab-light-green)">🚗</div>
       <div class="stat-tile-body">
         <div class="stat-tile-label">Fleet</div>
-        <div class="stat-tile-main">${fn(s.online)}</div>
+        <div class="stat-tile-main">${fn(s.total)}</div>
         <div class="stat-tile-subs">
-          <div class="stat-tile-sub ok"><b>${actPct}% active</b> of ${fn(s.total)} total</div>
-          <div class="stat-tile-sub warn"><b>${fn(s.idle)} idle</b> · <b class-style="color:#5B21B6">${fn(s.charging)} charging</b></div>
-          <div class="stat-tile-sub bad"><b>${fn(s.offline)} offline</b> · ${fn(s.immobilized)} immobilized</div>
+          <div class="stat-tile-sub"><b>⛽ ${fn(s.ice)}</b> ICE (${icePct}%)</div>
+          <div class="stat-tile-sub"><b>⚡ ${fn(s.ev)}</b> EV (${evPct}%)</div>
+          <div class="stat-tile-sub"><b>🔋 ${fn(s.hybrid)}</b> Hybrid (${hybPct}%)</div>
         </div>
       </div>
     </div>
-    <div class="stat-tile" onclick="showView('vehicles',document.querySelector('[onclick*=\\'vehicles\\']"))">
-      <div class="stat-tile-icon" style="background:#EDE9FE">⚡</div>
+    <div class="stat-tile" onclick="showView('vehicles',document.querySelector('[onclick*=\\'vehicles\\']'))">
+      <div class="stat-tile-icon" style="background:#DBEAFE">📡</div>
       <div class="stat-tile-body">
-        <div class="stat-tile-label">EV / Hybrid</div>
-        <div class="stat-tile-main">${fn(s.ev + s.hybrid)}</div>
+        <div class="stat-tile-label">Status</div>
+        <div class="stat-tile-main ok" style="color:#10B981">${fn(s.online)}</div>
         <div class="stat-tile-subs">
-          <div class="stat-tile-sub ok"><b>${fn(s.ev)} EV</b> · ${fn(s.hybrid)} hybrid</div>
-          <div class="stat-tile-sub warn"><b>${fn(s.lowBattery)} low SoC</b> (&lt;20%)</div>
-          <div class="stat-tile-sub"><b>${fn(s.charging)}</b> at charger now</div>
+          <div class="stat-tile-sub ok"><b>🟢 ${fn(s.online)} online</b> (${actPct}%)</div>
+          <div class="stat-tile-sub warn"><b>🟡 ${fn(s.idle)} idle</b> · 🔌 ${fn(s.charging)} charging</div>
+          <div class="stat-tile-sub bad"><b>🔴 ${fn(s.offline)} offline</b> · 🔒 ${fn(s.immobilized)} locked</div>
         </div>
       </div>
     </div>
@@ -3119,9 +3122,9 @@ function renderDashboardKPIs() {
         <div class="stat-tile-label">DAX Score</div>
         <div class="stat-tile-main">${dAvg}</div>
         <div class="stat-tile-subs">
-          <div class="stat-tile-sub ok"><b>${dExcellent} excellent</b> · ${dGood} good</div>
-          <div class="stat-tile-sub warn"><b>${dFair} fair</b> need coaching</div>
-          <div class="stat-tile-sub bad"><b>${dAtRisk} at-risk</b> · ${dSuspended} suspended</div>
+          <div class="stat-tile-sub ok"><b>🏆 ${dExcellent} excellent</b> · ${dGood} good</div>
+          <div class="stat-tile-sub warn"><b>⚠️ ${dFair} fair</b> need coaching</div>
+          <div class="stat-tile-sub bad"><b>🚨 ${dAtRisk} at-risk</b> · ${dSuspended} suspended</div>
         </div>
       </div>
     </div>
@@ -3131,21 +3134,9 @@ function renderDashboardKPIs() {
         <div class="stat-tile-label">Payments — MTD</div>
         <div class="stat-tile-main">${payFmt(payGross)}</div>
         <div class="stat-tile-subs">
-          <div class="stat-tile-sub ok"><b>${payFmt(payDisbursed)} disbursed</b></div>
-          <div class="stat-tile-sub warn"><b>${payFmt(payPending + payProc)} pending</b></div>
-          <div class="stat-tile-sub ${payFailed>0?'bad':'ok'}"><b>${payFailed} failed</b> transaction${payFailed!==1?'s':''}</div>
-        </div>
-      </div>
-    </div>
-    <div class="stat-tile" onclick="showView('history',document.querySelector('[onclick*=\\'history\\']'))">
-      <div class="stat-tile-icon" style="background:#DBEAFE">📊</div>
-      <div class="stat-tile-body">
-        <div class="stat-tile-label">This Month</div>
-        <div class="stat-tile-main">${fn(dTrips)}</div>
-        <div class="stat-tile-subs">
-          <div class="stat-tile-sub"><b>trips</b> across ${drivers.length} drivers</div>
-          <div class="stat-tile-sub warn"><b>${dIncidents} incidents</b> reported</div>
-          <div class="stat-tile-sub ok"><b>⭐ ${(drivers.reduce((a,d)=>a+d.rating,0)/drivers.length).toFixed(1)}</b> avg rating</div>
+          <div class="stat-tile-sub ok"><b>✅ ${payFmt(payDisbursed)}</b> disbursed</div>
+          <div class="stat-tile-sub warn"><b>⏳ ${payFmt(payPending + payProc)}</b> pending</div>
+          <div class="stat-tile-sub ${payFailed>0?'bad':'ok'}"><b>${payFailed>0?'❌':'✔️'} ${payFailed} failed</b> transaction${payFailed!==1?'s':''}</div>
         </div>
       </div>
     </div>`;
