@@ -632,6 +632,74 @@
     .profile-edit-btn { padding:5px 14px; border:1.5px solid var(--border); border-radius:6px; background:white; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.12s; }
     .profile-edit-btn:hover { border-color:var(--primary); color:var(--primary); }
 
+    /* DASHBOARD ENHANCEMENTS */
+    .dash-section-label { font-size:0.72rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 12px; display:flex; align-items:center; gap:8px; }
+    .dash-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+    .dash-3col { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
+    .dash-2col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .dash-2col-wide { display:grid; grid-template-columns:1.55fr 1fr; gap:16px; margin-bottom:16px; }
+    .info-card { background:white; border-radius:14px; padding:20px 22px; box-shadow:var(--card-shadow); }
+    .info-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .info-card-title { font-size:0.88rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:7px; }
+    .info-card-link { font-size:0.72rem; color:var(--primary); font-weight:600; cursor:pointer; white-space:nowrap; }
+    .info-card-link:hover { text-decoration:underline; }
+    /* DAX dist bar */
+    .dax-dist-track { display:flex; height:10px; border-radius:5px; overflow:hidden; gap:2px; margin:10px 0 8px; }
+    .dax-dist-seg { height:100%; border-radius:2px; transition:width 0.4s; }
+    .dax-dist-legend { display:flex; gap:12px; flex-wrap:wrap; }
+    .dax-dist-item { display:flex; align-items:center; gap:5px; font-size:0.7rem; color:var(--text-secondary); }
+    .dax-dist-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    /* Mini driver leaderboard */
+    .mini-driver-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+    .mini-driver-row:last-child { border-bottom:none; }
+    .mini-rank { width:22px; font-size:0.72rem; font-weight:700; color:var(--text-secondary); text-align:center; flex-shrink:0; }
+    .mini-driver-name { flex:1; font-size:0.82rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mini-driver-meta { font-size:0.7rem; color:var(--text-secondary); margin-top:1px; }
+    .mini-score { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; }
+    .mini-score.excellent { background:#DCFCE7; color:#15803D; }
+    .mini-score.good      { background:#DBEAFE; color:#1D4ED8; }
+    .mini-score.fair      { background:#FEF3C7; color:#92400E; }
+    .mini-score.risk      { background:#FEE2E2; color:#991B1B; }
+    /* Payment stats */
+    .pay-stat-2col { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .pay-stat-box { background:var(--bg); border-radius:10px; padding:12px 14px; }
+    .pay-stat-label { font-size:0.68rem; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+    .pay-stat-val { font-size:1.05rem; font-weight:700; color:var(--text); }
+    /* Mini pay activity */
+    .mini-pay-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); }
+    .mini-pay-row:last-child { border-bottom:none; }
+    .mini-pay-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .mini-pay-name { flex:1; font-size:0.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mini-pay-amt { font-size:0.82rem; font-weight:700; color:var(--primary); flex-shrink:0; }
+    .mini-pay-meta { font-size:0.7rem; color:var(--text-secondary); }
+    /* Compliance / alert rows */
+    .alert-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+    .alert-row:last-child { border-bottom:none; }
+    .alert-icon { width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+    .alert-icon.red    { background:#FEE2E2; }
+    .alert-icon.yellow { background:#FEF3C7; }
+    .alert-icon.green  { background:var(--grab-light-green); }
+    .alert-icon.blue   { background:#DBEAFE; }
+    .alert-label { flex:1; }
+    .alert-label strong { display:block; font-size:0.82rem; }
+    .alert-label span { font-size:0.7rem; color:var(--text-secondary); }
+    .alert-badge { font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+    .alert-badge.red    { background:#FEE2E2; color:#991B1B; }
+    .alert-badge.yellow { background:#FEF3C7; color:#92400E; }
+    .alert-badge.green  { background:#DCFCE7; color:#15803D; }
+    /* Monthly earnings donut (CSS-only arc) */
+    .pay-status-row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .pay-status-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:12px; font-size:0.72rem; font-weight:600; }
+    .pay-status-pill.completed { background:#DCFCE7; color:#15803D; }
+    .pay-status-pill.processing { background:#DBEAFE; color:#1E40AF; }
+    .pay-status-pill.pending    { background:#FEF3C7; color:#92400E; }
+    .pay-status-pill.failed     { background:#FEE2E2; color:#991B1B; }
+    .pay-status-pill::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.6; }
+    /* Utilisation sparkline-like bar */
+    .util-bar-wrap { margin:8px 0 4px; }
+    .util-bar-track { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+    .util-bar-fill { height:100%; border-radius:4px; background:var(--primary); }
+
     /* ROLE BADGE */
     .role-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:4px; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
     .role-badge.super-admin { background:#FEF3C7; color:#92400E; }
@@ -772,6 +840,23 @@
         <div class="recent-events" id="dash-events"></div>
       </div>
     </div>
+  </div>
+
+  <!-- Row 3: Monthly Operations KPIs -->
+  <div class="dash-section-label">📅 May 2026 — Month-to-Date</div>
+  <div class="kpi-grid" id="dash-kpi-ops" style="grid-template-columns:repeat(4,1fr)"></div>
+
+  <!-- Row 4: DAX snapshot · Payment snapshot · Fleet health -->
+  <div class="dash-3col" id="dash-row4">
+    <div class="info-card" id="dash-dax-card"></div>
+    <div class="info-card" id="dash-pay-card"></div>
+    <div class="info-card" id="dash-health-card"></div>
+  </div>
+
+  <!-- Row 5: Driver leaderboard · Payment activity -->
+  <div class="dash-2col-wide" id="dash-row5">
+    <div class="info-card" id="dash-leaderboard-card"></div>
+    <div class="info-card" id="dash-pay-activity-card"></div>
   </div>
 </div>
 
@@ -3007,6 +3092,248 @@ function renderDashboardKPIs() {
   const evts = document.getElementById('dash-events');
   if (evts) evts.innerHTML = dashEvents.map(e => `
     <div class="event-item"><div class="event-dot ${e.dot}"></div><div><div class="event-text">${e.text}</div><div class="event-time">${e.time}</div></div></div>`).join('');
+
+  // ── Row 3: Monthly Operations KPIs ─────────────────────────────────────
+  const totalTrips   = daxDrivers.reduce((s,d) => s + d.trips, 0);
+  const totalHours   = daxDrivers.reduce((s,d) => s + d.hoursOnline, 0);
+  const totalIncidents = daxDrivers.reduce((s,d) => s + d.incidents, 0);
+  const avgRating    = (daxDrivers.reduce((s,d) => s + d.rating, 0) / daxDrivers.length).toFixed(2);
+  const totalGross   = paymentData.reduce((s,p) => s + p.gross, 0);
+  const kpiOps = document.getElementById('dash-kpi-ops');
+  if (kpiOps) kpiOps.innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-icon green">🛣️</div>
+      <div class="kpi-label">Total Trips (MTD)</div>
+      <div class="kpi-value">${fn(totalTrips)}</div>
+      <div class="kpi-change">Avg <span>${Math.round(totalTrips/daxDrivers.length)}</span> trips/driver</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon blue">⏱️</div>
+      <div class="kpi-label">Driver Hours Online</div>
+      <div class="kpi-value">${fn(totalHours)}</div>
+      <div class="kpi-change">Avg <span>${Math.round(totalHours/daxDrivers.length)}h</span> per driver</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#FEF3C7">⚠️</div>
+      <div class="kpi-label">Safety Incidents (MTD)</div>
+      <div class="kpi-value" style="color:${totalIncidents>10?'var(--red)':'var(--yellow)'}">${totalIncidents}</div>
+      <div class="kpi-change"><span style="color:var(--text-secondary)">Avg rating</span> <span>⭐ ${avgRating}</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon green">💵</div>
+      <div class="kpi-label">Gross Earnings (MTD)</div>
+      <div class="kpi-value">$${(totalGross/1000).toFixed(1)}K</div>
+      <div class="kpi-change">Avg <span>$${Math.round(totalGross/daxDrivers.length).toLocaleString()}</span>/driver</div>
+    </div>`;
+
+  // ── Row 4a: DAX Snapshot ────────────────────────────────────────────────
+  const daxCard = document.getElementById('dash-dax-card');
+  if (daxCard) {
+    const drivers = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+    const excellent = drivers.filter(d => d.tier === 'excellent').length;
+    const good      = drivers.filter(d => d.tier === 'good').length;
+    const fair      = drivers.filter(d => d.tier === 'fair').length;
+    const risk      = drivers.filter(d => d.tier === 'risk').length;
+    const total     = drivers.length;
+    const avgScore  = Math.round(drivers.reduce((s,d) => s + d.daxScore, 0) / total);
+    const suspended = drivers.filter(d => d.status === 'suspended').length;
+    const pct = n => Math.round(n/total*100);
+    daxCard.innerHTML = `
+      <div class="info-card-header">
+        <div class="info-card-title">🏅 DAX Performance — May 2026</div>
+        <span class="info-card-link" onclick="showView('dax', document.querySelector('[onclick*=\'dax\']'))">View DAX →</span>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:4px">
+        <div style="font-size:2.2rem;font-weight:700;line-height:1;color:var(--text)">${avgScore}</div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);padding-bottom:4px">avg score<br><span style="color:#10B981;font-weight:600">▲ +2.1</span> vs Apr</div>
+      </div>
+      <div class="dax-dist-track">
+        <div class="dax-dist-seg" style="width:${pct(excellent)}%;background:#10B981"></div>
+        <div class="dax-dist-seg" style="width:${pct(good)}%;background:#3B82F6"></div>
+        <div class="dax-dist-seg" style="width:${pct(fair)}%;background:#F97316"></div>
+        <div class="dax-dist-seg" style="width:${pct(risk)}%;background:#EF4444"></div>
+      </div>
+      <div class="dax-dist-legend">
+        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#10B981"></div>Excellent ${excellent} (${pct(excellent)}%)</div>
+        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#3B82F6"></div>Good ${good} (${pct(good)}%)</div>
+        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#F97316"></div>Fair ${fair} (${pct(fair)}%)</div>
+        <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#EF4444"></div>At-Risk ${risk} (${pct(risk)}%)</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700">${total}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Total Drivers</div></div>
+        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#10B981">${total - suspended}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Active</div></div>
+        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#EF4444">${suspended}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Suspended</div></div>
+        <div style="flex:1;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#F97316">${totalIncidents}</div><div style="font-size:0.7rem;color:var(--text-secondary)">Incidents</div></div>
+      </div>`;
+  }
+
+  // ── Row 4b: Payment Snapshot ────────────────────────────────────────────
+  const payCard = document.getElementById('dash-pay-card');
+  if (payCard) {
+    const pd = paymentData;
+    const gross      = pd.reduce((s,p) => s + p.gross, 0);
+    const netDisbursed = pd.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.gross-p.deductions),0);
+    const pendingAmt = pd.filter(p=>p.status==='pending').reduce((s,p)=>s+(p.gross-p.deductions),0);
+    const failedN    = pd.filter(p=>p.status==='failed').length;
+    const completedN = pd.filter(p=>p.status==='completed').length;
+    const processingN= pd.filter(p=>p.status==='processing').length;
+    const pendingN   = pd.filter(p=>p.status==='pending').length;
+    const fmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
+    payCard.innerHTML = `
+      <div class="info-card-header">
+        <div class="info-card-title">💳 Payments — May 2026</div>
+        <span class="info-card-link" onclick="showView('payments', document.querySelector('[onclick*=\'payments\']'))">View All →</span>
+      </div>
+      <div class="pay-stat-2col">
+        <div class="pay-stat-box">
+          <div class="pay-stat-label">Gross Earnings</div>
+          <div class="pay-stat-val">${fmt(gross)}</div>
+        </div>
+        <div class="pay-stat-box">
+          <div class="pay-stat-label">Disbursed (Net)</div>
+          <div class="pay-stat-val" style="color:#10B981">${fmt(netDisbursed)}</div>
+        </div>
+        <div class="pay-stat-box">
+          <div class="pay-stat-label">Pending</div>
+          <div class="pay-stat-val" style="color:#F97316">${fmt(pendingAmt)}</div>
+        </div>
+        <div class="pay-stat-box">
+          <div class="pay-stat-label">Failed Txns</div>
+          <div class="pay-stat-val" style="color:${failedN>0?'#EF4444':'#10B981'}">${failedN}</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:7px">Payout Status</div>
+      <div class="pay-status-row">
+        <div class="pay-status-pill completed">Completed ${completedN}</div>
+        <div class="pay-status-pill processing">Processing ${processingN}</div>
+        <div class="pay-status-pill pending">Pending ${pendingN}</div>
+        <div class="pay-status-pill failed">Failed ${failedN}</div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:0.78rem;color:var(--text-secondary)">
+        Platform commission collected: <strong style="color:var(--text)">$${(gross*0.10).toLocaleString('en',{minimumFractionDigits:0})}</strong>
+        &nbsp;·&nbsp; Avg earnings/driver: <strong style="color:var(--text)">$${Math.round(gross/pd.length).toLocaleString()}</strong>
+      </div>`;
+  }
+
+  // ── Row 4c: Fleet Health ────────────────────────────────────────────────
+  const healthCard = document.getElementById('dash-health-card');
+  if (healthCard) {
+    const utilPct = Math.round(s.online / s.total * 100);
+    const licExpiring = daxDrivers.filter(d => {
+      const exp = new Date(d.licenseExpiry);
+      const now = new Date('2026-05-17');
+      const diff = (exp - now) / (1000*60*60*24);
+      return diff >= 0 && diff <= 90;
+    }).length;
+    const idExpiring = daxDrivers.filter(d => {
+      const exp = new Date(d.idExpiry);
+      const now = new Date('2026-05-17');
+      const diff = (exp - now) / (1000*60*60*24);
+      return diff >= 0 && diff <= 90;
+    }).length;
+    healthCard.innerHTML = `
+      <div class="info-card-header">
+        <div class="info-card-title">🔧 Fleet Health</div>
+        <span class="info-card-link" onclick="showView('history', document.querySelector('[onclick*=\'history\']'))">Reports →</span>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px">
+          <span style="color:var(--text-secondary)">Fleet Utilisation</span>
+          <span style="font-weight:700;color:${utilPct>70?'#10B981':utilPct>50?'#F97316':'#EF4444'}">${utilPct}%</span>
+        </div>
+        <div class="util-bar-track"><div class="util-bar-fill" style="width:${utilPct}%;background:${utilPct>70?'#10B981':utilPct>50?'#F97316':'#EF4444'}"></div></div>
+      </div>
+      <div class="alert-row">
+        <div class="alert-icon yellow">📋</div>
+        <div class="alert-label"><strong>License Expiring ≤ 90d</strong><span>${licExpiring} driver${licExpiring!==1?'s':''}</span></div>
+        <div class="alert-badge ${licExpiring>0?'yellow':'green'}">${licExpiring>0?licExpiring+' expiring':'All valid'}</div>
+      </div>
+      <div class="alert-row">
+        <div class="alert-icon yellow">🪪</div>
+        <div class="alert-label"><strong>ID Doc Expiring ≤ 90d</strong><span>${idExpiring} driver${idExpiring!==1?'s':''}</span></div>
+        <div class="alert-badge ${idExpiring>0?'yellow':'green'}">${idExpiring>0?idExpiring+' expiring':'All valid'}</div>
+      </div>
+      <div class="alert-row">
+        <div class="alert-icon red">🔒</div>
+        <div class="alert-label"><strong>Immobilized Vehicles</strong><span>Requires review</span></div>
+        <div class="alert-badge red">${fn(s.immobilized)} locked</div>
+      </div>
+      <div class="alert-row">
+        <div class="alert-icon green">⚡</div>
+        <div class="alert-label"><strong>EVs Online & Healthy</strong><span>SoC ≥ 20%</span></div>
+        <div class="alert-badge green">${fn(s.ev - s.lowBattery)} vehicles</div>
+      </div>`;
+  }
+
+  // ── Row 5a: Driver Leaderboard ──────────────────────────────────────────
+  const lbCard = document.getElementById('dash-leaderboard-card');
+  if (lbCard) {
+    const sorted = [...daxDrivers].sort((a,b) => b.daxScore - a.daxScore);
+    const top5   = sorted.slice(0, 5);
+    const atRisk = [...daxDrivers].filter(d => getDaxTier(d.daxScore) === 'risk').slice(0, 3);
+    const tierColors = { excellent:'#10B981', good:'#3B82F6', fair:'#F97316', risk:'#EF4444' };
+    lbCard.innerHTML = `
+      <div class="info-card-header">
+        <div class="info-card-title">🏆 Driver Leaderboard — DAX Score</div>
+        <span class="info-card-link" onclick="showView('dax', document.querySelector('[onclick*=\\'dax\\']'))">Full List →</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-size:0.7rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Top Performers</div>
+          ${top5.map((d,i) => {
+            const tier = getDaxTier(d.daxScore);
+            return `<div class="mini-driver-row">
+              <div class="mini-rank">${['🥇','🥈','🥉','4','5'][i]}</div>
+              <div style="flex:1;min-width:0">
+                <div class="mini-driver-name">${d.name}</div>
+                <div class="mini-driver-meta">${d.flag} ${d.city} · ${d.trips} trips</div>
+              </div>
+              <div class="mini-score ${tier}">${d.daxScore}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div>
+          <div style="font-size:0.7rem;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Needs Attention</div>
+          ${atRisk.map(d => {
+            const tier = getDaxTier(d.daxScore);
+            return `<div class="mini-driver-row">
+              <div class="mini-rank">🚨</div>
+              <div style="flex:1;min-width:0">
+                <div class="mini-driver-name">${d.name}</div>
+                <div class="mini-driver-meta">${d.flag} ${d.city} · ${d.incidents} incidents</div>
+              </div>
+              <div class="mini-score ${tier}">${d.daxScore}</div>
+            </div>`;
+          }).join('')}
+          <div style="margin-top:14px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:0.78rem;color:var(--text-secondary);line-height:1.5">
+            <strong style="color:var(--text)">${daxDrivers.filter(d=>getDaxTier(d.daxScore)==='fair').length} fair</strong> + <strong style="color:#EF4444">${daxDrivers.filter(d=>getDaxTier(d.daxScore)==='risk').length} at-risk</strong> drivers require coaching this month.
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Row 5b: Recent Payment Activity ────────────────────────────────────
+  const paCard = document.getElementById('dash-pay-activity-card');
+  if (paCard) {
+    const recent = [...paymentData].slice(0, 7);
+    const statusDot = { completed:'#10B981', processing:'#3B82F6', pending:'#F97316', failed:'#EF4444' };
+    paCard.innerHTML = `
+      <div class="info-card-header">
+        <div class="info-card-title">💰 Recent Payouts</div>
+        <span class="info-card-link" onclick="showView('payments', document.querySelector('[onclick*=\\'payments\\']'))">View All →</span>
+      </div>
+      ${recent.map(p => {
+        const net = p.gross - p.deductions;
+        return `<div class="mini-pay-row">
+          <div class="mini-pay-dot" style="background:${statusDot[p.status]}"></div>
+          <div style="flex:1;min-width:0">
+            <div class="mini-pay-name">${p.flag} ${p.driver}</div>
+            <div class="mini-pay-meta">${p.trips} trips · ${p.method} · ${p.status}</div>
+          </div>
+          <div class="mini-pay-amt">$${net.toFixed(0)}</div>
+        </div>`;
+      }).join('')}`;
+  }
 }
 
 // ─── PARAMS GRID (vehicle detail) ─────────────────────────────────────────
