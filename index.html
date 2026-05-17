@@ -825,9 +825,18 @@
     </div>
   </div>
   <!-- Row 1: Fleet composition -->
+  <div class="dash-section-label">🚗 Fleet</div>
   <div class="kpi-grid" id="dash-kpi-fleet"></div>
   <!-- Row 2: Vehicle status (5 columns) -->
   <div class="kpi-grid" id="dash-kpi-status" style="grid-template-columns:repeat(5,1fr);margin-top:-4px"></div>
+
+  <!-- Row 3: DAX KPIs -->
+  <div class="dash-section-label">🏅 DAX — Driver Performance</div>
+  <div class="kpi-grid" id="dash-kpi-dax"></div>
+
+  <!-- Row 4: Payment KPIs -->
+  <div class="dash-section-label">💳 Payments — May 2026 MTD</div>
+  <div class="kpi-grid" id="dash-kpi-pay"></div>
 
   <div class="map-grid">
     <div class="map-card">
@@ -3093,7 +3102,86 @@ function renderDashboardKPIs() {
   if (evts) evts.innerHTML = dashEvents.map(e => `
     <div class="event-item"><div class="event-dot ${e.dot}"></div><div><div class="event-text">${e.text}</div><div class="event-time">${e.time}</div></div></div>`).join('');
 
-  // ── Row 3: Monthly Operations KPIs ─────────────────────────────────────
+  // ── Row 3: DAX KPIs ─────────────────────────────────────────────────────
+  const daxKpi = document.getElementById('dash-kpi-dax');
+  if (daxKpi) {
+    const drivers    = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+    const dTotal     = drivers.length;
+    const dActive    = drivers.filter(d => d.status === 'active').length;
+    const dSuspended = drivers.filter(d => d.status === 'suspended').length;
+    const dAtRisk    = drivers.filter(d => d.tier === 'risk').length;
+    const dAvg       = Math.round(drivers.reduce((a,d) => a + d.daxScore, 0) / dTotal);
+    const dExcellent = drivers.filter(d => d.tier === 'excellent').length;
+    const topDriver  = [...drivers].sort((a,b) => b.daxScore - a.daxScore)[0];
+    const dTotalTrips = drivers.reduce((a,d) => a + d.trips, 0);
+    const dAvgRating  = (drivers.reduce((a,d) => a + d.rating, 0) / dTotal).toFixed(1);
+    const tierColor = { excellent:'#10B981', good:'#3B82F6', fair:'#F97316', risk:'#EF4444' };
+    daxKpi.innerHTML = `
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
+        <div class="kpi-icon green">🏅</div>
+        <div class="kpi-label">Avg DAX Score</div>
+        <div class="kpi-value">${dAvg}</div>
+        <div class="kpi-change"><span>▲ +2.1</span> vs last month · ${dExcellent} excellent</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
+        <div class="kpi-icon blue">👤</div>
+        <div class="kpi-label">Active Drivers</div>
+        <div class="kpi-value">${dActive}</div>
+        <div class="kpi-change">${dTotalTrips.toLocaleString()} trips · <span>⭐ ${dAvgRating}</span> avg rating</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
+        <div class="kpi-icon red">🚨</div>
+        <div class="kpi-label">At-Risk Drivers</div>
+        <div class="kpi-value red">${dAtRisk}</div>
+        <div class="kpi-change" style="color:#EF4444">${dSuspended} suspended · needs coaching</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('dax',document.querySelector('[onclick*=\\'dax\\']'))">
+        <div class="kpi-icon green">🏆</div>
+        <div class="kpi-label">Top Performer</div>
+        <div class="kpi-value" style="font-size:1.3rem;color:${tierColor[topDriver.tier]}">${topDriver.daxScore}</div>
+        <div class="kpi-change">${topDriver.flag} <span>${topDriver.name.split(' ')[0]}</span> · ${topDriver.trips} trips</div>
+      </div>`;
+  }
+
+  // ── Row 4: Payment KPIs ─────────────────────────────────────────────────
+  const payKpi = document.getElementById('dash-kpi-pay');
+  if (payKpi) {
+    const pd          = paymentData;
+    const gross       = pd.reduce((a,p) => a + p.gross, 0);
+    const disbursed   = pd.filter(p=>p.status==='completed').reduce((a,p)=>a+(p.gross-p.deductions),0);
+    const pending     = pd.filter(p=>p.status==='pending').reduce((a,p)=>a+(p.gross-p.deductions),0);
+    const processing  = pd.filter(p=>p.status==='processing').reduce((a,p)=>a+(p.gross-p.deductions),0);
+    const failedCount = pd.filter(p=>p.status==='failed').length;
+    const commission  = gross * 0.10;
+    const fmt = v => '$' + v.toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
+    payKpi.innerHTML = `
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
+        <div class="kpi-icon green">💵</div>
+        <div class="kpi-label">Gross Earnings (MTD)</div>
+        <div class="kpi-value">${fmt(gross)}</div>
+        <div class="kpi-change"><span>+8.4%</span> vs Apr · commission ${fmt(commission)}</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
+        <div class="kpi-icon green">✅</div>
+        <div class="kpi-label">Disbursed (Net)</div>
+        <div class="kpi-value green">${fmt(disbursed)}</div>
+        <div class="kpi-change"><span>${pd.filter(p=>p.status==='completed').length}</span> drivers paid out</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
+        <div class="kpi-icon yellow">⏳</div>
+        <div class="kpi-label">Pending + Processing</div>
+        <div class="kpi-value yellow">${fmt(pending + processing)}</div>
+        <div class="kpi-change">${pd.filter(p=>p.status==='pending').length} queued · ${pd.filter(p=>p.status==='processing').length} processing</div>
+      </div>
+      <div class="kpi-card" style="cursor:pointer" onclick="showView('payments',document.querySelector('[onclick*=\\'payments\\']'))">
+        <div class="kpi-icon red">❌</div>
+        <div class="kpi-label">Failed Transactions</div>
+        <div class="kpi-value red">${failedCount}</div>
+        <div class="kpi-change" style="color:#EF4444">Requires retry or review</div>
+      </div>`;
+  }
+
+  // ── Row 5: Monthly Operations KPIs ─────────────────────────────────────
   const totalTrips   = daxDrivers.reduce((s,d) => s + d.trips, 0);
   const totalHours   = daxDrivers.reduce((s,d) => s + d.hoursOnline, 0);
   const totalIncidents = daxDrivers.reduce((s,d) => s + d.incidents, 0);
@@ -3120,10 +3208,10 @@ function renderDashboardKPIs() {
       <div class="kpi-change"><span style="color:var(--text-secondary)">Avg rating</span> <span>⭐ ${avgRating}</span></div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-icon green">💵</div>
-      <div class="kpi-label">Gross Earnings (MTD)</div>
-      <div class="kpi-value">$${(totalGross/1000).toFixed(1)}K</div>
-      <div class="kpi-change">Avg <span>$${Math.round(totalGross/daxDrivers.length).toLocaleString()}</span>/driver</div>
+      <div class="kpi-icon" style="background:#DCFCE7">💼</div>
+      <div class="kpi-label">Platform Commission</div>
+      <div class="kpi-value" style="color:#15803D">$${(totalGross*0.10/1000).toFixed(1)}K</div>
+      <div class="kpi-change">10% of <span>$${(totalGross/1000).toFixed(1)}K</span> gross</div>
     </div>`;
 
   // ── Row 4a: DAX Snapshot ────────────────────────────────────────────────
