@@ -631,6 +631,31 @@
     .profile-field-value { font-weight:500; }
     .profile-edit-btn { padding:5px 14px; border:1.5px solid var(--border); border-radius:6px; background:white; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.12s; }
     .profile-edit-btn:hover { border-color:var(--primary); color:var(--primary); }
+
+    /* ROLE BADGE */
+    .role-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:4px; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+    .role-badge.super-admin { background:#FEF3C7; color:#92400E; }
+    .role-badge.fleet-admin { background:#DBEAFE; color:#1D4ED8; }
+    .role-badge.viewer      { background:#F3F4F6; color:#6B7280; }
+
+    /* USER MANAGEMENT VIEW */
+    .user-mgmt-table-wrap { background:white; border-radius:14px; box-shadow:var(--card-shadow); overflow:hidden; }
+    .user-role-chip { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:4px; font-size:0.68rem; font-weight:700; }
+    .user-role-chip.super-admin { background:#FEF3C7; color:#92400E; }
+    .user-role-chip.fleet-admin { background:#DBEAFE; color:#1D4ED8; }
+    .user-role-chip.viewer      { background:#F3F4F6; color:#6B7280; }
+
+    /* ADD USER MODAL */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:8000; display:none; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-card { background:white; border-radius:16px; padding:32px; width:460px; max-width:92vw; box-shadow:0 8px 32px rgba(0,0,0,0.15); }
+    .modal-title { font-size:1.1rem; font-weight:700; margin-bottom:20px; }
+    .modal-field { margin-bottom:14px; }
+    .modal-label { font-size:0.78rem; font-weight:600; color:var(--text); margin-bottom:6px; display:block; }
+    .modal-input { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; }
+    .modal-input:focus { border-color:var(--primary); }
+    .modal-select { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; background:white; }
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
   </style>
 </head>
 <body>
@@ -654,7 +679,10 @@
     </div>
     <div class="login-error" id="login-error">Invalid email or password. Please try again.</div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-hint">Demo mode — click Sign In to continue</div>
+    <div class="login-hint">Demo accounts:<br>
+      🔑 <b>superadmin@grab.com</b> / super123 — Super Admin (all fleets)<br>
+      🔑 <b>fleetadmin@grab.com</b> / fleet123 — Fleet Admin (Singapore)<br>
+      🔑 <b>viewer@grab.com</b> / view123 — Viewer (Singapore, read-only)</div>
   </div>
 </div>
 
@@ -702,15 +730,16 @@
     <div class="nav-label">Operations</div>
     <div class="nav-item" onclick="showView('dax', this)"><span class="nav-icon">🏅</span> DAX Management <span class="nav-badge" id="dax-alert-badge"></span></div>
     <div class="nav-item" onclick="showView('payments', this)"><span class="nav-icon">💳</span> Payments <span class="nav-badge" id="pay-alert-badge"></span></div>
-    <div class="nav-label">Remote Control</div>
-    <div class="nav-item" onclick="showView('immobilization', this)"><span class="nav-icon">🔒</span> Immobilization <span class="nav-badge" id="immob-count-badge">23</span></div>
-    <div class="nav-item" onclick="showView('geofence', this)"><span class="nav-icon">🏁</span> Geofences</div>
-    <div class="nav-label">Device Management</div>
-    <div class="nav-item" onclick="showView('ota', this)"><span class="nav-icon">🔄</span> OTA Updates <span class="nav-badge" id="ota-count-badge"></span></div>
-    <div class="nav-item" onclick="showView('simdata', this)"><span class="nav-icon">📶</span> SIM Data Management <span class="nav-badge" id="sim-alert-badge"></span></div>
+    <div class="nav-label" data-require-role="fleet_admin super_admin">Remote Control</div>
+    <div class="nav-item" data-require-role="fleet_admin super_admin" onclick="showView('immobilization', this)"><span class="nav-icon">🔒</span> Immobilization <span class="nav-badge" id="immob-count-badge">23</span></div>
+    <div class="nav-item" data-require-role="fleet_admin super_admin" onclick="showView('geofence', this)"><span class="nav-icon">🏁</span> Geofences</div>
+    <div class="nav-label" data-require-role="fleet_admin super_admin">Device Management</div>
+    <div class="nav-item" data-require-role="fleet_admin super_admin" onclick="showView('ota', this)"><span class="nav-icon">🔄</span> OTA Updates <span class="nav-badge" id="ota-count-badge"></span></div>
+    <div class="nav-item" data-require-role="fleet_admin super_admin" onclick="showView('simdata', this)"><span class="nav-icon">📶</span> SIM Data Management <span class="nav-badge" id="sim-alert-badge"></span></div>
     <div class="nav-label">Analytics</div>
     <div class="nav-item" onclick="showView('history', this)"><span class="nav-icon">📊</span> History & Reports</div>
     <div class="nav-label">Account</div>
+    <div class="nav-item" data-require-role="fleet_admin super_admin" onclick="showView('user-mgmt', this)"><span class="nav-icon">👥</span> User Management</div>
     <div class="nav-item" onclick="showView('profile', this)"><span class="nav-icon">👤</span> My Profile</div>
   </div>
 </aside>
@@ -724,7 +753,7 @@
     <div><div class="page-title">Fleet Dashboard</div><div class="page-subtitle">Real-time overview · Last updated just now</div></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-outline">📥 Export</button>
-      <button class="btn btn-primary">➕ Add Vehicle</button>
+      <button class="btn btn-primary" data-hide-viewer>➕ Add Vehicle</button>
     </div>
   </div>
   <!-- Row 1: Fleet composition -->
@@ -750,7 +779,7 @@
 <div class="view" id="view-vehicles">
   <div class="page-header">
     <div><div class="page-title">Vehicles</div><div id="vehicles-subtitle" class="page-subtitle"></div></div>
-    <button class="btn btn-primary">➕ Add Vehicle</button>
+    <button class="btn btn-primary" data-hide-viewer>➕ Add Vehicle</button>
   </div>
   <div class="table-card">
     <div class="table-toolbar">
@@ -983,7 +1012,7 @@
 <div class="view" id="view-iot-global">
   <div class="page-header">
     <div><div class="page-title">IoT Devices</div><div class="page-subtitle">KartaDongle · KartaDashCam · Edge AI Box — 3 device types × 68,900 vehicles</div></div>
-    <button class="btn btn-primary">➕ Pair Device</button>
+    <button class="btn btn-primary" data-hide-viewer>➕ Pair Device</button>
   </div>
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-icon blue">📡</div><div class="kpi-label">Total Units</div><div class="kpi-value" id="iot-kpi-total">206,700</div><div class="kpi-change"><span>3 types</span> × 68,900 vehicles</div></div>
@@ -1217,7 +1246,7 @@
       </select>
       <button class="btn btn-outline">📥 Export</button>
       <button class="btn btn-outline">📋 Generate Report</button>
-      <button class="btn btn-primary" onclick="openDaxOnboard()">➕ Onboard Driver</button>
+      <button class="btn btn-primary" data-hide-viewer onclick="openDaxOnboard()">➕ Onboard Driver</button>
     </div>
   </div>
 
@@ -1272,7 +1301,7 @@
         <option value="mar">March 2026</option>
       </select>
       <button class="btn btn-outline">📥 Export</button>
-      <button class="btn btn-primary" onclick="showToast('💳 Batch disbursement queued','#00B14F')">🚀 Disburse All Pending</button>
+      <button class="btn btn-primary" data-hide-viewer onclick="showToast('💳 Batch disbursement queued','#00B14F')">🚀 Disburse All Pending</button>
     </div>
   </div>
 
@@ -1745,7 +1774,7 @@
     <div class="profile-avatar-big" id="profile-avatar-big">FM</div>
     <div class="profile-info-main">
       <div class="profile-name" id="profile-name-display">Fleet Manager</div>
-      <div class="profile-role">Super Admin · GrabFleet Management Console</div>
+      <div class="profile-role" id="profile-role-text">Super Admin · GrabFleet Management Console</div>
       <div class="profile-meta">
         <div class="profile-meta-item">✉️ <span id="profile-email-display">admin@grab.com</span></div>
         <div class="profile-meta-item">📍 Singapore HQ</div>
@@ -1763,7 +1792,7 @@
     <div class="profile-section-title">Account Information</div>
     <div class="profile-field-row"><span class="profile-field-label">Full Name</span><span class="profile-field-value" id="profile-fullname">Fleet Manager</span></div>
     <div class="profile-field-row"><span class="profile-field-label">Email</span><span class="profile-field-value" id="profile-email-field">admin@grab.com</span></div>
-    <div class="profile-field-row"><span class="profile-field-label">Role</span><span class="profile-field-value">Super Admin</span></div>
+    <div class="profile-field-row"><span class="profile-field-label">Role</span><span class="profile-field-value" id="profile-role-field">Super Admin</span></div>
     <div class="profile-field-row"><span class="profile-field-label">Department</span><span class="profile-field-value">Fleet Operations</span></div>
     <div class="profile-field-row"><span class="profile-field-label">Location</span><span class="profile-field-value">Singapore HQ</span></div>
     <div class="profile-field-row"><span class="profile-field-label">Member Since</span><span class="profile-field-value">January 2024</span></div>
@@ -1777,6 +1806,75 @@
     <div class="profile-field-row">
       <div><div class="profile-field-value">Two-Factor Authentication</div><div class="profile-field-label" style="margin-top:2px">Not enabled</div></div>
       <button class="profile-edit-btn" onclick="showToast('🔐 2FA setup coming soon','#3B82F6')">Enable 2FA</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT VIEW -->
+<div class="view" id="view-user-mgmt">
+  <div class="page-header">
+    <div><div class="page-title">User Management</div><div class="page-subtitle" id="user-mgmt-subtitle">Manage users and their access levels</div></div>
+    <button class="btn btn-primary" id="btn-add-user" onclick="openAddUserModal()">➕ Add User</button>
+  </div>
+  <div class="user-mgmt-table-wrap">
+    <div class="table-toolbar">
+      <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search name, email…" oninput="filterUsersTable(this.value)" /></div>
+      <button class="filter-btn active" id="uf-all" onclick="setUserFilter('all',this)">All Roles</button>
+      <button class="filter-btn" id="uf-super_admin" onclick="setUserFilter('super_admin',this)">Super Admin</button>
+      <button class="filter-btn" id="uf-fleet_admin" onclick="setUserFilter('fleet_admin',this)">Fleet Admin</button>
+      <button class="filter-btn" id="uf-viewer" onclick="setUserFilter('viewer',this)">Viewer</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Fleet</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="user-mgmt-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="add-user-modal">
+  <div class="modal-card">
+    <div class="modal-title">➕ Add New User</div>
+    <div class="modal-field">
+      <label class="modal-label">Full Name</label>
+      <input class="modal-input" id="new-user-name" type="text" placeholder="e.g. Ahmad bin Rashid" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Email Address</label>
+      <input class="modal-input" id="new-user-email" type="email" placeholder="user@grab.com" />
+    </div>
+    <div class="modal-field" id="new-user-role-field">
+      <label class="modal-label">Role</label>
+      <select class="modal-select" id="new-user-role">
+        <option value="viewer">Fleet Viewer (Level 3)</option>
+        <option value="fleet_admin">Fleet Admin (Level 2)</option>
+        <option value="super_admin">Super Admin (Level 1)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Fleet</label>
+      <select class="modal-select" id="new-user-fleet">
+        <option value="Singapore">Singapore</option>
+        <option value="Malaysia">Malaysia</option>
+        <option value="Indonesia">Indonesia</option>
+        <option value="Thailand">Thailand</option>
+        <option value="Vietnam">Vietnam</option>
+        <option value="Philippines">Philippines</option>
+        <option value="all">All Fleets</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddUser()">Add User</button>
     </div>
   </div>
 </div>
@@ -4279,16 +4377,41 @@ function showPayTab(tabId, el) {
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 const USERS = [
-  { email:'admin@grab.com', password:'admin123', name:'Fleet Manager', initials:'FM' },
+  { email:'superadmin@grab.com', password:'super123', name:'Super Admin', initials:'SA', role:'super_admin', roleLabel:'Super Admin', fleet:'all' },
+  { email:'fleetadmin@grab.com', password:'fleet123', name:'Fleet Admin SG', initials:'FA', role:'fleet_admin', roleLabel:'Fleet Admin', fleet:'Singapore' },
+  { email:'viewer@grab.com',     password:'view123',  name:'Viewer SG',     initials:'VS', role:'viewer',      roleLabel:'Fleet Viewer', fleet:'Singapore' },
 ];
 let currentUser = null;
+
+// Demo user list (managed in User Management view)
+let managedUsers = [
+  { name:'Super Admin',    email:'superadmin@grab.com', role:'super_admin', fleet:'all',         status:'active' },
+  { name:'Fleet Admin SG', email:'fleetadmin@grab.com', role:'fleet_admin', fleet:'Singapore',   status:'active' },
+  { name:'Viewer SG',      email:'viewer@grab.com',     role:'viewer',      fleet:'Singapore',   status:'active' },
+  { name:'Ahmad Viewer',   email:'ahmad@grab.com',      role:'viewer',      fleet:'Malaysia',    status:'active' },
+  { name:'Siti Admin',     email:'siti@grab.com',       role:'fleet_admin', fleet:'Malaysia',    status:'active' },
+  { name:'Nguyen Viewer',  email:'nguyen@grab.com',     role:'viewer',      fleet:'Vietnam',     status:'inactive' },
+];
+
+const ROLE_LABELS = { super_admin:'Super Admin', fleet_admin:'Fleet Admin', viewer:'Fleet Viewer' };
+const ROLE_CHIP_CLASS = { super_admin:'super-admin', fleet_admin:'fleet-admin', viewer:'viewer' };
 
 function doLogin() {
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
-  document.getElementById('login-email').classList.remove('error');
-  document.getElementById('login-password').classList.remove('error');
-  const user = USERS[0];
+  const emailEl = document.getElementById('login-email');
+  const passEl  = document.getElementById('login-password');
+  emailEl.classList.remove('error');
+  passEl.classList.remove('error');
+  const email = emailEl.value.trim().toLowerCase();
+  const pass  = passEl.value;
+  const user  = USERS.find(u => u.email === email && u.password === pass);
+  if (!user) {
+    errEl.style.display = 'block';
+    emailEl.classList.add('error');
+    passEl.classList.add('error');
+    return;
+  }
   currentUser = user;
   // Update UI with user info
   document.getElementById('topbar-avatar').textContent = user.initials;
@@ -4299,7 +4422,41 @@ function doLogin() {
   document.getElementById('profile-fullname').textContent = user.name;
   document.getElementById('profile-email-display').textContent = user.email;
   document.getElementById('profile-email-field').textContent = user.email;
+  const fleetScope = user.fleet === 'all' ? 'All Fleets' : user.fleet + ' Fleet';
+  document.getElementById('profile-role-text').textContent = user.roleLabel + ' · ' + fleetScope;
+  document.getElementById('profile-role-field').textContent = user.roleLabel;
   document.getElementById('login-overlay').style.display = 'none';
+  applyRolePermissions(user);
+}
+
+function applyRolePermissions(user) {
+  // Show/hide nav items that require a minimum role
+  document.querySelectorAll('[data-require-role]').forEach(el => {
+    const allowed = el.dataset.requireRole.split(' ');
+    el.style.display = allowed.includes(user.role) ? '' : 'none';
+  });
+  // Hide action buttons not available to viewers
+  document.querySelectorAll('[data-hide-viewer]').forEach(el => {
+    el.style.display = user.role === 'viewer' ? 'none' : '';
+  });
+  // Fleet Admin: restrict Add User to viewer role only, hide super_admin option
+  if (user.role === 'fleet_admin') {
+    const roleSelect = document.getElementById('new-user-role');
+    if (roleSelect) {
+      Array.from(roleSelect.options).forEach(opt => {
+        if (opt.value === 'super_admin') opt.style.display = 'none';
+        if (opt.value === 'fleet_admin') opt.style.display = 'none';
+      });
+      // Lock fleet to their own fleet
+      const fleetSelect = document.getElementById('new-user-fleet');
+      if (fleetSelect) {
+        Array.from(fleetSelect.options).forEach(opt => {
+          opt.disabled = (opt.value !== user.fleet);
+        });
+        fleetSelect.value = user.fleet;
+      }
+    }
+  }
 }
 
 function doLogout() {
@@ -4309,6 +4466,9 @@ function doLogout() {
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-overlay').style.display = 'flex';
+  // Reset all role restrictions
+  document.querySelectorAll('[data-require-role]').forEach(el => el.style.display = '');
+  document.querySelectorAll('[data-hide-viewer]').forEach(el => el.style.display = '');
   showView('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
 }
 
@@ -4325,6 +4485,103 @@ document.addEventListener('click', function(e) {
   const wrap = document.getElementById('user-dropdown-wrap');
   if (wrap && !wrap.contains(e.target)) closeUserDropdown();
 });
+
+// ─── USER MANAGEMENT ──────────────────────────────────────────────────────
+let userFilter = 'all';
+let userSearch = '';
+
+function renderUsersTable() {
+  const tbody = document.getElementById('user-mgmt-tbody');
+  if (!tbody) return;
+  let list = managedUsers.filter(u => {
+    if (userFilter !== 'all' && u.role !== userFilter) return false;
+    if (currentUser && currentUser.role === 'fleet_admin' && u.fleet !== currentUser.fleet && u.fleet !== 'all') return false;
+    if (userSearch) {
+      const q = userSearch.toLowerCase();
+      if (!u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  tbody.innerHTML = list.map(u => `
+    <tr>
+      <td><div class="vehicle-info">
+        <div class="vehicle-avatar" style="background:${u.role==='super_admin'?'#FEF3C7':u.role==='fleet_admin'?'#DBEAFE':'#F3F4F6'}">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+        <div><div class="vehicle-plate">${u.name}</div></div>
+      </div></td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${u.email}</td>
+      <td><span class="user-role-chip ${ROLE_CHIP_CLASS[u.role]}">${ROLE_LABELS[u.role]}</span></td>
+      <td style="font-size:0.82rem">${u.fleet === 'all' ? '🌏 All Fleets' : u.fleet}</td>
+      <td><span class="status-badge ${u.status==='active'?'online':'offline'}">${u.status==='active'?'Active':'Inactive'}</span></td>
+      <td>
+        ${canManageUser(u) ? `<button class="dax-action-btn" onclick="toggleUserStatus('${u.email}')">
+          ${u.status==='active'?'Deactivate':'Activate'}
+        </button>` : '<span style="color:var(--text-secondary);font-size:0.78rem">—</span>'}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function canManageUser(u) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'super_admin') return u.email !== currentUser.email;
+  if (currentUser.role === 'fleet_admin') return u.role === 'viewer' && u.fleet === currentUser.fleet;
+  return false;
+}
+
+function toggleUserStatus(email) {
+  const u = managedUsers.find(x => x.email === email);
+  if (!u) return;
+  u.status = u.status === 'active' ? 'inactive' : 'active';
+  renderUsersTable();
+  showToast(u.status === 'active' ? '✅ User activated' : '⛔ User deactivated', u.status === 'active' ? '#10B981' : '#EF4444');
+}
+
+function setUserFilter(f, el) {
+  userFilter = f;
+  document.querySelectorAll('[id^="uf-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderUsersTable();
+}
+
+function filterUsersTable(q) { userSearch = q; renderUsersTable(); }
+
+function openAddUserModal() {
+  document.getElementById('new-user-name').value = '';
+  document.getElementById('new-user-email').value = '';
+  document.getElementById('add-user-modal').classList.add('open');
+}
+
+function closeAddUserModal() {
+  document.getElementById('add-user-modal').classList.remove('open');
+}
+
+function submitAddUser() {
+  const name  = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const role  = document.getElementById('new-user-role').value;
+  const fleet = document.getElementById('new-user-fleet').value;
+  if (!name || !email) { showToast('⚠️ Please fill in all fields','#F97316'); return; }
+  if (managedUsers.find(u => u.email === email)) { showToast('⚠️ Email already exists','#F97316'); return; }
+  managedUsers.push({ name, email, role, fleet, status:'active' });
+  closeAddUserModal();
+  renderUsersTable();
+  showToast('✅ User added successfully', '#10B981');
+}
+
+// Hook into showView for user management
+const _origShowView = showView;
+showView = function(name, navEl) {
+  _origShowView(name, navEl);
+  if (name === 'user-mgmt') {
+    const subtitle = document.getElementById('user-mgmt-subtitle');
+    if (subtitle && currentUser) {
+      subtitle.textContent = currentUser.role === 'super_admin'
+        ? 'Manage all users across all fleets'
+        : 'Manage viewers in your ' + currentUser.fleet + ' fleet';
+    }
+    renderUsersTable();
+  }
+};
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
 renderDashboardKPIs();
