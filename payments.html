@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Payment Management</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-payments">
+  <div class="page-header">
+    <div>
+      <div class="page-title">💳 Payment Management</div>
+      <div class="page-subtitle">Driver payouts, deductions &amp; disbursement tracking</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none" id="pay-period-select" onchange="renderPayView()">
+        <option value="may">May 2026</option>
+        <option value="apr">April 2026</option>
+        <option value="mar">March 2026</option>
+      </select>
+      <button class="btn btn-outline">📥 Export</button>
+      <button class="btn btn-primary" data-hide-viewer onclick="showToast('💳 Batch disbursement queued','#00B14F')">🚀 Disburse All Pending</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="pay-kpi-grid"></div>
+  <div class="pay-summary-strip" id="pay-summary-strip"></div>
+
+  <div class="tabs" style="margin-bottom:16px">
+    <div class="tab active" onclick="showPayTab('pay-tab-payouts',this)">💸 Driver Payouts</div>
+    <div class="tab" onclick="showPayTab('pay-tab-deductions',this)">✂️ Deductions</div>
+    <div class="tab" onclick="showPayTab('pay-tab-invoices',this)">🧾 Invoices</div>
+  </div>
+
+  <!-- PAYOUTS TAB -->
+  <div class="tab-content active" id="pay-tab-payouts">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or plate…" oninput="filterPayments(this.value)" /></div>
+        <button class="filter-btn active" id="pay-f-all"        onclick="setPayFilter('all',this)">All</button>
+        <button class="filter-btn"        id="pay-f-completed"  onclick="setPayFilter('completed',this)">✅ Completed</button>
+        <button class="filter-btn"        id="pay-f-pending"    onclick="setPayFilter('pending',this)">⏳ Pending</button>
+        <button class="filter-btn"        id="pay-f-processing" onclick="setPayFilter('processing',this)">🔄 Processing</button>
+        <button class="filter-btn"        id="pay-f-failed"     onclick="setPayFilter('failed',this)">❌ Failed</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Driver</th>
+            <th>Country</th>
+            <th>Period</th>
+            <th>Trips</th>
+            <th>Gross Earnings</th>
+            <th>Deductions</th>
+            <th>Net Payout</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pay-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DEDUCTIONS TAB -->
+  <div class="tab-content" id="pay-tab-deductions">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">✂️ Deduction Categories</div><span style="font-size:0.75rem;color:var(--primary);cursor:pointer;font-weight:500">Edit Rules</span></div>
+        <div class="card-body" id="pay-deduction-categories"></div>
+      </div>
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">📊 Deduction Breakdown</div><span style="font-size:0.75rem;color:var(--text-secondary)">This month</span></div>
+        <div class="card-body">
+          <div class="pay-channel-bar" id="pay-deduct-bar"></div>
+          <div id="pay-deduct-breakdown"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVOICES TAB -->
+  <div class="tab-content" id="pay-tab-invoices">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span style="font-size:0.875rem;font-weight:600">🧾 Fleet Invoices</span>
+        <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem">📥 Download All</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Invoice #</th><th>Driver</th><th>Period</th><th>Amount</th><th>Issued</th><th>Due Date</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="pay-invoice-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('payments.html');
+
+let payFilter = 'all';
+let paySearch = '';
+
+function renderPayView() {
+  const data = paymentData;
+  const totalGross    = data.reduce((s,p) => s + p.gross, 0);
+  const totalNet      = data.reduce((s,p) => s + (p.gross - p.deductions), 0);
+  const totalPending  = data.filter(p => p.status === 'pending').reduce((s,p) => s + (p.gross - p.deductions), 0);
+  const failedCount   = data.filter(p => p.status === 'failed').length;
+  const completedCount= data.filter(p => p.status === 'completed').length;
+
+  document.getElementById('pay-kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon green">💰</div><div class="kpi-label">Total Gross Earnings</div><div class="kpi-value">$${totalGross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change"><span>+8.4%</span> vs last month</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Disbursed (Net)</div><div class="kpi-value green">$${data.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.gross-p.deductions),0).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change"><span>${completedCount}</span> drivers paid</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⏳</div><div class="kpi-label">Pending Disbursement</div><div class="kpi-value yellow">$${totalPending.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="kpi-change">${data.filter(p=>p.status==='pending').length} payouts queued</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">❌</div><div class="kpi-label">Failed Transactions</div><div class="kpi-value red">${failedCount}</div><div class="kpi-change" style="color:#EF4444">Requires retry or review</div></div>`;
+
+  const methods = {};
+  data.forEach(p => { methods[p.method] = (methods[p.method]||0) + (p.gross - p.deductions); });
+  const methodIcons = { 'Bank Transfer':'🏦', 'GrabPay Wallet':'💚', 'GCash':'💙', 'PromptPay':'🇹🇭', 'MoMo Wallet':'🩷' };
+  document.getElementById('pay-summary-strip').innerHTML = Object.entries(methods).map(([m, amt]) => `
+    <div class="pay-summary-pill">
+      <div class="pay-summary-pill-icon" style="background:var(--primary-light)">${methodIcons[m]||'💳'}</div>
+      <div><div style="font-size:0.72rem;color:var(--text-secondary)">${m}</div><div style="font-size:0.95rem;font-weight:700">$${amt.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+    </div>`).join('');
+
+  const badge = document.getElementById('pay-alert-badge');
+  if (badge) { badge.textContent = failedCount > 0 ? failedCount : ''; badge.style.display = failedCount > 0 ? '' : 'none'; }
+
+  renderPayTable();
+  renderDeductionsTab();
+  renderInvoicesTab();
+}
+
+function renderPayTable() {
+  const q = paySearch.toLowerCase();
+  const rows = paymentData
+    .filter(p => payFilter === 'all' || p.status === payFilter)
+    .filter(p => !q || p.driver.toLowerCase().includes(q) || p.plate.toLowerCase().includes(q));
+  const statusIcons = { completed:'✅', pending:'⏳', processing:'🔄', failed:'❌' };
+  document.getElementById('pay-tbody').innerHTML = rows.map(p => {
+    const net = p.gross - p.deductions;
+    return `<tr onclick="showToast('💳 ${p.driver} — $${net.toFixed(2)} net','#00B14F')">
+      <td><div class="vehicle-info">
+        <div class="vehicle-avatar" style="font-size:0.9rem">${p.flag}</div>
+        <div><div class="vehicle-plate">${p.driver}</div><div class="vehicle-model">${p.plate}</div></div>
+      </div></td>
+      <td>${p.country}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${p.period}</td>
+      <td>${p.trips}</td>
+      <td class="pay-amount">$${p.gross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="color:#EF4444;font-size:0.875rem">−$${p.deductions.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="pay-amount" style="color:var(--primary)">$${net.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td><span class="pay-method-badge">${p.method}</span></td>
+      <td><span class="pay-status-badge ${p.status}">${statusIcons[p.status]} ${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
+      <td style="font-size:0.78rem;color:var(--text-secondary)">${p.date}</td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();showToast('${p.status==='failed'?'🔄 Retrying payment…':'📄 Opening payment detail…'}','${p.status==='failed'?'#F97316':'#3B82F6'}')">${p.status==='failed'?'Retry':'Detail'}</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text-secondary)">No payments match filter</td></tr>`;
+}
+
+function renderDeductionsTab() {
+  const totalDeductions = paymentData.reduce((s, p) => s + p.deductions, 0);
+  document.getElementById('pay-deduction-categories').innerHTML = deductionCategories.map(d => `
+    <div class="pay-deduction-item">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span>${d.icon}</span>
+        <div><div style="font-weight:600;font-size:0.875rem">${d.name}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${d.pct}% of gross</div></div>
+      </div>
+      <div style="text-align:right"><div style="font-weight:700;color:var(--text)">$${(totalDeductions * d.pct / 20).toFixed(2)}</div></div>
+    </div>`).join('');
+
+  document.getElementById('pay-deduct-bar').innerHTML = deductionCategories.map(d => `
+    <div class="pay-channel-seg" style="width:${d.pct/20*100}%;background:${d.color}"></div>`).join('');
+
+  document.getElementById('pay-deduct-breakdown').innerHTML = deductionCategories.map(d => `
+    <div class="pay-breakdown-row">
+      <div style="display:flex;align-items:center;gap:8px"><div class="pay-breakdown-dot" style="background:${d.color}"></div>${d.name}</div>
+      <div style="font-weight:600">${d.pct}%</div>
+    </div>`).join('');
+}
+
+function renderInvoicesTab() {
+  const invoices = paymentData.map((p, i) => ({
+    id: `INV-2026-${String(i+1001).padStart(4,'0')}`,
+    driver: p.driver, period: p.period,
+    amount: p.gross - p.deductions,
+    issued: '2026-05-01',
+    due: '2026-05-15',
+    status: p.status === 'completed' ? 'paid' : p.status === 'failed' ? 'overdue' : 'unpaid'
+  }));
+  const invStatusColors = { paid:'#15803D', unpaid:'#92400E', overdue:'#991B1B' };
+  const invStatusBg = { paid:'#DCFCE7', unpaid:'#FEF3C7', overdue:'#FEE2E2' };
+  document.getElementById('pay-invoice-tbody').innerHTML = invoices.map(inv => `
+    <tr onclick="showToast('🧾 Invoice ${inv.id} — $${inv.amount.toFixed(2)}','#00B14F')">
+      <td style="font-size:0.82rem;font-weight:600;color:var(--primary)">${inv.id}</td>
+      <td>${inv.driver}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.period}</td>
+      <td class="pay-amount">$${inv.amount.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.issued}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${inv.due}</td>
+      <td><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;background:${invStatusBg[inv.status]};color:${invStatusColors[inv.status]}">${inv.status.charAt(0).toUpperCase()+inv.status.slice(1)}</span></td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();showToast('📥 Downloading invoice…','#3B82F6')">📥 PDF</button></td>
+    </tr>`).join('');
+}
+
+function setPayFilter(f, el) {
+  payFilter = f;
+  document.querySelectorAll('[id^="pay-f-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPayTable();
+}
+
+function filterPayments(q) { paySearch = q; renderPayTable(); }
+
+function showPayTab(tabId, el) {
+  document.querySelectorAll('#view-payments .tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#view-payments .tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+renderPayView();
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — User Management</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  .modal-card { background:white; border-radius:16px; padding:28px; width:420px; }
+  .modal-title { font-size:1.1rem; font-weight:700; margin-bottom:20px; }
+  .modal-field { margin-bottom:14px; }
+  .modal-label { display:block; font-size:0.82rem; font-weight:600; color:var(--text-secondary); margin-bottom:5px; }
+  .modal-input { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; box-sizing:border-box; }
+  .modal-input:focus { border-color:var(--primary); }
+  .modal-select { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.875rem; outline:none; background:white; box-sizing:border-box; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+</style>
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-user-mgmt">
+  <div class="page-header">
+    <div><div class="page-title">User Management</div><div class="page-subtitle" id="user-mgmt-subtitle">Manage users and their access levels</div></div>
+    <button class="btn btn-primary" id="btn-add-user" onclick="openAddUserModal()">➕ Add User</button>
+  </div>
+  <div class="user-mgmt-table-wrap">
+    <div class="table-toolbar">
+      <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search name, email…" oninput="filterUsersTable(this.value)" /></div>
+      <button class="filter-btn active" id="uf-all" onclick="setUserFilter('all',this)">All Roles</button>
+      <button class="filter-btn" id="uf-super_admin" onclick="setUserFilter('super_admin',this)">Super Admin</button>
+      <button class="filter-btn" id="uf-fleet_admin" onclick="setUserFilter('fleet_admin',this)">Fleet Admin</button>
+      <button class="filter-btn" id="uf-viewer" onclick="setUserFilter('viewer',this)">Viewer</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Fleet</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="user-mgmt-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="add-user-modal">
+  <div class="modal-card">
+    <div class="modal-title">➕ Add New User</div>
+    <div class="modal-field">
+      <label class="modal-label">Full Name</label>
+      <input class="modal-input" id="new-user-name" type="text" placeholder="e.g. Ahmad bin Rashid" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Email Address</label>
+      <input class="modal-input" id="new-user-email" type="email" placeholder="user@grab.com" />
+    </div>
+    <div class="modal-field" id="new-user-role-field">
+      <label class="modal-label">Role</label>
+      <select class="modal-select" id="new-user-role">
+        <option value="viewer">Fleet Viewer (Level 3)</option>
+        <option value="fleet_admin">Fleet Admin (Level 2)</option>
+        <option value="super_admin">Super Admin (Level 1)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Fleet</label>
+      <select class="modal-select" id="new-user-fleet">
+        <option value="Singapore">Singapore</option>
+        <option value="Malaysia">Malaysia</option>
+        <option value="Indonesia">Indonesia</option>
+        <option value="Thailand">Thailand</option>
+        <option value="Vietnam">Vietnam</option>
+        <option value="Philippines">Philippines</option>
+        <option value="all">All Fleets</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddUser()">Add User</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('users.html');
+
+// Update subtitle based on role
+const subtitle = document.getElementById('user-mgmt-subtitle');
+if (subtitle && currentUser) {
+  subtitle.textContent = currentUser.role === 'super_admin'
+    ? 'Manage all users across all fleets'
+    : 'Manage viewers in your ' + currentUser.fleet + ' fleet';
+}
+
+// Role-restrict the add user form
+if (currentUser && currentUser.role === 'fleet_admin') {
+  const roleSelect = document.getElementById('new-user-role');
+  if (roleSelect) {
+    Array.from(roleSelect.options).forEach(opt => {
+      if (opt.value === 'super_admin' || opt.value === 'fleet_admin') opt.style.display = 'none';
+    });
+  }
+  const fleetSelect = document.getElementById('new-user-fleet');
+  if (fleetSelect) {
+    Array.from(fleetSelect.options).forEach(opt => { opt.disabled = (opt.value !== currentUser.fleet); });
+    fleetSelect.value = currentUser.fleet;
+  }
+}
+
+let userFilter = 'all';
+let userSearch = '';
+
+function renderUsersTable() {
+  const tbody = document.getElementById('user-mgmt-tbody');
+  if (!tbody) return;
+  let list = managedUsers.filter(u => {
+    if (userFilter !== 'all' && u.role !== userFilter) return false;
+    if (currentUser && currentUser.role === 'fleet_admin' && u.fleet !== currentUser.fleet && u.fleet !== 'all') return false;
+    if (userSearch) {
+      const q = userSearch.toLowerCase();
+      if (!u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  tbody.innerHTML = list.map(u => `
+    <tr>
+      <td><div class="vehicle-info">
+        <div class="vehicle-avatar" style="background:${u.role==='super_admin'?'#FEF3C7':u.role==='fleet_admin'?'#DBEAFE':'#F3F4F6'}">${u.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+        <div><div class="vehicle-plate">${u.name}</div></div>
+      </div></td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${u.email}</td>
+      <td><span class="user-role-chip ${ROLE_CHIP_CLASS[u.role]}">${ROLE_LABELS[u.role]}</span></td>
+      <td style="font-size:0.82rem">${u.fleet === 'all' ? '🌏 All Fleets' : u.fleet}</td>
+      <td><span class="status-badge ${u.status==='active'?'online':'offline'}">${u.status==='active'?'Active':'Inactive'}</span></td>
+      <td>
+        ${canManageUser(u) ? `<button class="dax-action-btn" onclick="toggleUserStatus('${u.email}')">
+          ${u.status==='active'?'Deactivate':'Activate'}
+        </button>` : '<span style="color:var(--text-secondary);font-size:0.78rem">—</span>'}
+      </td>
+    </tr>`).join('');
+}
+
+function canManageUser(u) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'super_admin') return u.email !== currentUser.email;
+  if (currentUser.role === 'fleet_admin') return u.role === 'viewer' && u.fleet === currentUser.fleet;
+  return false;
+}
+
+function toggleUserStatus(email) {
+  const u = managedUsers.find(x => x.email === email);
+  if (!u) return;
+  u.status = u.status === 'active' ? 'inactive' : 'active';
+  renderUsersTable();
+  showToast(u.status === 'active' ? '✅ User activated' : '⛔ User deactivated', u.status === 'active' ? '#10B981' : '#EF4444');
+}
+
+function setUserFilter(f, el) {
+  userFilter = f;
+  document.querySelectorAll('[id^="uf-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderUsersTable();
+}
+
+function filterUsersTable(q) { userSearch = q; renderUsersTable(); }
+
+function openAddUserModal() {
+  document.getElementById('new-user-name').value = '';
+  document.getElementById('new-user-email').value = '';
+  document.getElementById('add-user-modal').classList.add('open');
+}
+
+function closeAddUserModal() {
+  document.getElementById('add-user-modal').classList.remove('open');
+}
+
+function submitAddUser() {
+  const name  = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const role  = document.getElementById('new-user-role').value;
+  const fleet = document.getElementById('new-user-fleet').value;
+  if (!name || !email) { showToast('⚠️ Please fill in all fields','#F97316'); return; }
+  if (managedUsers.find(u => u.email === email)) { showToast('⚠️ Email already exists','#F97316'); return; }
+  managedUsers.push({ name, email, role, fleet, status:'active' });
+  closeAddUserModal();
+  renderUsersTable();
+  showToast('✅ User added successfully', '#10B981');
+}
+
+document.getElementById('add-user-modal').addEventListener('click', function(e) { if(e.target===this) closeAddUserModal(); });
+
+renderUsersTable();
+</script>
+</body>
+</html>

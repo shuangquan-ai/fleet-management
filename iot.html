@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — IoT Devices</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<!-- IOT GLOBAL VIEW -->
+<div class="view active" id="view-iot-global">
+  <div class="page-header">
+    <div><div class="page-title">IoT Devices</div><div class="page-subtitle">KartaDongle · KartaDashCam · Edge AI Box — 3 device types × 68,900 vehicles</div></div>
+    <button class="btn btn-primary" data-hide-viewer>➕ Pair Device</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-icon blue">📡</div><div class="kpi-label">Total Units</div><div class="kpi-value" id="iot-kpi-total">—</div><div class="kpi-change"><span>3 types</span> × 68,900 vehicles</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Online</div><div class="kpi-value green" id="iot-kpi-online">—</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">❌</div><div class="kpi-label">Offline / Degraded</div><div class="kpi-value red" id="iot-kpi-offline">—</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">🔄</div><div class="kpi-label">Firmware OK</div><div class="kpi-value yellow" id="iot-kpi-update">—</div></div>
+  </div>
+  <div id="iot-filter-bar" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="filter-btn active" onclick="setIotFilter('all',this)">🔲 All Devices</button>
+    <button class="filter-btn" onclick="setIotFilter('kartadongle',this)">🔌 KartaDongle</button>
+    <button class="filter-btn" onclick="setIotFilter('kartadashcam',this)">📷 KartaDashCam</button>
+    <button class="filter-btn" onclick="setIotFilter('edgeaibox',this)">🧠 Edge AI Box</button>
+  </div>
+  <div id="iot-global-area"></div>
+</div>
+
+<!-- IOT DEVICE DETAIL VIEW -->
+<div class="view" id="view-iot-device">
+  <div class="detail-back" id="iot-device-back" onclick="goBackFromDevice()">← Back to IoT Devices</div>
+  <div id="iot-device-content"></div>
+</div>
+
+</main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('iot.html');
+
+let iotGlobalFilter = 'all';
+
+const latestFirmware = {
+  kartadongle:  { version:'v3.2.1', released:'2026-04-15', size:'4.2 MB',  changes:['Improved GPS fix time by 40%','CAN Bus 2.0 stability patch','Reduced LTE data usage 18%','OBD protocol extended support','Critical security patch CVE-2026-0142'] },
+  kartadashcam: { version:'v2.4.0', released:'2026-04-28', size:'18.6 MB', changes:['4K front camera support','Night vision enhancement +30%','Live stream latency ↓ 220ms','Auto event clip cloud upload','H.265 encoding for 40% storage saving'] },
+  edgeaibox:    { version:'v1.6.2', released:'2026-05-01', size:'312 MB',  changes:['GrabEdge AI model v4.0','Drowsiness detection accuracy 97%','Lane departure sensitivity tuning','Driver ID confidence 98%','Edge inference 30% faster'] },
+};
+const otaState = {};
+
+function getFwStatus(type, fw) {
+  const latest = latestFirmware[type];
+  if (!latest) return 'ok';
+  const parse = v => v.replace('v','').split('.').map(Number);
+  const cur = parse(fw), lat = parse(latest.version);
+  for (let i = 0; i < Math.max(cur.length, lat.length); i++) {
+    const c = cur[i]||0, l = lat[i]||0;
+    if (c < l) return 'outdated';
+    if (c > l) return 'ok';
+  }
+  return 'ok';
+}
+
+function buildFwStatusHtml(d) {
+  const key = `${d.type}-${d.vid}`;
+  const state = otaState[key];
+  const latest = latestFirmware[d.type];
+  const fw = (state === 'updated') ? latest.version : d.fw;
+  const status = (state === 'updated') ? 'ok' : getFwStatus(d.type, d.fw);
+  if (state === 'updating') {
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="pulse" style="background:var(--primary)"></div><span style="font-size:0.875rem;font-weight:500;color:var(--primary)">Installing ${latest.version}…</span></div>
+      <div class="ota-progress"><div class="ota-progress-bar" id="ota-prog-${d.vid}" style="width:0%"></div></div>`;
+  }
+  if (state === 'updated') {
+    return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:3px">Installed Version</div><div style="font-size:1.1rem;font-weight:700">${fw}</div></div><span class="fw-badge ok">✅ Up to date</span></div>`;
+  }
+  let html = `<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:${status==='outdated'?'14px':'0'}"><div><div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:3px">Installed Version</div><div style="font-size:1.1rem;font-weight:700">${fw}</div></div>`;
+  if (status === 'outdated') {
+    html += `<div><div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:3px">Latest Available</div><div style="font-size:1.1rem;font-weight:700;color:var(--primary)">${latest.version}</div></div><span class="fw-badge outdated">⚠️ Update Available</span></div>`;
+    html += `<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:12px"><div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">What's new in ${latest.version} · ${latest.released} · ${latest.size}</div>${latest.changes.map(c => `<div class="changelog-item">${c}</div>`).join('')}</div>
+      <button onclick="startOtaUpdate('${d.type}','${d.vid}')" class="btn btn-primary" style="font-size:0.82rem">🚀 Install ${latest.version}</button>`;
+  } else {
+    html += `<span class="fw-badge ok">✅ Up to date</span></div>`;
+  }
+  return html;
+}
+
+function checkFirmwareUpdate(type, vid) {
+  const btn = document.getElementById(`fw-check-btn-${vid}`);
+  const area = document.getElementById(`fw-status-area-${vid}`);
+  if (!btn || !area) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;animation:spin 0.8s linear infinite">🔄</span> Checking…';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = '🔍 Check for Update';
+    const v = vehicles.find(x => x.id === vid);
+    if (!v) return;
+    const d = getVehicleIotInstances(v).find(x => x.type === type);
+    if (!d) return;
+    area.innerHTML = buildFwStatusHtml(d);
+    const status = otaState[`${type}-${vid}`] === 'updated' ? 'ok' : getFwStatus(type, d.fw);
+    showToast(status === 'ok' ? `✅ ${d.name} is up to date` : `⚠️ Update available: ${latestFirmware[type].version}`, status === 'ok' ? '#10B981' : '#F97316');
+  }, 1600);
+}
+
+function startOtaUpdate(type, vid) {
+  const key = `${type}-${vid}`;
+  otaState[key] = 'updating';
+  const area = document.getElementById(`fw-status-area-${vid}`);
+  const v = vehicles.find(x => x.id === vid);
+  const d = getVehicleIotInstances(v).find(x => x.type === type);
+  if (area) area.innerHTML = buildFwStatusHtml(d);
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(100, progress + Math.random() * 14 + 4);
+    const bar = document.getElementById(`ota-prog-${vid}`);
+    if (bar) bar.style.width = progress + '%';
+    if (progress >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        otaState[key] = 'updated';
+        const a = document.getElementById(`fw-status-area-${vid}`);
+        if (a) a.innerHTML = buildFwStatusHtml(d);
+        showToast(`✅ ${d.name} on ${v.plate} updated to ${latestFirmware[type].version}`, '#10B981');
+      }, 400);
+    }
+  }, 280);
+}
+
+function setIotFilter(type, el) {
+  iotGlobalFilter = type;
+  document.querySelectorAll('#iot-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderIotGlobal();
+}
+
+function renderIotGlobal() {
+  const allInstances = vehicles.flatMap(v => getVehicleIotInstances(v));
+  const filtered = iotGlobalFilter === 'all' ? allInstances : allInstances.filter(d => d.type === iotGlobalFilter);
+  const s = fleetStats;
+  document.getElementById('iot-kpi-total').textContent = fn(s.iotTotal);
+  document.getElementById('iot-kpi-online').textContent = fn(s.iotOnline);
+  document.getElementById('iot-kpi-offline').textContent = fn(s.iotOffline);
+  document.getElementById('iot-kpi-update').textContent = fn(s.iotFwOK);
+
+  if (iotGlobalFilter === 'all') {
+    const rows = vehicles.map(v => {
+      const inst = getVehicleIotInstances(v);
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:13px 18px"><div style="font-weight:700;font-size:0.875rem">${v.flag} ${v.plate}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${v.driver} · ${v.city}</div></td>
+        ${inst.map(d => `<td style="padding:13px 18px">
+          <div style="display:flex;align-items:center;gap:8px"><span class="status-badge ${d.status === 'online' ? 'online' : d.status === 'degraded' ? 'low-soc' : 'offline'}" style="font-size:0.65rem;padding:2px 7px">${d.status}</span></div>
+          <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:3px">${d.deviceId} · FW ${d.fw}</div>
+        </td>`).join('')}
+      </tr>`;
+    }).join('');
+    document.getElementById('iot-global-area').innerHTML = `
+      <div class="table-card"><table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="padding:12px 18px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Vehicle</th>
+          ${iotCatalogue.map(c => `<th style="padding:12px 18px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">${c.icon} ${c.name}</th>`).join('')}
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  } else {
+    const cat = iotCatalogue.find(c => c.type === iotGlobalFilter);
+    document.getElementById('iot-global-area').innerHTML = `
+      <div style="background:white;border-radius:14px;padding:18px 20px;box-shadow:var(--card-shadow);margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="iot-icon ${cat.color}" style="width:52px;height:52px;font-size:1.5rem;border-radius:12px">${cat.icon}</div>
+          <div><div style="font-size:1.05rem;font-weight:700">${cat.name}</div><div style="font-size:0.82rem;color:var(--text-secondary);margin-top:3px">${cat.desc}</div></div>
+          <div style="margin-left:auto;display:flex;gap:8px">${cat.capabilities.map(c => `<span style="font-size:0.68rem;font-weight:600;background:var(--bg);border:1px solid var(--border);padding:3px 8px;border-radius:10px;color:var(--text-secondary)">${c}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div class="iot-grid" style="grid-template-columns:repeat(3,1fr)">
+        ${filtered.map(d => `
+          <div class="iot-card" style="cursor:pointer;border:1.5px solid var(--border);border-radius:12px;transition:box-shadow 0.15s,border-color 0.15s"
+               onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,177,79,0.12)';this.style.borderColor='var(--primary)'"
+               onmouseleave="this.style.boxShadow='';this.style.borderColor='var(--border)'"
+               onclick="showIotDevice('${d.type}','${d.vid}')">
+            <div class="iot-icon ${d.color}">${d.icon}</div>
+            <div style="flex:1">
+              <div class="iot-name">${d.flag||''} ${d.plate}</div>
+              <div class="iot-id">${d.deviceId} · FW ${d.fw}</div>
+              <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:3px">🌡️ ${d.temp} · ⏱️ ${d.uptime} uptime</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="status-badge ${d.status === 'online' ? 'online' : d.status === 'degraded' ? 'low-soc' : 'offline'}">${d.status}</span>
+              <span style="font-size:0.7rem;color:var(--primary);font-weight:600">Details →</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+function showIotDevice(type, vid) {
+  const v = vehicles.find(x => x.id === vid);
+  if (!v) return;
+  const d = getVehicleIotInstances(v).find(x => x.type === type);
+  if (!d) return;
+  const logEntries = [
+    { time:'Today 09:14', event:'Device heartbeat', level:'info' },
+    { time:'Today 08:52', event:'Firmware check — up to date', level:'info' },
+    { time:'Today 08:30', event:'Signal strength dropped to 2/4', level:'warn' },
+    { time:'Today 07:55', event:'Device rebooted — power cycle', level:'warn' },
+    { time:'Yesterday 23:10', event:'Normal operation resumed', level:'info' },
+    { time:'Yesterday 22:48', event:'High temp warning: 58°C', level:'warn' },
+  ];
+  const extraMetrics = {
+    kartadongle: [{ label:'OBD Protocol', value:'CAN Bus 2.0' },{ label:'Engine Data Rate', value:'10 Hz' },{ label:'GPS Fix', value:'3D Fix · 9 sats' },{ label:'LTE Band', value:'B3 / B7' },{ label:'Data Usage', value:'1.2 GB / month' }],
+    kartadashcam: [{ label:'Active Channels', value:d.status==='online'?'Front, Rear':'—' },{ label:'Recording Mode', value:'Continuous + Event' },{ label:'Resolution', value:'Front: 1080p · Rear: 720p' },{ label:'Storage Used', value:'14.2 GB / 64 GB' },{ label:'Live Stream', value:d.status==='online'?'Active':'Inactive' }],
+    edgeaibox: [{ label:'AI Model', value:'GrabEdge v3.1' },{ label:'Inference Rate', value:'30 FPS' },{ label:'CPU Usage', value:`${35 + parseInt(vid.replace('V',''))*3 % 40}%` },{ label:'RAM Usage', value:'1.1 GB / 4 GB' },{ label:'Events Today', value:`${parseInt(vid.replace('V',''))*2 + 3} detections` }],
+  };
+  const stClass = d.status === 'online' ? 'online' : d.status === 'degraded' ? 'low-soc' : 'offline';
+  const colorMap = { green:'var(--primary-light)', blue:'#DBEAFE', purple:'#EDE9FE' };
+  document.getElementById('iot-device-back').textContent = '← Back to IoT Devices';
+  document.getElementById('iot-device-content').innerHTML = `
+    <div style="background:white;border-radius:14px;padding:24px;box-shadow:var(--card-shadow);margin-bottom:20px;display:flex;align-items:flex-start;gap:20px">
+      <div style="width:64px;height:64px;border-radius:14px;background:${colorMap[d.color]||'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0">${d.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:1.2rem;font-weight:700">${d.name}</span><span class="status-badge ${stClass}">${d.status}</span></div>
+        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px">${d.desc}</div>
+        <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;font-size:0.82rem">
+          <span>🔖 <strong>Device ID:</strong> ${d.deviceId}</span>
+          <span>🔧 <strong>Firmware:</strong> ${d.fw}</span>
+          <span>🚗 <strong>Vehicle:</strong> ${v.flag} ${v.plate} · ${v.driver}</span>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="font-size:0.82rem" onclick="setIotFilter('${type}',document.querySelector('#iot-filter-bar .filter-btn[onclick*=\\'${type}\\']'))">View all ${d.name}s →</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div class="param-card"><div class="param-label">Signal</div><div class="param-value">${['—','Weak','Fair','Good','Excellent'][d.signal]||'—'}</div></div>
+      <div class="param-card"><div class="param-label">Device Temp</div><div class="param-value">${d.temp}</div></div>
+      <div class="param-card"><div class="param-label">Uptime</div><div class="param-value">${d.uptime}</div></div>
+      <div class="param-card"><div class="param-label">Last Seen</div><div class="param-value" style="font-size:0.95rem">${d.lastSeen}</div></div>
+    </div>
+    <div style="background:white;border-radius:14px;padding:20px;box-shadow:var(--card-shadow);margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="card-title">🔧 Firmware Management</div>
+        <button onclick="checkFirmwareUpdate('${type}','${v.id}')" class="btn btn-outline" style="font-size:0.82rem" id="fw-check-btn-${v.id}">🔍 Check for Update</button>
+      </div>
+      <div id="fw-status-area-${v.id}">${buildFwStatusHtml(d)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:white;border-radius:14px;padding:20px;box-shadow:var(--card-shadow)">
+        <div class="card-title" style="margin-bottom:14px">⚙️ Capabilities</div>
+        ${d.capabilities.map(c => `<div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;margin-bottom:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0"></span>${c}</div>`).join('')}
+      </div>
+      <div style="background:white;border-radius:14px;padding:20px;box-shadow:var(--card-shadow)">
+        <div class="card-title" style="margin-bottom:14px">📊 Device Metrics</div>
+        ${(extraMetrics[type]||[]).map(m => `<div style="display:flex;justify-content:space-between;font-size:0.82rem;padding-bottom:8px;border-bottom:1px solid var(--border)"><span style="color:var(--text-secondary)">${m.label}</span><span style="font-weight:600">${m.value}</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="background:white;border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden">
+      <div class="card-header"><div class="card-title">📋 Device Event Log</div></div>
+      <div style="padding:4px 0">
+        ${logEntries.map(e => `<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border)"><span style="width:8px;height:8px;border-radius:50%;background:${e.level==='warn'?'var(--yellow)':'var(--primary)'};flex-shrink:0"></span><span style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;min-width:120px">${e.time}</span><span style="font-size:0.85rem">${e.event}</span><span style="margin-left:auto;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;background:${e.level==='warn'?'#FEF3C7':'#DCFCE7'};color:${e.level==='warn'?'#92400E':'#15803D'}">${e.level.toUpperCase()}</span></div>`).join('')}
+      </div>
+    </div>`;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-iot-device').classList.add('active');
+}
+
+function goBackFromDevice() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-iot-global').classList.add('active');
+}
+
+renderIotGlobal();
+</script>
+</body>
+</html>

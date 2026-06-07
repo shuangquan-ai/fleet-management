@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Telematics</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-telematics">
+  <div class="page-header">
+    <div><div class="page-title">Telematics Events</div><div class="page-subtitle">All fleet events · Today</div></div>
+    <div style="display:flex;gap:8px">
+      <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none"><option>Today</option><option>Last 7 days</option><option>Last 30 days</option></select>
+      <button class="btn btn-outline">🔽 Filter</button>
+      <button class="btn btn-primary">📥 Export</button>
+    </div>
+  </div>
+  <div class="kpi-grid" id="tel-kpi-grid"></div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span style="font-size:0.875rem;font-weight:600" id="tel-events-label">All Events</span>
+      <button class="filter-btn active" style="margin-left:auto">All</button>
+      <button class="filter-btn">🛑 Braking</button>
+      <button class="filter-btn">⚡ Speeding</button>
+      <button class="filter-btn">🏁 Geofence</button>
+      <button class="filter-btn">🚨 SOS</button>
+    </div>
+    <div style="padding:16px">
+      <div class="events-list" id="all-tel-events"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('telematics.html');
+
+function renderTelKPIs() {
+  const s = fleetStats;
+  const grid = document.getElementById('tel-kpi-grid');
+  if (grid) grid.innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon red">🛑</div><div class="kpi-label">Harsh Braking</div><div class="kpi-value red">${fn(s.harshBraking)}</div><div class="kpi-change">Today across <span>fleet</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⚡</div><div class="kpi-label">Speeding</div><div class="kpi-value yellow">${fn(s.speeding)}</div><div class="kpi-change">Today across <span>fleet</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue">🏁</div><div class="kpi-label">Geofence Events</div><div class="kpi-value" style="color:#3B82F6">${fn(s.geofenceEvts)}</div><div class="kpi-change">Today across <span>fleet</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon red">🚨</div><div class="kpi-label">SOS / Collision</div><div class="kpi-value red">${fn(s.sos)}</div><div class="kpi-change"><span>Critical</span> — reviewing</div></div>`;
+  const lbl = document.getElementById('tel-events-label');
+  if (lbl) lbl.textContent = `All Events Today (${fn(s.telTotal)}) — showing sample`;
+}
+
+function renderTelEvents() {
+  document.getElementById('all-tel-events').innerHTML = telEvents.map(e => `
+    <div class="tel-event">
+      <div class="tel-icon ${e.color}">${e.icon}</div>
+      <div><div class="tel-name">${e.type}</div><div class="tel-detail">${e.detail}</div></div>
+      <div class="tel-right">
+        <div class="tel-time">${e.time}</div>
+        <div class="tel-vehicle">${e.vehicle}</div>
+        <div style="margin-top:4px"><span class="severity ${e.severity}">${e.severity.toUpperCase()}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+renderTelKPIs();
+renderTelEvents();
+</script>
+</body>
+</html>

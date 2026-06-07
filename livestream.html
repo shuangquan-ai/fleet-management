@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Live Streams</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-livestream">
+  <div class="page-header" style="margin-bottom:12px">
+    <div><div class="page-title">📹 Live Streams</div><div class="page-subtitle">KartaDashCam network · Real-time feeds</div></div>
+    <div class="layout-toggle">
+      <button class="layout-btn active" id="layout-btn-group" onclick="setStreamLayout('group',this)" title="Group by vehicle">⊟</button>
+      <button class="layout-btn" id="layout-btn-flat" onclick="setStreamLayout('flat',this)" title="Flat grid">⊞</button>
+    </div>
+  </div>
+  <div class="stream-stats-row">
+    <div class="stream-stat-pill"><span class="dot" style="background:#6B7280"></span>Total&nbsp;<strong id="stream-stat-total">0</strong></div>
+    <div class="stream-stat-pill"><span class="dot" style="background:var(--red)"></span>LIVE&nbsp;<strong id="stream-stat-live" style="color:var(--red)">0</strong></div>
+    <div class="stream-stat-pill"><span class="dot" style="background:#9CA3AF"></span>Offline&nbsp;<strong id="stream-stat-offline">0</strong></div>
+    <div class="stream-stat-pill"><span class="dot" style="background:var(--primary)"></span>Vehicles&nbsp;<strong id="stream-stat-vehicles" style="color:var(--primary)">0</strong></div>
+  </div>
+  <div class="stream-filter-bar">
+    <div class="filter-row">
+      <span class="filter-label">Country</span>
+      <div class="filter-chip active" onclick="setStreamCountry('all',this)">🌏 All</div>
+      <div class="filter-chip" onclick="setStreamCountry('Singapore',this)">🇸🇬 Singapore</div>
+      <div class="filter-chip" onclick="setStreamCountry('Malaysia',this)">🇲🇾 Malaysia</div>
+      <div class="filter-chip" onclick="setStreamCountry('Indonesia',this)">🇮🇩 Indonesia</div>
+      <div class="filter-chip" onclick="setStreamCountry('Thailand',this)">🇹🇭 Thailand</div>
+      <div class="filter-chip" onclick="setStreamCountry('Vietnam',this)">🇻🇳 Vietnam</div>
+      <div class="filter-chip" onclick="setStreamCountry('Philippines',this)">🇵🇭 Philippines</div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">City</span>
+      <div id="stream-city-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div class="filter-divider"></div>
+      <span class="filter-label">Channel</span>
+      <div class="filter-chip active" onclick="setStreamChannel('all',this)">All</div>
+      <div class="filter-chip" onclick="setStreamChannel('front',this)">📷 Front</div>
+      <div class="filter-chip" onclick="setStreamChannel('rear',this)">📷 Rear</div>
+      <div class="filter-chip" onclick="setStreamChannel('cabin',this)">📷 Cabin</div>
+      <div class="filter-divider"></div>
+      <div class="filter-chip active" id="status-chip-all" onclick="setStreamStatus('all',this)">All status</div>
+      <div class="filter-chip" id="status-chip-live" onclick="setStreamStatus('live',this)">🔴 Live only</div>
+      <div class="filter-chip" id="status-chip-offline" onclick="setStreamStatus('offline',this)">⚫ Offline</div>
+      <div class="filter-divider"></div>
+      <div class="stream-search-wrap">
+        <span class="si">🔍</span>
+        <input class="stream-search-input" type="text" placeholder="Plate or driver…" oninput="setStreamSearch(this.value)" />
+      </div>
+    </div>
+  </div>
+  <div id="stream-main"></div>
+</div>
+
+</main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('livestream.html');
+
+let streamFilter = { country:'all', city:'all', channel:'all', status:'all', search:'', layout:'group' };
+
+function setStreamCountry(val, el) {
+  streamFilter.country = val; streamFilter.city = 'all';
+  document.querySelectorAll('#view-livestream .filter-row:first-child .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderStreams();
+}
+function setStreamChannel(val, el) {
+  streamFilter.channel = val;
+  el.closest('.filter-row').querySelectorAll('.filter-chip').forEach(c => {
+    if (['all','front','rear','cabin'].some(v => c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${v}'`))) c.classList.remove('active');
+  });
+  el.classList.add('active');
+  renderStreams();
+}
+function setStreamStatus(val, el) {
+  streamFilter.status = val;
+  ['all','live','offline'].forEach(s => { const c = document.getElementById('status-chip-'+s); if(c) c.classList.remove('active'); });
+  el.classList.add('active');
+  renderStreams();
+}
+function setStreamSearch(val) { streamFilter.search = val.trim().toLowerCase(); renderStreams(); }
+function setStreamLayout(val, el) {
+  streamFilter.layout = val;
+  document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderStreams();
+}
+function setStreamCity(val, el) {
+  streamFilter.city = val;
+  document.querySelectorAll('#stream-city-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderStreams();
+}
+
+function getFilteredStreams() {
+  return streamChannels.filter(s => {
+    if (streamFilter.country !== 'all' && s.country !== streamFilter.country) return false;
+    if (streamFilter.city !== 'all' && s.city !== streamFilter.city) return false;
+    if (streamFilter.channel !== 'all' && s.ch !== streamFilter.channel) return false;
+    if (streamFilter.status === 'live' && !s.live) return false;
+    if (streamFilter.status === 'offline' && s.live) return false;
+    if (streamFilter.search && !s.plate.toLowerCase().includes(streamFilter.search) && !s.driver.toLowerCase().includes(streamFilter.search) && !s.city.toLowerCase().includes(streamFilter.search)) return false;
+    return true;
+  });
+}
+
+function renderStreamCities() {
+  const cities = ['all', ...new Set(streamChannels.filter(s => streamFilter.country === 'all' || s.country === streamFilter.country).map(s => s.city))];
+  const el = document.getElementById('stream-city-chips');
+  if (!el) return;
+  el.innerHTML = cities.map(c => `<div class="filter-chip${streamFilter.city === c ? ' active' : ''}" onclick="setStreamCity('${c}',this)">${c === 'all' ? 'All cities' : c}</div>`).join('');
+}
+
+function signalBars(n, live) {
+  return `<div class="sc2-signal">${[1,2,3,4].map(i => `<span class="${live && i <= n ? 'on' : ''}"></span>`).join('')}</div>`;
+}
+
+function renderStreamCard(s, showVehicle) {
+  const bg = ['#0D0D0D','#0A0A0A','#080808','#111'][Math.abs(s.camId.charCodeAt(s.camId.length-1)) % 4];
+  const speedChip = s.vstatus === 'idle'
+    ? `<span class="sc2-speed idle">Idle</span>`
+    : s.vstatus === 'online' ? `<span class="sc2-speed">${s.speed} km/h</span>` : '';
+  if (!s.live) {
+    return `<div class="sc2 offline" style="background:${bg}">
+      <div style="text-align:center"><div style="font-size:1.8rem;margin-bottom:4px;opacity:0.3">📷</div><div class="sc2-offline-lbl">${s.chName}</div><div class="sc2-offline-lbl" style="margin-top:2px;opacity:0.6">${s.vstatus === 'offline' ? 'Vehicle Offline' : 'Channel Offline'}</div></div>
+      <div class="sc2-overlay">
+        <div class="sc2-top"><span style="background:rgba(100,100,100,0.7);color:white;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:4px">⚫ OFFLINE</span><span class="sc2-ch">${s.chName}</span></div>
+        ${showVehicle ? `<div class="sc2-bottom"><div class="sc2-plate">${s.flag} ${s.plate}</div><div class="sc2-city">${s.city}</div></div>` : ''}
+      </div>
+    </div>`;
+  }
+  return `<div class="sc2" style="background:${bg}" onclick="showToast('Opening ${s.plate} — ${s.chName}…','#00B14F')">
+    <div style="font-size:1.8rem;opacity:0.15">📷</div>
+    <div class="sc2-overlay">
+      <div class="sc2-top">
+        <span class="live-badge">● LIVE</span>
+        <div style="display:flex;align-items:center;gap:6px">${signalBars(s.signal, true)}<span class="sc2-res">${s.res}</span><span class="sc2-fps">${s.fps}fps</span></div>
+      </div>
+      <div class="sc2-bottom">
+        ${showVehicle ? `<div class="sc2-plate">${s.flag} ${s.plate}</div><div class="sc2-city">${s.city} · ${speedChip}</div>` : ''}
+        <div class="sc2-meta"><span class="sc2-ch">${s.chName}</span><span class="sc2-cam-id">${s.camId}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStreamGroup(g) {
+  const liveCh = g.channels.filter(c => c.live).length;
+  const statusColor = g.vstatus === 'online' ? '#10B981' : g.vstatus === 'idle' ? '#F97316' : '#EF4444';
+  const veh = vehicles.find(v => v.id === g.vid) || {};
+  const energyInfo = veh.type === 'ev'
+    ? `<span style="background:#EDE9FE;color:#6D28D9;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">⚡ EV ${veh.charging ? '🔌 Charging '+veh.chargeEta : veh.soc+'%'}</span>`
+    : veh.type === 'hybrid' ? `<span style="background:#DCFCE7;color:#15803D;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">🔋 Hybrid</span>` : '';
+  return `<div class="stream-group">
+    <div class="stream-group-header">
+      <span class="sgp-flag">${g.flag}</span>
+      <div><div class="sgp-plate">${g.plate}${energyInfo}</div><div class="sgp-driver">${g.driver}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:12px">
+        <span style="width:8px;height:8px;border-radius:50%;background:${statusColor};display:inline-block"></span>
+        <span style="font-size:0.78rem;color:#4B5563;font-weight:500">${g.vstatus.charAt(0).toUpperCase()+g.vstatus.slice(1)}</span>
+        ${g.vstatus !== 'offline' ? `<span style="font-size:0.75rem;color:var(--text-secondary)">${g.vstatus === 'idle' ? 'Parked' : g.channels[0].speed+' km/h'}</span>` : ''}
+      </div>
+      <div class="sgp-meta">
+        <div>${g.city}</div>
+        <div class="sgp-ch-count">${liveCh}/${g.channels.length} channels live</div>
+      </div>
+    </div>
+    <div class="stream-group-channels">${g.channels.map(s => renderStreamCard(s, false)).join('')}</div>
+  </div>`;
+}
+
+function renderStreams() {
+  renderStreamCities();
+  const streams = getFilteredStreams();
+  const live = streams.filter(s => s.live).length;
+  const vids = new Set(streams.map(s => s.vid));
+  const isFiltered = streamFilter.search || streamFilter.country !== 'all' || streamFilter.city !== 'all' || streamFilter.channel !== 'all';
+  const tot = document.getElementById('stream-stat-total');
+  const liveEl = document.getElementById('stream-stat-live');
+  const offEl = document.getElementById('stream-stat-offline');
+  const vehEl = document.getElementById('stream-stat-vehicles');
+  if (tot) tot.textContent = isFiltered ? streams.length : fn(fleetStats.cameras);
+  if (liveEl) liveEl.textContent = isFiltered ? live : fn(fleetStats.camsLive);
+  if (offEl) offEl.textContent = isFiltered ? (streams.length - live) : fn(fleetStats.camsOffline);
+  if (vehEl) vehEl.textContent = isFiltered ? vids.size : fn(fleetStats.camsVehicles);
+  const container = document.getElementById('stream-main');
+  if (!container) return;
+  if (streams.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--text-secondary)"><div style="font-size:2.5rem;margin-bottom:12px">📷</div><p>No streams match the current filters.</p></div>`;
+    return;
+  }
+  if (streamFilter.layout === 'group') {
+    const groups = {};
+    streams.forEach(s => {
+      if (!groups[s.vid]) groups[s.vid] = { vid:s.vid, plate:s.plate, driver:s.driver, city:s.city, country:s.country, flag:s.flag, vstatus:s.vstatus, channels:[] };
+      groups[s.vid].channels.push(s);
+    });
+    container.innerHTML = `<div class="stream-groups">${Object.values(groups).map(g => renderStreamGroup(g)).join('')}</div>`;
+  } else {
+    container.innerHTML = `<div class="stream-flat-grid">${streams.map(s => renderStreamCard(s, true)).join('')}</div>`;
+  }
+}
+
+renderStreams();
+</script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — DAX Management</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-dax">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🏅 DAX Management</div>
+      <div class="page-subtitle">Driver Activity Index · Performance, Compliance &amp; Scoring</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none" id="dax-period-select" onchange="renderDaxView()">
+        <option value="may">May 2026</option>
+        <option value="apr">April 2026</option>
+        <option value="mar">March 2026</option>
+      </select>
+      <button class="btn btn-outline">📥 Export</button>
+      <button class="btn btn-outline">📋 Generate Report</button>
+      <button class="btn btn-primary" data-hide-viewer onclick="openDaxOnboard()">➕ Onboard Driver</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="dax-kpi-grid"></div>
+  <div class="dax-dist-row" id="dax-dist-row"></div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or plate…" oninput="filterDax(this.value)" /></div>
+      <button class="filter-btn active" id="dax-f-all"       onclick="setDaxFilter('all',this)">All</button>
+      <button class="filter-btn"        id="dax-f-excellent" onclick="setDaxFilter('excellent',this)">🏆 Excellent</button>
+      <button class="filter-btn"        id="dax-f-good"      onclick="setDaxFilter('good',this)">✅ Good</button>
+      <button class="filter-btn"        id="dax-f-fair"      onclick="setDaxFilter('fair',this)">⚠️ Fair</button>
+      <button class="filter-btn"        id="dax-f-risk"      onclick="setDaxFilter('risk',this)">🚨 At Risk</button>
+      <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem;padding:6px 12px">📥 Export</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Driver</th>
+          <th>City</th>
+          <th>DAX Score</th>
+          <th>Trips</th>
+          <th>Hours Online</th>
+          <th>Incidents</th>
+          <th>Avg Rating</th>
+          <th>Tier</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="dax-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- DAX ONBOARDING WIZARD MODAL -->
+<div class="modal-overlay" id="dax-onboard-modal">
+  <div class="modal onboard-modal">
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div class="modal-header-title">➕ Onboard New Driver</div>
+        <button class="modal-close" onclick="closeDaxOnboard()">✕</button>
+      </div>
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="ob-step-1"><div class="step-circle">1</div><div class="step-label">Personal</div></div>
+        <div class="wizard-step"        id="ob-step-2"><div class="step-circle">2</div><div class="step-label">Identity</div></div>
+        <div class="wizard-step"        id="ob-step-3"><div class="step-circle">3</div><div class="step-label">Vehicle</div></div>
+        <div class="wizard-step"        id="ob-step-4"><div class="step-circle">4</div><div class="step-label">Review</div></div>
+      </div>
+    </div>
+
+    <div class="modal-body" style="min-height:320px;max-height:65vh;overflow-y:auto">
+
+      <!-- STEP 1: PERSONAL INFO -->
+      <div class="step-content active" id="ob-modal-step-1">
+        <div class="form-section-title">👤 Personal Information</div>
+        <div class="form-grid">
+          <div class="form-field full"><label class="form-label">Full Legal Name <span class="req">*</span></label><input class="form-input" id="ob-name" type="text" placeholder="As per ID document" /></div>
+          <div class="form-field"><label class="form-label">Date of Birth <span class="req">*</span></label><input class="form-input" id="ob-dob" type="date" /></div>
+          <div class="form-field"><label class="form-label">Gender <span class="req">*</span></label><select class="form-select" id="ob-gender"><option value="">Select…</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+          <div class="form-field"><label class="form-label">Nationality <span class="req">*</span></label><select class="form-select" id="ob-nationality"><option value="">Select…</option><option>Singaporean</option><option>Malaysian</option><option>Indonesian</option><option>Thai</option><option>Vietnamese</option><option>Filipino</option><option>Other</option></select></div>
+          <div class="form-field"><label class="form-label">Phone Number <span class="req">*</span></label><input class="form-input" id="ob-phone" type="tel" placeholder="+65 9123 4567" /></div>
+          <div class="form-field"><label class="form-label">Email Address</label><input class="form-input" id="ob-email" type="email" placeholder="driver@example.com" /></div>
+          <div class="form-field full"><label class="form-label">Residential Address <span class="req">*</span></label><input class="form-input" id="ob-address" type="text" placeholder="Street, City, Postal Code" /></div>
+          <div class="form-field"><label class="form-label">Emergency Contact Name</label><input class="form-input" id="ob-ec-name" type="text" placeholder="Full name" /></div>
+          <div class="form-field"><label class="form-label">Emergency Contact Phone</label><input class="form-input" id="ob-ec-phone" type="tel" placeholder="+65 9000 0000" /></div>
+        </div>
+        <div class="form-section-title">📷 Driver Photo</div>
+        <div class="upload-area" id="ob-photo-area" onclick="markUpload('ob-photo-area','ob-photo-status')">
+          <div class="upload-area-icon">🤳</div>
+          <div class="upload-area-label">Upload Driver Photo</div>
+          <div class="upload-area-hint" id="ob-photo-status">JPG or PNG · Max 5MB · Click to upload</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: IDENTIFICATION -->
+      <div class="step-content" id="ob-modal-step-2">
+        <div class="form-section-title">🪪 Identity Document</div>
+        <div class="form-grid">
+          <div class="form-field"><label class="form-label">ID Type <span class="req">*</span></label><select class="form-select" id="ob-id-type"><option value="">Select…</option><option>NRIC (Singapore)</option><option>MyKad (Malaysia)</option><option>KTP (Indonesia)</option><option>National ID (Thailand)</option><option>CCCD (Vietnam)</option><option>PhilSys ID (Philippines)</option><option>Passport</option></select></div>
+          <div class="form-field"><label class="form-label">ID Number <span class="req">*</span></label><input class="form-input" id="ob-id-num" type="text" placeholder="e.g. S8812345A" /></div>
+          <div class="form-field"><label class="form-label">ID Issue Date</label><input class="form-input" id="ob-id-issued" type="date" /></div>
+          <div class="form-field"><label class="form-label">ID Expiry Date <span class="req">*</span></label><input class="form-input" id="ob-id-expiry" type="date" /></div>
+          <div class="form-field full"><label class="form-label">Upload ID Document (Front) <span class="req">*</span></label><div class="upload-area" id="ob-id-front-area" onclick="markUpload('ob-id-front-area','ob-id-front-status')"><div class="upload-area-icon">🪪</div><div class="upload-area-label">Front Side of ID</div><div class="upload-area-hint" id="ob-id-front-status">JPG, PNG or PDF · Max 10MB</div></div></div>
+          <div class="form-field full"><label class="form-label">Upload ID Document (Back)</label><div class="upload-area" id="ob-id-back-area" onclick="markUpload('ob-id-back-area','ob-id-back-status')"><div class="upload-area-icon">🪪</div><div class="upload-area-label">Back Side of ID</div><div class="upload-area-hint" id="ob-id-back-status">JPG, PNG or PDF · Max 10MB</div></div></div>
+        </div>
+        <div class="form-section-title">🚘 Driver's License</div>
+        <div class="form-grid">
+          <div class="form-field"><label class="form-label">License Number <span class="req">*</span></label><input class="form-input" id="ob-lic-num" type="text" placeholder="e.g. S1234567" /></div>
+          <div class="form-field"><label class="form-label">License Class <span class="req">*</span></label><select class="form-select" id="ob-lic-class"><option value="">Select…</option><option>Class 3 / Class B</option><option>Class 3A / Class B Auto</option><option>Class 4 (Truck)</option><option>Class 5 (Bus)</option><option>Other</option></select></div>
+          <div class="form-field"><label class="form-label">License Issue Date</label><input class="form-input" id="ob-lic-issued" type="date" /></div>
+          <div class="form-field"><label class="form-label">License Expiry Date <span class="req">*</span></label><input class="form-input" id="ob-lic-expiry" type="date" /></div>
+          <div class="form-field full"><label class="form-label">Upload Driver's License <span class="req">*</span></label><div class="upload-area" id="ob-lic-area" onclick="markUpload('ob-lic-area','ob-lic-status')"><div class="upload-area-icon">🚘</div><div class="upload-area-label">Driver's License Photo</div><div class="upload-area-hint" id="ob-lic-status">Front of license card · JPG or PNG · Max 5MB</div></div></div>
+        </div>
+      </div>
+
+      <!-- STEP 3: VEHICLE BINDING -->
+      <div class="step-content" id="ob-modal-step-3">
+        <div class="form-section-title">🚗 Assign Vehicle</div>
+        <div class="form-grid">
+          <div class="form-field full"><label class="form-label">Select Existing Vehicle</label><select class="form-select" id="ob-vehicle-select" onchange="obVehicleSelected()"><option value="">— Assign later / no vehicle —</option></select></div>
+          <div id="ob-vehicle-preview" style="display:none;grid-column:1/-1">
+            <div class="dp-vehicle-card" style="margin-bottom:0">
+              <div class="dp-vehicle-icon">🚗</div>
+              <div><div style="font-weight:700;font-size:0.95rem" id="ob-veh-plate-preview">—</div><div style="font-size:0.8rem;color:var(--primary-dark);margin-top:2px" id="ob-veh-model-preview">—</div><div style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px" id="ob-veh-city-preview">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin:14px 0;text-align:center;font-size:0.78rem;color:var(--text-secondary)">— or register a new vehicle —</div>
+        <div class="form-grid">
+          <div class="form-field"><label class="form-label">License Plate Number</label><input class="form-input" id="ob-new-plate" type="text" placeholder="e.g. SGX9876Z" oninput="this.value=this.value.toUpperCase()" /></div>
+          <div class="form-field"><label class="form-label">Vehicle Make &amp; Model</label><input class="form-input" id="ob-new-model" type="text" placeholder="e.g. Toyota Vios 2024" /></div>
+          <div class="form-field"><label class="form-label">Vehicle Color</label><input class="form-input" id="ob-new-color" type="text" placeholder="e.g. Silver" /></div>
+          <div class="form-field"><label class="form-label">Fuel Type</label><select class="form-select" id="ob-new-fueltype"><option value="">Select…</option><option value="petrol">Petrol / ICE</option><option value="ev">Electric (EV)</option><option value="hybrid">Hybrid</option></select></div>
+          <div class="form-field"><label class="form-label">Vehicle Registration Expiry</label><input class="form-input" id="ob-new-reg-expiry" type="date" /></div>
+          <div class="form-field"><label class="form-label">Insurance Expiry</label><input class="form-input" id="ob-new-ins-expiry" type="date" /></div>
+          <div class="form-field full"><label class="form-label">Upload Vehicle Photos / Grant Card</label><div class="upload-area" id="ob-veh-photo-area" onclick="markUpload('ob-veh-photo-area','ob-veh-photo-status')"><div class="upload-area-icon">📸</div><div class="upload-area-label">Vehicle Photos &amp; Documents</div><div class="upload-area-hint" id="ob-veh-photo-status">Front, back, sides + grant card · Max 20MB</div></div></div>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW -->
+      <div class="step-content" id="ob-modal-step-4">
+        <div style="background:var(--primary-light);border:1px solid #A7D9BB;border-radius:8px;padding:10px 14px;font-size:0.82rem;color:var(--primary-dark);display:flex;gap:8px;margin-bottom:14px">
+          <span>✅</span><span>Please review all information before submitting. You can go back to edit any section.</span>
+        </div>
+        <div class="review-section" id="ob-review-personal"><div class="review-section-title">👤 Personal Information</div></div>
+        <div class="review-section" id="ob-review-identity"><div class="review-section-title">🪪 Identity &amp; License</div></div>
+        <div class="review-section" id="ob-review-vehicle"><div class="review-section-title">🚗 Vehicle Assignment</div></div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="ob-back-btn" onclick="obWizardBack()" style="visibility:hidden">← Back</button>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeDaxOnboard()">Cancel</button>
+        <button class="btn btn-primary" id="ob-next-btn" onclick="obWizardNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVER PROFILE MODAL -->
+<div class="modal-overlay" id="dp-modal">
+  <div class="modal dp-modal">
+    <div class="dp-header-card">
+      <div class="dp-avatar" id="dp-avatar-icon">👤</div>
+      <div class="dp-header-info">
+        <div class="dp-header-name" id="dp-header-name">—</div>
+        <div class="dp-header-sub" id="dp-header-sub">—</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="dp-header-badges"></div>
+      </div>
+      <div class="dp-score-badge">
+        <div class="dp-score-num" id="dp-score-num">—</div>
+        <div class="dp-score-lbl">DAX Score</div>
+      </div>
+      <button class="modal-close" onclick="closeDpModal()" style="align-self:flex-start">✕</button>
+    </div>
+    <div class="dp-tabs">
+      <div class="dp-tab active" onclick="showDpTab('dp-tab-overview',this)">📋 Overview</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-personal',this)">👤 Personal Info</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-docs',this)">🪪 Documents</div>
+      <div class="dp-tab" onclick="showDpTab('dp-tab-vehicle',this)">🚗 Vehicle</div>
+    </div>
+    <div class="dp-body">
+      <div class="dp-tab-content active" id="dp-tab-overview">
+        <div class="dp-stat-row" id="dp-stat-row"></div>
+        <div style="background:white;border-radius:12px;padding:16px;box-shadow:var(--card-shadow);margin-bottom:14px">
+          <div style="font-size:0.82rem;font-weight:700;margin-bottom:12px">DAX Score Breakdown</div>
+          <div id="dp-score-breakdown"></div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="font-size:0.82rem;font-weight:700;margin-bottom:10px">Recent Activity</div>
+          <div id="dp-recent-activity"></div>
+        </div>
+      </div>
+      <div class="dp-tab-content" id="dp-tab-personal"><div class="dp-info-grid" id="dp-personal-grid"></div></div>
+      <div class="dp-tab-content" id="dp-tab-docs"><div id="dp-docs-content"></div></div>
+      <div class="dp-tab-content" id="dp-tab-vehicle"><div id="dp-vehicle-content"></div></div>
+    </div>
+    <div class="modal-footer" style="justify-content:flex-end">
+      <button class="btn btn-outline" onclick="showToast('📥 Exporting driver profile…','#3B82F6')">📥 Export Profile</button>
+      <button class="btn btn-outline" onclick="showToast('✏️ Edit mode coming soon','#6B7280')">✏️ Edit</button>
+      <button class="btn btn-primary" onclick="closeDpModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('dax.html');
+
+function getDaxTier(score) {
+  if (score >= 90) return 'excellent';
+  if (score >= 75) return 'good';
+  if (score >= 55) return 'fair';
+  return 'risk';
+}
+function getDaxTierLabel(tier) {
+  return { excellent:'🏆 Excellent', good:'✅ Good', fair:'⚠️ Fair', risk:'🚨 At Risk' }[tier];
+}
+
+let daxFilter = 'all';
+let daxSearch = '';
+
+function renderDaxView() {
+  const drivers = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+  const total = drivers.length;
+  const activeToday = drivers.filter(d => d.status === 'active').length;
+  const avgScore = Math.round(drivers.reduce((s, d) => s + d.daxScore, 0) / total);
+  const atRisk = drivers.filter(d => d.tier === 'risk').length;
+  document.getElementById('dax-kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon blue">👤</div><div class="kpi-label">Total Drivers</div><div class="kpi-value">${total}</div><div class="kpi-change">Across <span>${[...new Set(drivers.map(d=>d.country))].length} countries</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Active Today</div><div class="kpi-value green">${activeToday}</div><div class="kpi-change"><span>+3</span> vs yesterday</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">🏅</div><div class="kpi-label">Avg DAX Score</div><div class="kpi-value">${avgScore}</div><div class="kpi-change"><span>+2.1</span> vs last month</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">🚨</div><div class="kpi-label">At-Risk Drivers</div><div class="kpi-value red">${atRisk}</div><div class="kpi-change" style="color:#EF4444">Requires intervention</div></div>`;
+
+  const tiers = ['excellent','good','fair','risk'];
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  const tierCounts = {};
+  tiers.forEach(t => tierCounts[t] = drivers.filter(d => d.tier === t).length);
+  document.getElementById('dax-dist-row').innerHTML = tiers.map(t => `
+    <div class="dax-dist-pill">
+      <div class="dax-dist-pill-dot" style="background:${tierColors[t]}"></div>
+      <div><div class="dax-dist-pill-label">${getDaxTierLabel(t)}</div><div class="dax-dist-pill-val" style="color:${tierColors[t]}">${tierCounts[t]}</div></div>
+      <div style="margin-left:auto;font-size:0.72rem;color:var(--text-secondary)">${Math.round(tierCounts[t]/total*100)}%</div>
+    </div>`).join('');
+
+  renderDaxTable();
+}
+
+function renderDaxTable() {
+  const tier = daxFilter;
+  const q = daxSearch.toLowerCase();
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  const rows = daxDrivers
+    .map(d => ({ ...d, tier: getDaxTier(d.daxScore) }))
+    .filter(d => (tier === 'all' || d.tier === tier))
+    .filter(d => !q || d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q));
+  document.getElementById('dax-tbody').innerHTML = rows.map(d => `
+    <tr onclick="openDpModal('${d.id}')" style="cursor:pointer">
+      <td><div class="vehicle-info">
+        <div class="dax-score-ring ${d.tier}">${d.daxScore}</div>
+        <div><div class="vehicle-plate">${d.name}</div><div class="vehicle-model">${d.plate}</div></div>
+      </div></td>
+      <td><span>${d.flag}</span> ${d.city}</td>
+      <td><div class="score-mini">
+        <div class="score-track"><div class="score-fill ${d.tier}" style="width:${d.daxScore}%"></div></div>
+        <span style="font-size:0.8rem;font-weight:700;color:${tierColors[d.tier]}">${d.daxScore}</span>
+      </div></td>
+      <td>${d.trips.toLocaleString()}</td>
+      <td>${d.hoursOnline.toLocaleString()} h</td>
+      <td><span style="color:${d.incidents>4?'#EF4444':d.incidents>1?'#F97316':'#10B981'};font-weight:700">${d.incidents}</span></td>
+      <td>${'⭐'.repeat(Math.round(d.rating))} <span style="font-size:0.78rem;color:var(--text-secondary)">${d.rating}</span></td>
+      <td><span class="dax-tier-badge ${d.tier}">${getDaxTierLabel(d.tier)}</span></td>
+      <td><span class="status-badge ${d.status === 'active' ? 'online' : 'offline'}">${d.status === 'active' ? 'Active' : 'Suspended'}</span></td>
+      <td><button class="dax-action-btn" onclick="event.stopPropagation();openDpModal('${d.id}')">View Profile</button></td>
+    </tr>`).join('') || `<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-secondary)">No drivers match filter</td></tr>`;
+}
+
+function setDaxFilter(f, el) {
+  daxFilter = f;
+  document.querySelectorAll('[id^="dax-f-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDaxTable();
+}
+
+function filterDax(q) { daxSearch = q; renderDaxTable(); }
+
+// ─── DAX ONBOARDING WIZARD ────────────────────────────────────────────────
+let obStep = 1;
+
+function openDaxOnboard() {
+  obStep = 1;
+  setObStep(1);
+  const sel = document.getElementById('ob-vehicle-select');
+  sel.innerHTML = '<option value="">— Assign later / no vehicle —</option>' +
+    vehicles.map(v => `<option value="${v.id}">${v.plate} · ${v.model} · ${v.city}</option>`).join('');
+  document.getElementById('ob-vehicle-preview').style.display = 'none';
+  ['ob-photo-area','ob-id-front-area','ob-id-back-area','ob-lic-area','ob-veh-photo-area'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('upload-done');
+  });
+  document.getElementById('ob-photo-status').textContent = 'JPG or PNG · Max 5MB · Click to upload';
+  document.getElementById('ob-id-front-status').textContent = 'JPG, PNG or PDF · Max 10MB';
+  document.getElementById('ob-id-back-status').textContent = 'JPG, PNG or PDF · Max 10MB';
+  document.getElementById('ob-lic-status').textContent = 'Front of license card · JPG or PNG · Max 5MB';
+  document.getElementById('ob-veh-photo-status').textContent = 'Front, back, sides + grant card · Max 20MB';
+  document.getElementById('dax-onboard-modal').classList.add('open');
+}
+
+function closeDaxOnboard() { document.getElementById('dax-onboard-modal').classList.remove('open'); }
+
+function setObStep(n) {
+  obStep = n;
+  [1,2,3,4].forEach(i => {
+    const el = document.getElementById(`ob-step-${i}`);
+    el.className = 'wizard-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    el.querySelector('.step-circle').textContent = i < n ? '✓' : i;
+    document.getElementById(`ob-modal-step-${i}`).className = 'step-content' + (i === n ? ' active' : '');
+  });
+  document.getElementById('ob-back-btn').style.visibility = n > 1 ? 'visible' : 'hidden';
+  document.getElementById('ob-next-btn').textContent = n === 4 ? '✅ Submit & Onboard' : 'Next →';
+}
+
+function markUpload(areaId, statusId) {
+  document.getElementById(areaId).classList.add('upload-done');
+  document.getElementById(statusId).textContent = '✅ File selected — ready to upload';
+}
+
+function obVehicleSelected() {
+  const sel = document.getElementById('ob-vehicle-select');
+  const vid = sel.value;
+  const preview = document.getElementById('ob-vehicle-preview');
+  if (!vid) { preview.style.display = 'none'; return; }
+  const v = vehicles.find(x => x.id === vid);
+  if (!v) return;
+  document.getElementById('ob-veh-plate-preview').textContent = v.plate;
+  document.getElementById('ob-veh-model-preview').textContent = `${v.model} · ${v.color}`;
+  document.getElementById('ob-veh-city-preview').textContent = `${v.flag} ${v.city}, ${v.country}`;
+  preview.style.display = '';
+}
+
+function obWizardNext() {
+  if (obStep === 1) {
+    const name = document.getElementById('ob-name').value.trim();
+    const phone = document.getElementById('ob-phone').value.trim();
+    const address = document.getElementById('ob-address').value.trim();
+    if (!name || !phone || !address) { showToast('⚠️ Please fill in required fields (Name, Phone, Address)', '#F97316'); return; }
+    setObStep(2);
+  } else if (obStep === 2) {
+    const idType = document.getElementById('ob-id-type').value;
+    const idNum = document.getElementById('ob-id-num').value.trim();
+    const licNum = document.getElementById('ob-lic-num').value.trim();
+    const licClass = document.getElementById('ob-lic-class').value;
+    if (!idType || !idNum || !licNum || !licClass) { showToast('⚠️ Please fill in required identity & license fields', '#F97316'); return; }
+    setObStep(3);
+  } else if (obStep === 3) {
+    setObStep(4); buildObReview();
+  } else if (obStep === 4) {
+    closeDaxOnboard();
+    showToast('✅ Driver onboarded successfully! DAX profile created.', '#00B14F');
+  }
+}
+
+function obWizardBack() { if (obStep > 1) setObStep(obStep - 1); }
+
+function buildObReview() {
+  const g = id => document.getElementById(id)?.value || '—';
+  document.getElementById('ob-review-personal').innerHTML = `
+    <div class="review-section-title">👤 Personal Information</div>
+    ${[['Full Name',g('ob-name')],['DOB',g('ob-dob')],['Gender',g('ob-gender')],
+       ['Nationality',g('ob-nationality')],['Phone',g('ob-phone')],['Email',g('ob-email')],
+       ['Address',g('ob-address')],['Emergency Contact',g('ob-ec-name')+' · '+g('ob-ec-phone')]
+    ].map(([l,v])=>`<div class="review-row"><span class="rl">${l}</span><span class="rv">${v||'—'}</span></div>`).join('')}`;
+  document.getElementById('ob-review-identity').innerHTML = `
+    <div class="review-section-title">🪪 Identity & License</div>
+    ${[['ID Type',g('ob-id-type')],['ID Number',g('ob-id-num')],['ID Expiry',g('ob-id-expiry')],
+       ['License No.',g('ob-lic-num')],['License Class',g('ob-lic-class')],['License Expiry',g('ob-lic-expiry')]
+    ].map(([l,v])=>`<div class="review-row"><span class="rl">${l}</span><span class="rv">${v||'—'}</span></div>`).join('')}`;
+  const selVid = document.getElementById('ob-vehicle-select').value;
+  const selV = selVid ? vehicles.find(x => x.id === selVid) : null;
+  const newPlate = document.getElementById('ob-new-plate').value;
+  const vehicleInfo = selV ? `${selV.plate} · ${selV.model} · ${selV.city}` : newPlate ? `New: ${newPlate} · ${g('ob-new-model')}` : 'Assign later';
+  document.getElementById('ob-review-vehicle').innerHTML = `
+    <div class="review-section-title">🚗 Vehicle Assignment</div>
+    <div class="review-row"><span class="rl">Vehicle</span><span class="rv">${vehicleInfo}</span></div>
+    ${newPlate?`<div class="review-row"><span class="rl">Fuel Type</span><span class="rv">${g('ob-new-fueltype')||'—'}</span></div>`:''}`;
+}
+
+document.getElementById('dax-onboard-modal').addEventListener('click', function(e) { if (e.target===this) closeDaxOnboard(); });
+
+// ─── DRIVER PROFILE MODAL ──────────────────────────────────────────────────
+function openDpModal(driverId) {
+  const d = daxDrivers.find(x => x.id === driverId);
+  if (!d) return;
+  const tier = getDaxTier(d.daxScore);
+  const tierColors = { excellent:'#10B981', good:'#00B14F', fair:'#F59E0B', risk:'#EF4444' };
+  document.getElementById('dp-avatar-icon').textContent = d.gender === 'Female' ? '👩' : '👨';
+  document.getElementById('dp-header-name').textContent = d.name;
+  document.getElementById('dp-header-sub').textContent = `${d.flag} ${d.city}, ${d.country} · Onboarded ${d.onboardedDate}`;
+  document.getElementById('dp-score-num').textContent = d.daxScore;
+  document.getElementById('dp-header-badges').innerHTML = `
+    <span class="dax-tier-badge ${tier}" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white">${getDaxTierLabel(tier)}</span>
+    <span class="status-badge ${d.status==='active'?'online':'offline'}" style="background:rgba(255,255,255,0.15);color:white">${d.status==='active'?'Active':'Suspended'}</span>
+    ${d.vid?`<span style="background:rgba(255,255,255,0.15);color:white;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:600">🚗 ${d.plate}</span>`:'<span style="background:rgba(239,68,68,0.3);color:white;font-size:0.72rem;padding:2px 8px;border-radius:10px;font-weight:600">⚠️ No Vehicle</span>'}`;
+  document.querySelectorAll('#dp-modal .dp-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('.dp-tab-content').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.getElementById('dp-stat-row').innerHTML = `
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.trips}</div><div class="dp-stat-lbl">Total Trips</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.hoursOnline}h</div><div class="dp-stat-lbl">Hours Online</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val">${d.rating}</div><div class="dp-stat-lbl">Avg Rating</div></div>
+    <div class="dp-stat-card"><div class="dp-stat-val" style="color:${d.incidents>4?'#EF4444':d.incidents>1?'#F97316':'#10B981'}">${d.incidents}</div><div class="dp-stat-lbl">Incidents</div></div>`;
+  const scoreFactors = [
+    { label:'Trip Completion Rate', score:Math.min(100,d.trips/2.3|0) },
+    { label:'Safety Score', score:Math.max(0,100-d.incidents*12) },
+    { label:'Customer Rating', score:Math.round((d.rating/5)*100) },
+    { label:'Online Hours', score:Math.min(100,(d.hoursOnline/3.75)|0) },
+  ];
+  document.getElementById('dp-score-breakdown').innerHTML = scoreFactors.map(f => {
+    const c = tierColors[getDaxTier(f.score)];
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+        <span>${f.label}</span><span style="font-weight:700;color:${c}">${f.score}</span>
+      </div><div class="score-track" style="height:7px"><div class="score-fill" style="width:${f.score}%;background:${c}"></div></div>
+    </div>`;}).join('');
+  document.getElementById('dp-recent-activity').innerHTML = [
+    {icon:'🚗',text:'Completed trip — '+d.city+' city center',time:'Today, 09:14 AM'},
+    {icon:'⭐',text:'Received 5-star rating from passenger',time:'Today, 08:50 AM'},
+    {icon:'📱',text:'Logged in to Grab Driver app',time:'Today, 07:30 AM'},
+    {icon:'✅',text:'DAX score updated: '+d.daxScore,time:'Yesterday'},
+  ].map(a=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:1.1rem">${a.icon}</span>
+    <div><div style="font-size:0.82rem">${a.text}</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">${a.time}</div></div>
+  </div>`).join('');
+  document.getElementById('dp-personal-grid').innerHTML = [
+    ['Full Name',d.name],['Date of Birth',d.dob],['Gender',d.gender],['Nationality',d.nationality],
+    ['Phone',d.phone],['Email',d.email],['Residential Address',d.address,true],
+    ['Emergency Contact',d.ecName+' · '+d.ecPhone,true],
+    ['City',`${d.flag} ${d.city}`],['Country',d.country],['Onboarded',d.onboardedDate],['Onboarded By',d.onboardedBy],
+  ].map(([lbl,val,full])=>`<div class="dp-info-item${full?' full':''}"><div class="dp-info-label">${lbl}</div><div class="dp-info-value">${val||'—'}</div></div>`).join('');
+  const idExp = new Date(d.idExpiry), licExp = new Date(d.licenseExpiry), now = new Date('2026-05-09');
+  const mId = Math.round((idExp-now)/(1000*60*60*24*30)), mLic = Math.round((licExp-now)/(1000*60*60*24*30));
+  const docSt = m => m<0?'expired':m<3?'expiring':'valid';
+  const docLbl = m => m<0?'❌ Expired':m<3?`⚠️ Exp. in ${m}m`:'✅ Valid';
+  document.getElementById('dp-docs-content').innerHTML = `
+    <div class="dp-doc-card">
+      <div class="dp-doc-header">
+        <div class="dp-doc-icon" style="background:#DBEAFE">🪪</div>
+        <div style="flex:1"><div style="font-weight:700">${d.idType}</div><div style="font-size:0.78rem;color:var(--text-secondary)">Government-issued identification</div></div>
+        <span class="status-tag ${docSt(mId)}">${docLbl(mId)}</span>
+      </div>
+      <div class="dp-info-grid">${[['ID Number',d.idNumber],['Issue Date',d.idIssued],['Expiry Date',d.idExpiry],['Document',d.idUploaded?'✅ Uploaded':'❌ Missing']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}</div>
+    </div>
+    <div class="dp-doc-card">
+      <div class="dp-doc-header">
+        <div class="dp-doc-icon" style="background:#DCFCE7">🚘</div>
+        <div style="flex:1"><div style="font-weight:700">Driver's License</div><div style="font-size:0.78rem;color:var(--text-secondary)">${d.licenseClass}</div></div>
+        <span class="status-tag ${docSt(mLic)}">${docLbl(mLic)}</span>
+      </div>
+      <div class="dp-info-grid">${[['License Number',d.licenseNumber],['Class',d.licenseClass],['Issue Date',d.licenseIssued],['Expiry Date',d.licenseExpiry],['License Doc',d.licUploaded?'✅ Uploaded':'❌ Missing'],['Driver Photo',d.photoUploaded?'✅ Uploaded':'❌ Missing']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}</div>
+    </div>`;
+  const bv = d.vid ? vehicles.find(v => v.id === d.vid) : null;
+  document.getElementById('dp-vehicle-content').innerHTML = bv ? `
+    <div class="dp-vehicle-card">
+      <div class="dp-vehicle-icon">${bv.type==='ev'?'⚡':bv.type==='hybrid'?'🔋':'🚗'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:1rem">${bv.plate}</div>
+        <div style="font-size:0.82rem;color:var(--primary-dark);margin-top:2px">${bv.model} · ${bv.color}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:3px">${bv.flag} ${bv.city}, ${bv.country}</div>
+      </div>
+      <span class="status-badge ${bv.status}">${bv.status}</span>
+    </div>
+    <div class="dp-info-grid">${[['Plate',bv.plate],['Model',bv.model],['Color',bv.color],['Type',bv.type.toUpperCase()],['City',`${bv.flag} ${bv.city}`],['Mileage',bv.mileage.toLocaleString()+' km'],['Speed',bv.speed+' km/h'],['Signal',['—','Weak','Fair','Good','Excellent'][bv.signal]||'—']].map(([l,v])=>`<div class="dp-info-item"><div class="dp-info-label">${l}</div><div class="dp-info-value">${v}</div></div>`).join('')}</div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-outline" style="font-size:0.82rem" onclick="showToast('🔄 Rebinding coming soon','#6B7280')">🔄 Rebind Vehicle</button>
+      <button class="btn btn-outline" style="font-size:0.82rem;color:#EF4444;border-color:#FECACA" onclick="showToast('⚠️ Vehicle unbound from driver','#EF4444')">🔗 Unbind</button>
+    </div>` :
+    `<div style="text-align:center;padding:40px;color:var(--text-secondary)">
+      <div style="font-size:3rem;margin-bottom:10px">🚗</div>
+      <div style="font-weight:600">No Vehicle Assigned</div>
+      <div style="font-size:0.8rem;margin-top:6px">This driver has not been assigned a vehicle yet.</div>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="showToast('🚗 Vehicle assignment flow coming soon','#00B14F')">➕ Assign Vehicle</button>
+    </div>`;
+  document.getElementById('dp-modal').classList.add('open');
+}
+
+function closeDpModal() { document.getElementById('dp-modal').classList.remove('open'); }
+
+function showDpTab(tabId, el) {
+  document.querySelectorAll('#dp-modal .dp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dp-tab-content').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+document.getElementById('dp-modal').addEventListener('click', function(e) { if (e.target===this) closeDpModal(); });
+
+renderDaxView();
+</script>
+</body>
+</html>

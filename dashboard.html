@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Dashboard</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<!-- DASHBOARD VIEW -->
+<div class="view active" id="view-dashboard">
+  <div class="page-header">
+    <div><div class="page-title">Fleet Dashboard</div><div class="page-subtitle">Real-time overview · Last updated just now</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline">📥 Export</button>
+      <button class="btn btn-primary" data-hide-viewer>➕ Add Vehicle</button>
+    </div>
+  </div>
+  <div class="stat-tiles" id="dash-stat-tiles"></div>
+  <div class="map-grid">
+    <div class="map-card">
+      <div class="card-header">
+        <div class="card-title">📍 Live Vehicle Map</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">🔄 Refresh</button>
+          <button class="btn btn-outline" style="font-size:0.78rem;padding:5px 10px">⛶ Fullscreen</button>
+        </div>
+      </div>
+      <div id="fleet-map"></div>
+    </div>
+    <div class="map-card" style="display:flex;flex-direction:column">
+      <div class="card-header" style="padding:12px 16px">
+        <div class="dash-tab-bar">
+          <button class="dash-tab active" onclick="showDashTab('events',this)">⚡ Events</button>
+          <button class="dash-tab" onclick="showDashTab('dax',this)">🏅 DAX</button>
+          <button class="dash-tab" onclick="showDashTab('pay',this)">💳 Payments</button>
+        </div>
+        <span style="font-size:0.72rem;color:var(--primary);cursor:pointer;font-weight:600" onclick="showDashTabDetail()">Details →</span>
+      </div>
+      <div style="flex:1;overflow:hidden">
+        <div id="dash-tab-pane-events" class="dash-tab-pane active">
+          <div class="sidebar-map-pane"><div class="recent-events" id="dash-events"></div></div>
+        </div>
+        <div id="dash-tab-pane-dax" class="dash-tab-pane">
+          <div class="sidebar-map-pane" id="dash-sidebar-dax"></div>
+        </div>
+        <div id="dash-tab-pane-pay" class="dash-tab-pane">
+          <div class="sidebar-map-pane" id="dash-sidebar-pay"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('dashboard.html');
+
+let fleetMap;
+
+function initFleetMap() {
+  fleetMap = L.map('fleet-map', { zoomControl: true }).setView([3.5, 108], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(fleetMap);
+  vehicles.forEach(v => {
+    const color = v.status === 'online' ? '#10B981' : v.status === 'idle' ? '#F97316' : '#EF4444';
+    const marker = L.divIcon({ className: '', html: `<div style="background:white;border:2px solid ${color};border-radius:6px;padding:2px 7px;font-size:0.68rem;font-weight:700;color:#111;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)">${v.plate}</div>`, iconAnchor: [30, 10] });
+    L.marker([v.lat, v.lng], { icon: marker }).addTo(fleetMap)
+      .bindPopup(`<b>${v.plate}</b><br>${v.driver}<br>${v.city}<br>Speed: ${v.speed} km/h`);
+  });
+}
+
+const dashEvents = [
+  { dot:'red',    text:'<strong>Harsh Braking</strong> — SGX1234A on PIE Expressway', time:'2 min ago · Ahmad Hassan' },
+  { dot:'yellow', text:'<strong>Speeding Alert</strong> — WKL7823B exceeded 90 km/h', time:'8 min ago · KL Highway' },
+  { dot:'blue',   text:'<strong>Geofence Exit</strong> — BJB3921C left Zone A', time:'15 min ago · Jakarta' },
+  { dot:'green',  text:'<strong>Trip Completed</strong> — BKK4421D arrived depot', time:'22 min ago · Bangkok' },
+  { dot:'red',    text:'<strong>KDC Offline</strong> — HCM8812E camera disconnected', time:'35 min ago · Ho Chi Minh' },
+  { dot:'purple', text:'<strong>🔌 Charging Started</strong> — SGX5512F (BYD Atto 3 EV) plugged in at depot · 11% SOC', time:'42 min ago · Singapore' },
+  { dot:'yellow', text:'<strong>⚡ Low Battery Alert</strong> — HCM8812E (VinFast EV) 23% SOC · Range: 61 km', time:'58 min ago · Ho Chi Minh' },
+  { dot:'green',  text:'<strong>🔋 Charge Complete</strong> — BJB3921C (Hybrid) battery fully charged', time:'1 hr ago · Jakarta' },
+  { dot:'green',  text:'<strong>Trip Started</strong> — MNL2233G departed depot', time:'1 hr 15 min ago · Manila' },
+  { dot:'blue',   text:'<strong>OTA Update</strong> — KDC firmware v2.3.1 applied', time:'2 hrs ago · SGX1234A' },
+];
+
+function getDaxTier(score) {
+  if (score >= 90) return 'excellent';
+  if (score >= 75) return 'good';
+  if (score >= 55) return 'fair';
+  return 'risk';
+}
+
+function renderDashboardKPIs() {
+  const s = fleetStats;
+  const actPct = Math.round(s.online / s.total * 100);
+
+  const drivers     = daxDrivers.map(d => ({ ...d, tier: getDaxTier(d.daxScore) }));
+  const dAvg        = Math.round(drivers.reduce((a,d) => a + d.daxScore, 0) / drivers.length);
+  const dActive     = drivers.filter(d => d.status === 'active').length;
+  const dAtRisk     = drivers.filter(d => d.tier === 'risk').length;
+  const dExcellent  = drivers.filter(d => d.tier === 'excellent').length;
+  const dGood       = drivers.filter(d => d.tier === 'good').length;
+  const dFair       = drivers.filter(d => d.tier === 'fair').length;
+  const dSuspended  = drivers.filter(d => d.status === 'suspended').length;
+  const topDriver   = [...drivers].sort((a,b) => b.daxScore - a.daxScore)[0];
+  const riskDrivers = [...drivers].filter(d => d.tier === 'risk' || d.status === 'suspended');
+
+  const pd          = paymentData;
+  const payGross    = pd.reduce((a,p) => a + p.gross, 0);
+  const payDisbursed= pd.filter(p=>p.status==='completed').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payPending  = pd.filter(p=>p.status==='pending').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payProc     = pd.filter(p=>p.status==='processing').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payFailed   = pd.filter(p=>p.status==='failed').length;
+  const payFmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  const icePct = Math.round(s.ice / s.total * 100);
+  const evPct  = Math.round(s.ev  / s.total * 100);
+  const hybPct = Math.round(s.hybrid / s.total * 100);
+  const tilesEl = document.getElementById('dash-stat-tiles');
+  if (tilesEl) tilesEl.innerHTML = `
+    <div class="stat-tile" onclick="window.location.href='vehicles.html'">
+      <div class="stat-tile-icon" style="background:var(--grab-light-green)">🚗</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">Fleet</div>
+        <div class="stat-tile-main">${fn(s.total)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub"><b>⛽ ${fn(s.ice)}</b> ICE (${icePct}%)</div>
+          <div class="stat-tile-sub"><b>⚡ ${fn(s.ev)}</b> EV (${evPct}%)</div>
+          <div class="stat-tile-sub"><b>🔋 ${fn(s.hybrid)}</b> Hybrid (${hybPct}%)</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-tile" onclick="window.location.href='vehicles.html'">
+      <div class="stat-tile-icon" style="background:#DBEAFE">📡</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">Status</div>
+        <div class="stat-tile-main ok" style="color:#10B981">${fn(s.online)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>🟢 ${fn(s.online)} online</b> (${actPct}%)</div>
+          <div class="stat-tile-sub warn"><b>🟡 ${fn(s.idle)} idle</b> · 🔌 ${fn(s.charging)} charging</div>
+          <div class="stat-tile-sub bad"><b>🔴 ${fn(s.offline)} offline</b> · 🔒 ${fn(s.immobilized)} locked</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-tile" onclick="window.location.href='dax.html'">
+      <div class="stat-tile-icon" style="background:#FEF3C7">🏅</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">DAX Score</div>
+        <div class="stat-tile-main">${dAvg}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>🏆 ${dExcellent} excellent</b> · ${dGood} good</div>
+          <div class="stat-tile-sub warn"><b>⚠️ ${dFair} fair</b> need coaching</div>
+          <div class="stat-tile-sub bad"><b>🚨 ${dAtRisk} at-risk</b> · ${dSuspended} suspended</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-tile" onclick="window.location.href='payments.html'">
+      <div class="stat-tile-icon" style="background:#DCFCE7">💳</div>
+      <div class="stat-tile-body">
+        <div class="stat-tile-label">Payments — MTD</div>
+        <div class="stat-tile-main">${payFmt(payGross)}</div>
+        <div class="stat-tile-subs">
+          <div class="stat-tile-sub ok"><b>✅ ${payFmt(payDisbursed)}</b> disbursed</div>
+          <div class="stat-tile-sub warn"><b>⏳ ${payFmt(payPending + payProc)}</b> pending</div>
+          <div class="stat-tile-sub ${payFailed>0?'bad':'ok'}"><b>${payFailed>0?'❌':'✔️'} ${payFailed} failed</b> transaction${payFailed!==1?'s':''}</div>
+        </div>
+      </div>
+    </div>`;
+
+  const evts = document.getElementById('dash-events');
+  if (evts) evts.innerHTML = dashEvents.map(e => `
+    <div class="event-item"><div class="event-dot ${e.dot}"></div><div><div class="event-text">${e.text}</div><div class="event-time">${e.time}</div></div></div>`).join('');
+
+  const daxPane = document.getElementById('dash-sidebar-dax');
+  if (daxPane) {
+    const total = drivers.length;
+    const pct = n => Math.round(n/total*100);
+    const sorted = [...drivers].sort((a,b) => b.daxScore - a.daxScore);
+    daxPane.innerHTML = `
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em">Score Distribution</div>
+          <div style="font-size:1.3rem;font-weight:700">${dAvg} <span style="font-size:0.75rem;color:#10B981;font-weight:600">▲+2.1</span></div>
+        </div>
+        <div class="dax-dist-track">
+          <div class="dax-dist-seg" style="width:${pct(dExcellent)}%;background:#10B981"></div>
+          <div class="dax-dist-seg" style="width:${pct(dGood)}%;background:#3B82F6"></div>
+          <div class="dax-dist-seg" style="width:${pct(dFair)}%;background:#F97316"></div>
+          <div class="dax-dist-seg" style="width:${pct(dAtRisk)}%;background:#EF4444"></div>
+        </div>
+        <div class="dax-dist-legend" style="margin-top:6px">
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#10B981"></div>Exc ${dExcellent}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#3B82F6"></div>Good ${dGood}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#F97316"></div>Fair ${dFair}</div>
+          <div class="dax-dist-item"><div class="dax-dist-dot" style="background:#EF4444"></div>Risk ${dAtRisk}</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Top Drivers</div>
+      ${sorted.slice(0,4).map((d,i) => `
+        <div class="dax-mini-row">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);width:16px">${i+1}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${d.flag} ${d.city} · ${d.trips} trips</div>
+          </div>
+          <div class="dax-mini-score ${d.tier}">${d.daxScore}</div>
+        </div>`).join('')}
+      ${riskDrivers.length > 0 ? `
+      <div style="font-size:0.72rem;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.06em;margin:12px 0 8px">Needs Attention</div>
+      ${riskDrivers.slice(0,3).map(d => `
+        <div class="dax-mini-row">
+          <div style="font-size:0.9rem;width:16px">🚨</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${d.incidents} incidents · score ${d.daxScore}</div>
+          </div>
+          <span style="font-size:0.68rem;background:#FEE2E2;color:#991B1B;padding:2px 7px;border-radius:8px;font-weight:700">${d.status==='suspended'?'Suspended':'At-Risk'}</span>
+        </div>`).join('')}` : ''}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <a class="info-card-link" href="dax.html">View full DAX report →</a>
+      </div>`;
+  }
+
+  const payPane = document.getElementById('dash-sidebar-pay');
+  if (payPane) {
+    const statusDot = { completed:'#10B981', processing:'#3B82F6', pending:'#F97316', failed:'#EF4444' };
+    const statusLabel = { completed:'Paid', processing:'Processing', pending:'Pending', failed:'Failed' };
+    payPane.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Gross MTD</div>
+          <div style="font-size:1rem;font-weight:700">${payFmt(payGross)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Disbursed</div>
+          <div style="font-size:1rem;font-weight:700;color:#10B981">${payFmt(payDisbursed)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Pending</div>
+          <div style="font-size:1rem;font-weight:700;color:#F97316">${payFmt(payPending + payProc)}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Failed</div>
+          <div style="font-size:1rem;font-weight:700;color:${payFailed>0?'#EF4444':'#10B981'}">${payFailed}</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Recent Payouts</div>
+      ${pd.slice(0,6).map(p => {
+        const net = p.gross - p.deductions;
+        return `<div class="pay-mini-item">
+          <div class="pay-mini-dot" style="background:${statusDot[p.status]}"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.flag} ${p.driver}</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary)">${p.trips} trips · ${statusLabel[p.status]}</div>
+          </div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--primary);flex-shrink:0">$${net.toFixed(0)}</div>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <a class="info-card-link" href="payments.html">View all payments →</a>
+      </div>`;
+  }
+}
+
+function showDashTab(name, el) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-tab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dash-tab-pane-' + name).classList.add('active');
+}
+
+function showDashTabDetail() {
+  const activeTab = document.querySelector('.dash-tab.active');
+  if (!activeTab) return;
+  const name = activeTab.textContent.includes('DAX') ? 'dax.html'
+             : activeTab.textContent.includes('Pay') ? 'payments.html'
+             : 'dashboard.html';
+  window.location.href = name;
+}
+
+renderDashboardKPIs();
+setTimeout(initFleetMap, 100);
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — OTA Updates</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-ota">
+  <div class="page-header">
+    <div><div class="page-title">🔄 OTA Firmware Updates</div><div class="page-subtitle">Manage firmware across KartaDongle · KartaDashCam · Edge AI Box</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline">📥 Export Report</button>
+      <button class="btn btn-primary" onclick="pushOtaToAll('kartadongle');pushOtaToAll('kartadashcam');pushOtaToAll('edgeaibox')">🚀 Push All Updates</button>
+    </div>
+  </div>
+  <div class="kpi-grid" id="ota-kpi-grid"></div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Latest Firmware Releases</div>
+    <div style="display:flex;flex-direction:column;gap:10px" id="ota-latest-versions"></div>
+  </div>
+  <div class="table-card">
+    <div class="table-toolbar" id="ota-filter-bar">
+      <span style="font-size:0.875rem;font-weight:600" id="ota-table-label">All Devices</span>
+      <button class="filter-btn active" data-type="all" onclick="setOtaFilter('all',this)" style="margin-left:auto">🔲 All</button>
+      <button class="filter-btn" data-type="kartadongle" onclick="setOtaFilter('kartadongle',this)">🔌 KartaDongle</button>
+      <button class="filter-btn" data-type="kartadashcam" onclick="setOtaFilter('kartadashcam',this)">📷 KartaDashCam</button>
+      <button class="filter-btn" data-type="edgeaibox" onclick="setOtaFilter('edgeaibox',this)">🧠 Edge AI Box</button>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Vehicle</th>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Device</th>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Current FW</th>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Latest FW</th>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Status</th>
+        <th style="padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;background:#FAFAFA;border-bottom:1px solid var(--border)">Action</th>
+      </tr></thead>
+      <tbody id="ota-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('ota.html');
+
+const latestFirmware = {
+  kartadongle:  { version:'v3.2.1', released:'2026-04-15', size:'4.2 MB',  changes:['Improved GPS fix time by 40%','CAN Bus 2.0 stability patch','Reduced LTE data usage 18%','OBD protocol extended support','Critical security patch CVE-2026-0142'] },
+  kartadashcam: { version:'v2.4.0', released:'2026-04-28', size:'18.6 MB', changes:['4K front camera support','Night vision enhancement +30%','Live stream latency ↓ 220ms','Auto event clip cloud upload','H.265 encoding for 40% storage saving'] },
+  edgeaibox:    { version:'v1.6.2', released:'2026-05-01', size:'312 MB',  changes:['GrabEdge AI model v4.0','Drowsiness detection accuracy 97%','Lane departure sensitivity tuning','Driver ID confidence 98%','Edge inference 30% faster'] },
+};
+const otaState = {};
+
+function getFwStatus(type, fw) {
+  const latest = latestFirmware[type];
+  if (!latest) return 'ok';
+  const parse = v => v.replace('v','').split('.').map(Number);
+  const cur = parse(fw), lat = parse(latest.version);
+  for (let i = 0; i < Math.max(cur.length, lat.length); i++) {
+    if ((cur[i]||0) < (lat[i]||0)) return 'outdated';
+    if ((cur[i]||0) > (lat[i]||0)) return 'ok';
+  }
+  return 'ok';
+}
+
+function startOtaUpdate(type, vid) {
+  const key = `${type}-${vid}`;
+  otaState[key] = 'updating';
+  renderOtaView();
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(100, progress + Math.random() * 14 + 4);
+    const bar = document.getElementById(`ota-prog-${vid}-${type}`);
+    if (bar) bar.style.width = progress + '%';
+    if (progress >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        otaState[key] = 'updated';
+        const v = vehicles.find(x => x.id === vid);
+        const d = getVehicleIotInstances(v).find(x => x.type === type);
+        renderOtaView();
+        showToast(`✅ ${d.name} on ${v.plate} updated to ${latestFirmware[type].version}`, '#10B981');
+      }, 400);
+    }
+  }, 280);
+}
+
+function pushOtaToAll(type) {
+  const instances = vehicles.flatMap(v => getVehicleIotInstances(v)).filter(d => {
+    const key = `${d.type}-${d.vid}`;
+    return d.type === type && !otaState[key] && getFwStatus(d.type, d.fw) === 'outdated';
+  });
+  if (instances.length === 0) { showToast(`✅ All ${iotCatalogue.find(c=>c.type===type)?.name||''} devices up to date`, '#10B981'); return; }
+  instances.forEach(d => { otaState[`${d.type}-${d.vid}`] = 'updating'; });
+  renderOtaView();
+  showToast(`🚀 OTA push initiated for ${instances.length} device${instances.length>1?'s':''}`, '#00B14F');
+  instances.forEach((d, i) => {
+    setTimeout(() => {
+      otaState[`${d.type}-${d.vid}`] = 'updated';
+      if (i === instances.length - 1) { renderOtaView(); showToast(`✅ All ${iotCatalogue.find(c=>c.type===type)?.name||''} updated`, '#10B981'); }
+    }, 2000 + i * 600);
+  });
+}
+
+function renderOtaView() {
+  const allInstances = vehicles.flatMap(v => getVehicleIotInstances(v));
+  const s = fleetStats;
+  const fwUpToDate = 142890, fwOutdated = 57336, fwUpdating = 6474;
+  const kpiEl = document.getElementById('ota-kpi-grid');
+  if (kpiEl) kpiEl.innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon blue">📦</div><div class="kpi-label">Total Devices</div><div class="kpi-value">${fn(s.iotTotal)}</div><div class="kpi-change"><span>3 types</span> × ${fn(s.total)} vehicles</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Up-to-date</div><div class="kpi-value green">${fn(fwUpToDate)}</div><div class="kpi-change"><span>${Math.round(fwUpToDate/s.iotTotal*100)}%</span> of fleet</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⚠️</div><div class="kpi-label">Update Available</div><div class="kpi-value yellow">${fn(fwOutdated)}</div><div class="kpi-change"><span>Across all device types</span></div></div>
+    <div class="kpi-card"><div class="kpi-icon" style="background:#DBEAFE">🔄</div><div class="kpi-label">Updating Now</div><div class="kpi-value" style="color:#1D4ED8">${fn(fwUpdating)}</div><div class="kpi-change">OTA in progress</div></div>`;
+
+  const latestEl = document.getElementById('ota-latest-versions');
+  if (latestEl) latestEl.innerHTML = Object.entries(latestFirmware).map(([type, info]) => {
+    const cat = iotCatalogue.find(c => c.type === type);
+    const outdatedSample = allInstances.filter(d => d.type === type && !otaState[`${type}-${d.vid}`] && getFwStatus(type, d.fw) === 'outdated').length;
+    return `<div style="background:white;border-radius:12px;padding:16px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:16px">
+      <div class="iot-icon ${cat.color}" style="flex-shrink:0">${cat.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-weight:700;font-size:0.9rem">${cat.name}</span>
+          <span style="background:var(--primary-light);color:var(--primary-dark);font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px">${info.version}</span>
+          <span style="font-size:0.75rem;color:var(--text-secondary)">Released ${info.released} · ${info.size}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">
+          ${info.changes.slice(0,4).map(c => `<span style="font-size:0.65rem;background:var(--bg);border:1px solid var(--border);padding:2px 7px;border-radius:10px;color:var(--text-secondary)">${c}</span>`).join('')}
+        </div>
+      </div>
+      ${outdatedSample > 0
+        ? `<button onclick="pushOtaToAll('${type}')" class="btn btn-primary" style="font-size:0.78rem;padding:7px 14px;white-space:nowrap;flex-shrink:0">🚀 Push to All (${outdatedSample})</button>`
+        : `<span style="font-size:0.78rem;color:#15803D;font-weight:600;padding:7px 14px;flex-shrink:0">✅ All up to date</span>`}
+    </div>`;
+  }).join('');
+
+  const filterType = document.querySelector('#ota-filter-bar .filter-btn.active')?.getAttribute('data-type') || 'all';
+  const tableInstances = filterType === 'all' ? allInstances : allInstances.filter(d => d.type === filterType);
+  const lbl = document.getElementById('ota-table-label');
+  if (lbl) lbl.textContent = filterType === 'all' ? 'All Devices — Sample Vehicles' : `${iotCatalogue.find(c=>c.type===filterType)?.name||''} — Sample Vehicles`;
+
+  const tbodyEl = document.getElementById('ota-tbody');
+  if (tbodyEl) tbodyEl.innerHTML = tableInstances.map(d => {
+    const key = `${d.type}-${d.vid}`;
+    const state = otaState[key];
+    const fwDisplay = state === 'updated' ? latestFirmware[d.type].version : d.fw;
+    const fwLatest = latestFirmware[d.type]?.version || d.fw;
+    const status = state === 'updated' ? 'ok' : state === 'updating' ? 'updating' : getFwStatus(d.type, d.fw);
+    const v = vehicles.find(x => x.id === d.vid);
+    const statusHtml = {
+      ok: `<span class="fw-badge ok">✅ Up to date</span>`,
+      outdated: `<span class="fw-badge outdated">⚠️ Update Available</span>`,
+      updating: `<span class="fw-badge updating"><span style="display:inline-block;animation:spin 0.8s linear infinite">🔄</span> Updating…</span>`,
+    }[status] || '';
+    const actionHtml = status === 'updating'
+      ? `<div class="ota-progress" style="width:120px"><div class="ota-progress-bar" id="ota-prog-${d.vid}-${d.type}" style="width:50%"></div></div>`
+      : status === 'outdated'
+        ? `<button onclick="event.stopPropagation();startOtaUpdate('${d.type}','${d.vid}')" class="btn btn-primary" style="font-size:0.75rem;padding:5px 12px">🚀 Update</button>`
+        : `<span style="font-size:0.78rem;color:var(--text-secondary)">—</span>`;
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:13px 16px"><div style="font-weight:600;font-size:0.875rem">${v?.flag||''} ${v?.plate||''}</div><div style="font-size:0.72rem;color:var(--text-secondary)">${v?.driver||''} · ${v?.city||''}</div></td>
+      <td style="padding:13px 16px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:1rem">${d.icon}</span><div><div style="font-size:0.82rem;font-weight:600">${d.name}</div><div style="font-size:0.7rem;color:var(--text-secondary)">${d.deviceId}</div></div></div></td>
+      <td style="padding:13px 16px;font-size:0.875rem;font-weight:600">${fwDisplay}</td>
+      <td style="padding:13px 16px;font-size:0.875rem;font-weight:600;color:${status==='outdated'?'var(--primary)':'var(--text-secondary)'}">${fwLatest}</td>
+      <td style="padding:13px 16px">${statusHtml}</td>
+      <td style="padding:13px 16px">${actionHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function setOtaFilter(type, el) {
+  document.querySelectorAll('#ota-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderOtaView();
+}
+
+renderOtaView();
+</script>
+</body>
+</html>

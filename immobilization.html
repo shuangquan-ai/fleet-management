@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Immobilization</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active" id="view-immobilization">
+  <div class="page-header">
+    <div><div class="page-title">🔒 Immobilization</div><div class="page-subtitle">Remotely lock or unlock vehicles · Requires authorization</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline">📥 Export Log</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-icon blue">🚗</div><div class="kpi-label">Total Vehicles</div><div class="kpi-value" id="immob-kpi-total">—</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">🔓</div><div class="kpi-label">Mobilized</div><div class="kpi-value green" id="immob-kpi-mobile">—</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">🔒</div><div class="kpi-label">Immobilized</div><div class="kpi-value red" id="immob-kpi-locked">—</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⏳</div><div class="kpi-label">Pending Command</div><div class="kpi-value yellow">38</div></div>
+  </div>
+  <div class="immob-grid" id="immob-vehicle-grid"></div>
+  <div class="immob-log">
+    <div class="card-header"><div class="card-title">📋 Immobilization Log</div></div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Time</th>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Vehicle</th>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Action</th>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Reason</th>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Authorized By</th>
+        <th style="padding:10px 16px;text-align:left;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;background:#FAFAFA;border-bottom:1px solid var(--border)">Status</th>
+      </tr></thead>
+      <tbody id="immob-log-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- IMMOBILIZATION WIZARD MODAL -->
+<div class="modal-overlay" id="immob-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div class="modal-header-title" id="modal-header-title">🔒 Immobilize Vehicle</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="wstep-1"><div class="step-circle">1</div><div class="step-label">Locate</div></div>
+        <div class="wizard-step" id="wstep-2"><div class="step-circle">2</div><div class="step-label">Safety Check</div></div>
+        <div class="wizard-step" id="wstep-3"><div class="step-circle">3</div><div class="step-label">Confirm</div></div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="step-content active" id="modal-step-1">
+        <div class="modal-vehicle-row" id="modal-vrow"></div>
+        <div class="locate-status locating" id="locate-status"><div class="pulse"></div><span id="locate-status-text">Fetching live GPS location…</span></div>
+        <div id="modal-locate-map"></div>
+        <div class="location-address" id="modal-address"><span>📍</span><span id="modal-address-text" style="color:var(--text-secondary)">Resolving address…</span></div>
+      </div>
+      <div class="step-content" id="modal-step-2">
+        <div class="modal-vehicle-row" id="modal-vrow2"></div>
+        <div class="safety-checks" id="safety-checks-list"></div>
+        <div class="safety-banner" id="safety-banner"></div>
+      </div>
+      <div class="step-content" id="modal-step-3">
+        <div class="confirm-summary" id="confirm-summary"></div>
+        <div class="modal-reason-label">Reason <span class="req">*</span></div>
+        <textarea class="modal-reason" id="modal-reason" rows="2" placeholder="e.g. Unauthorized usage, Maintenance required…"></textarea>
+        <div class="modal-final-warning" id="modal-final-warning" style="display:none"><span>🚨</span><span id="modal-final-warning-text"></span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-back-btn" onclick="wizardBack()" style="visibility:hidden">← Back</button>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-next-btn" onclick="wizardNext()">Locating… →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('immobilization.html');
+
+let immobTargetId = null, immobAction = null, wizardStep = 1, locateMapInstance = null, safetyResult = 'ok';
+const immobLog = [
+  { time:'Today 08:30 AM', plate:'HCM8812E', action:'lock', reason:'Overdue maintenance', by:'Fleet Manager', status:'success' },
+  { time:'Yesterday 3:10 PM', plate:'BJB3921C', action:'unlock', reason:'Maintenance completed', by:'Fleet Manager', status:'success' },
+  { time:'Yesterday 11:00 AM', plate:'BJB3921C', action:'lock', reason:'Scheduled service', by:'Admin', status:'success' },
+  { time:'2 days ago', plate:'WKL7823B', action:'lock', reason:'Insurance expired', by:'Fleet Manager', status:'success' },
+  { time:'2 days ago', plate:'WKL7823B', action:'unlock', reason:'Insurance renewed', by:'Fleet Manager', status:'success' },
+];
+const mockAddresses = {
+  'V001':'Pan Island Expressway, near Buona Vista, Singapore','V002':'Federal Highway, near Bangsar, Kuala Lumpur',
+  'V003':'Tol Dalam Kota, near Semanggi, Jakarta','V004':'Sukhumvit Rd, near On Nut, Bangkok',
+  'V005':'Đường Nguyễn Huệ, near District 1, Ho Chi Minh City','V006':'EDSA, near Makati, Manila',
+  'V007':'Orchard Road, near Somerset, Singapore','V008':'Jurong East Ave 1, Singapore',
+};
+
+function statusIcon(v) { if (v.type === 'ev' && v.charging) return '🔌'; return v.status === 'online' ? '🟢' : v.status === 'idle' ? '🟡' : '🔴'; }
+function energyIcon(v) { if (v.type === 'ev') return v.charging ? '🔌' : '⚡'; if (v.type === 'hybrid') return '🔋'; return '⛽'; }
+function energyDisplay(v) { if (v.type === 'ev') return v.charging ? `Charging ${v.chargeEta||''}` : `${v.soc}% · ${v.range}km`; if (v.type === 'hybrid') return `${v.soc ?? v.fuel}% SOC`; return `${v.fuel}%`; }
+function typeLabelShort(v) { return v.type === 'ev' ? '⚡ EV' : v.type === 'hybrid' ? '🔋 HEV' : '⛽ ICE'; }
+
+function renderImmobView() {
+  const grid = document.getElementById('immob-vehicle-grid');
+  grid.innerHTML = vehicles.map(v => `
+    <div class="immob-vehicle-card ${v.immobilized ? 'locked' : 'mobile-ok'}">
+      <div class="immob-card-top">
+        <div>
+          <div class="immob-card-plate">${v.plate} ${v.immobilized ? '🔒' : '🔓'}</div>
+          <div class="immob-card-driver">${v.driver} · ${v.city}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <span class="immob-badge ${v.immobilized ? 'immobilized' : 'mobile'}">${v.immobilized ? 'Immobilized' : 'Mobilized'}</span>
+          ${v.immobilized
+            ? `<button class="btn-unlock" style="font-size:0.78rem;padding:6px 14px" onclick="openUnlockModal('${v.id}')">🔓 Unlock</button>`
+            : v.speed > 0
+              ? `<button style="background:#F1F5F9;color:#94A3B8;border:none;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:not-allowed;font-family:inherit" disabled>🚫 Moving</button>`
+              : `<button class="btn-lock" style="font-size:0.78rem;padding:6px 14px" onclick="openImmobModal('${v.id}')">🔒 Lock</button>`}
+        </div>
+      </div>
+      ${v.immobilized ? `<div style="font-size:0.75rem;background:#FEE2E2;border-radius:6px;padding:6px 10px;color:#991B1B;margin-top:4px">Reason: ${v.immobReason || '—'} · By: ${v.immobBy || '—'} · ${v.immobTime || ''}</div>` : ''}
+      <div class="immob-card-meta">
+        <span>${statusIcon(v)} ${v.status}</span>
+        <span>🚀 ${v.speed} km/h</span>
+        <span>📶 Signal ${v.signal}/4</span>
+        <span>${energyIcon(v)} ${energyDisplay(v)}</span>
+        <span class="type-badge ${v.type}">${typeLabelShort(v)}</span>
+      </div>
+    </div>`).join('');
+  const locked = vehicles.filter(v => v.immobilized).length;
+  document.getElementById('immob-kpi-total').textContent = vehicles.length;
+  document.getElementById('immob-kpi-mobile').textContent = vehicles.length - locked;
+  document.getElementById('immob-kpi-locked').textContent = locked;
+  document.getElementById('immob-log-tbody').innerHTML = immobLog.map(e => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:11px 16px;font-size:0.78rem;color:var(--text-secondary)">${e.time}</td>
+      <td style="padding:11px 16px;font-size:0.82rem;font-weight:600">${e.plate}</td>
+      <td style="padding:11px 16px"><span class="immob-badge ${e.action === 'lock' ? 'immobilized' : 'mobile'}">${e.action === 'lock' ? '🔒 Locked' : '🔓 Unlocked'}</span></td>
+      <td style="padding:11px 16px;font-size:0.82rem;color:var(--text-secondary)">${e.reason}</td>
+      <td style="padding:11px 16px;font-size:0.82rem">${e.by}</td>
+      <td style="padding:11px 16px"><span style="font-size:0.72rem;font-weight:700;color:#15803D;background:#DCFCE7;padding:2px 8px;border-radius:4px">${e.status.toUpperCase()}</span></td>
+    </tr>`).join('');
+}
+
+function vehicleRowHtml(v) {
+  return `<div style="width:36px;height:36px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🚗</div>
+    <div><div class="plate">${v.plate}</div><div class="meta">${v.model} · ${v.driver}</div></div>
+    <div style="margin-left:auto;text-align:right"><span class="status-badge ${v.status}">${v.status}</span></div>`;
+}
+function openImmobModal(vehicleId) { startWizard(vehicleId, 'lock'); }
+function openUnlockModal(vehicleId) { startWizard(vehicleId, 'unlock'); }
+
+function startWizard(vehicleId, action) {
+  immobTargetId = vehicleId; immobAction = action; wizardStep = 1;
+  const v = vehicles.find(x => x.id === vehicleId);
+  document.getElementById('modal-header-title').textContent = action === 'lock' ? '🔒 Immobilize Vehicle' : '🔓 Unlock Vehicle';
+  ['modal-vrow','modal-vrow2'].forEach(id => document.getElementById(id).innerHTML = vehicleRowHtml(v));
+  document.getElementById('modal-reason').value = '';
+  document.getElementById('modal-reason').classList.remove('error');
+  document.getElementById('modal-final-warning').style.display = 'none';
+  setWizardStep(1);
+  initLocateStep(v);
+  document.getElementById('immob-modal').classList.add('open');
+}
+
+function initLocateStep(v) {
+  const nextBtn = document.getElementById('modal-next-btn');
+  document.getElementById('locate-status').className = 'locate-status locating';
+  document.getElementById('locate-status').innerHTML = '<div class="pulse"></div><span>Fetching live GPS location…</span>';
+  document.getElementById('modal-address-text').textContent = 'Resolving address…';
+  nextBtn.disabled = true; nextBtn.textContent = 'Locating… →';
+  if (locateMapInstance) { locateMapInstance.remove(); locateMapInstance = null; }
+  document.getElementById('modal-locate-map').innerHTML = '';
+  setTimeout(() => {
+    locateMapInstance = L.map('modal-locate-map', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([v.lat, v.lng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(locateMapInstance);
+    const pinColor = v.status === 'online' ? '#10B981' : v.status === 'idle' ? '#F97316' : '#EF4444';
+    const pin = L.divIcon({ className: '', html: `<div style="background:white;border:3px solid ${pinColor};border-radius:50% 50% 50% 0;width:24px;height:24px;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`, iconAnchor:[12,24] });
+    L.marker([v.lat, v.lng], { icon: pin }).addTo(locateMapInstance);
+    L.circle([v.lat, v.lng], { radius: 40, color: pinColor, fillColor: pinColor, fillOpacity: 0.1, weight: 2 }).addTo(locateMapInstance);
+    document.getElementById('locate-status').className = 'locate-status found';
+    document.getElementById('locate-status').innerHTML = `<span>✅</span><span>Location confirmed · GPS accuracy ±3m</span>`;
+    document.getElementById('modal-address-text').textContent = mockAddresses[v.id] || v.city;
+    nextBtn.disabled = false; nextBtn.textContent = 'Safety Check →';
+  }, 1800);
+}
+
+function buildSafetyChecks(v) {
+  const isLock = immobAction === 'lock';
+  const checks = isLock ? [
+    { icon: v.speed === 0 ? '✅' : '🚫', cls: v.speed === 0 ? 'pass' : 'fail', name: 'Vehicle Speed', detail: v.speed === 0 ? 'Stationary — Safe to immobilize' : `Moving at ${v.speed} km/h — BLOCKED`, val: v.speed + ' km/h' },
+    { icon: v.signal >= 3 ? '✅' : v.signal >= 1 ? '⚠️' : '❌', cls: v.signal >= 3 ? 'pass' : v.signal >= 1 ? 'warn' : 'fail', name: 'Signal', detail: v.signal >= 3 ? 'Strong signal' : v.signal >= 1 ? 'Weak signal' : 'No signal', val: ['No Signal','Weak','Fair','Good','Excellent'][v.signal] },
+    { icon: v.status !== 'offline' ? '✅' : '❌', cls: v.status !== 'offline' ? 'pass' : 'fail', name: 'Device Connection', detail: v.status !== 'offline' ? 'Device online' : 'Device offline', val: v.status !== 'offline' ? 'Connected' : 'Offline' },
+    { icon: v.battery > 20 ? '✅' : '⚠️', cls: v.battery > 20 ? 'pass' : 'warn', name: 'Device Battery', detail: `${v.battery}% battery`, val: v.battery + '%' },
+  ] : [
+    { icon: v.signal >= 1 ? '✅' : '❌', cls: v.signal >= 1 ? 'pass' : 'fail', name: 'Device Reachability', detail: v.signal >= 1 ? 'Reachable' : 'Unreachable', val: v.signal >= 1 ? 'Reachable' : 'Unreachable' },
+    { icon: '✅', cls: 'pass', name: 'Authorization', detail: 'Fleet Manager — authorized', val: 'Fleet Manager' },
+  ];
+  const fails = checks.filter(c => c.cls === 'fail').length;
+  const warns = checks.filter(c => c.cls === 'warn').length;
+  safetyResult = (isLock && v.speed > 0) ? 'blocked' : fails > 0 ? 'fail' : warns > 0 ? 'warn' : 'ok';
+  return checks;
+}
+
+function setWizardStep(n) {
+  wizardStep = n;
+  [1,2,3].forEach(i => {
+    const el = document.getElementById(`wstep-${i}`);
+    el.className = 'wizard-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    el.querySelector('.step-circle').textContent = i < n ? '✓' : i;
+    document.getElementById(`modal-step-${i}`).className = 'step-content' + (i === n ? ' active' : '');
+  });
+  document.getElementById('modal-back-btn').style.visibility = n > 1 ? 'visible' : 'hidden';
+}
+
+function wizardNext() {
+  const v = vehicles.find(x => x.id === immobTargetId);
+  if (wizardStep === 1) {
+    const checks = buildSafetyChecks(v);
+    document.getElementById('safety-checks-list').innerHTML = checks.map(c => `<div class="safety-check-item"><div class="check-icon ${c.cls}">${c.icon}</div><div><div class="check-name">${c.name}</div><div style="font-size:0.75rem;color:var(--text-secondary)">${c.detail}</div></div><div class="check-val ${c.cls}">${c.val}</div></div>`).join('');
+    const bannerMap = { ok:{ cls:'ok',icon:'✅',text:'All checks passed.' }, warn:{ cls:'warn',icon:'⚠️',text:'Warnings present. Proceed with caution.' }, fail:{ cls:'fail',icon:'🚨',text:'Critical checks failed.' }, blocked:{ cls:'fail',icon:'🚫',text:'BLOCKED — Vehicle is moving.' } };
+    const b = bannerMap[safetyResult];
+    document.getElementById('safety-banner').className = `safety-banner ${b.cls}`;
+    document.getElementById('safety-banner').innerHTML = `<span>${b.icon}</span><span>${b.text}</span>`;
+    const nextBtn = document.getElementById('modal-next-btn');
+    if (safetyResult === 'blocked' || safetyResult === 'fail') {
+      nextBtn.disabled = true; nextBtn.style.cssText = 'background:#94A3B8;color:white;border:none;cursor:not-allowed;opacity:1;padding:9px 18px;border-radius:7px;font-weight:600;font-family:inherit;font-size:0.875rem';
+      nextBtn.textContent = safetyResult === 'blocked' ? '🚫 Blocked — Vehicle Moving' : '🚫 Cannot Proceed';
+    } else {
+      nextBtn.disabled = false; nextBtn.style.cssText = ''; nextBtn.className = 'btn btn-primary'; nextBtn.textContent = 'Continue →';
+    }
+    setWizardStep(2);
+  } else if (wizardStep === 2) {
+    const isLock = immobAction === 'lock';
+    document.getElementById('confirm-summary').innerHTML = `
+      <div class="confirm-row"><span class="clabel">Vehicle</span><span class="cval">${v.plate} — ${v.model}</span></div>
+      <div class="confirm-row"><span class="clabel">Driver</span><span class="cval">${v.driver}</span></div>
+      <div class="confirm-row"><span class="clabel">Location</span><span class="cval">${mockAddresses[v.id] || v.city}</span></div>
+      <div class="confirm-row"><span class="clabel">Speed</span><span class="cval" style="color:${v.speed > 10 ? '#EF4444' : '#10B981'}">${v.speed} km/h</span></div>
+      <div class="confirm-row"><span class="clabel">Action</span><span class="cval" style="color:${isLock ? '#EF4444' : '#10B981'}">${isLock ? '🔒 Immobilize' : '🔓 Unlock'}</span></div>`;
+    const btn = document.getElementById('modal-next-btn');
+    btn.style.cssText = `background:${isLock?'#EF4444':'#10B981'};color:white;border:none;border-radius:7px;padding:9px 18px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.875rem`;
+    btn.textContent = isLock ? '🔒 Confirm Immobilize' : '🔓 Confirm Unlock';
+    setWizardStep(3);
+  } else if (wizardStep === 3) {
+    const reason = document.getElementById('modal-reason').value.trim();
+    if (!reason) { document.getElementById('modal-reason').classList.add('error'); document.getElementById('modal-reason').focus(); return; }
+    executeImmob(reason);
+  }
+}
+
+function wizardBack() {
+  if (wizardStep > 1) {
+    setWizardStep(wizardStep - 1);
+    const btn = document.getElementById('modal-next-btn');
+    btn.className = 'btn btn-primary'; btn.style.cssText = '';
+    btn.textContent = wizardStep === 1 ? 'Safety Check →' : 'Continue →';
+  }
+}
+
+function executeImmob(reason) {
+  const v = vehicles.find(x => x.id === immobTargetId);
+  const now = 'Today ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  if (immobAction === 'lock') { v.immobilized = true; v.immobReason = reason; v.immobBy = 'Fleet Manager'; v.immobTime = now; immobLog.unshift({ time: now, plate: v.plate, action: 'lock', reason, by: 'Fleet Manager', status: 'success' }); }
+  else { v.immobilized = false; v.lastUnlockBy = 'Fleet Manager'; v.lastUnlockTime = now; delete v.immobReason; immobLog.unshift({ time: now, plate: v.plate, action: 'unlock', reason, by: 'Fleet Manager', status: 'success' }); }
+  closeModal();
+  renderImmobView();
+  showToast(immobAction === 'lock' ? `🔒 ${v.plate} immobilized` : `🔓 ${v.plate} unlocked`, immobAction === 'lock' ? '#EF4444' : '#10B981');
+}
+
+function closeModal() {
+  document.getElementById('immob-modal').classList.remove('open');
+  if (locateMapInstance) { locateMapInstance.remove(); locateMapInstance = null; }
+}
+
+document.getElementById('immob-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+renderImmobView();
+</script>
+</body>
+</html>
