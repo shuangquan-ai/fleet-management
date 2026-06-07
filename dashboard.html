@@ -16,8 +16,12 @@
 <!-- DASHBOARD VIEW -->
 <div class="view active" id="view-dashboard">
   <div class="page-header">
-    <div><div class="page-title">Fleet Dashboard</div><div class="page-subtitle">Real-time overview · Last updated just now</div></div>
-    <div style="display:flex;gap:8px">
+    <div>
+      <div class="page-title">Fleet Dashboard</div>
+      <div class="page-subtitle">Real-time overview · Southeast Asia</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="last-updated-pill" id="dash-last-updated">🟢 Updated just now</span>
       <button class="btn btn-outline">📥 Export</button>
       <button class="btn btn-primary" data-hide-viewer>➕ Add Vehicle</button>
     </div>
@@ -135,6 +139,7 @@ function renderDashboardKPIs() {
       <div class="stat-tile-body">
         <div class="stat-tile-label">Fleet</div>
         <div class="stat-tile-main">${fn(s.total)}</div>
+        <div style="margin-bottom:6px"><span class="trend-up"><span class="trend-arrow">↑</span>3.2% vs last week</span></div>
         <div class="stat-tile-subs">
           <div class="stat-tile-sub"><b>⛽ ${fn(s.ice)}</b> ICE (${icePct}%)</div>
           <div class="stat-tile-sub"><b>⚡ ${fn(s.ev)}</b> EV (${evPct}%)</div>
@@ -145,8 +150,9 @@ function renderDashboardKPIs() {
     <div class="stat-tile" onclick="window.location.href='vehicles.html'">
       <div class="stat-tile-icon" style="background:#DBEAFE">📡</div>
       <div class="stat-tile-body">
-        <div class="stat-tile-label">Status</div>
+        <div class="stat-tile-label">Active Vehicles</div>
         <div class="stat-tile-main ok" style="color:#10B981">${fn(s.online)}</div>
+        <div style="margin-bottom:6px"><span class="trend-up"><span class="trend-arrow">↑</span>1.8% vs last week</span></div>
         <div class="stat-tile-subs">
           <div class="stat-tile-sub ok"><b>🟢 ${fn(s.online)} online</b> (${actPct}%)</div>
           <div class="stat-tile-sub warn"><b>🟡 ${fn(s.idle)} idle</b> · 🔌 ${fn(s.charging)} charging</div>
@@ -159,6 +165,7 @@ function renderDashboardKPIs() {
       <div class="stat-tile-body">
         <div class="stat-tile-label">DAX Score</div>
         <div class="stat-tile-main">${dAvg}</div>
+        <div style="margin-bottom:6px"><span class="trend-up"><span class="trend-arrow">↑</span>2.1 pts vs last week</span></div>
         <div class="stat-tile-subs">
           <div class="stat-tile-sub ok"><b>🏆 ${dExcellent} excellent</b> · ${dGood} good</div>
           <div class="stat-tile-sub warn"><b>⚠️ ${dFair} fair</b> need coaching</div>
@@ -171,6 +178,7 @@ function renderDashboardKPIs() {
       <div class="stat-tile-body">
         <div class="stat-tile-label">Payments — MTD</div>
         <div class="stat-tile-main">${payFmt(payGross)}</div>
+        <div style="margin-bottom:6px"><span class="${payFailed>0?'trend-down':'trend-up'}"><span class="trend-arrow">${payFailed>0?'↓':'↑'}</span>${payFailed>0?'1.4% vs last week':'4.7% vs last week'}</span></div>
         <div class="stat-tile-subs">
           <div class="stat-tile-sub ok"><b>✅ ${payFmt(payDisbursed)}</b> disbursed</div>
           <div class="stat-tile-sub warn"><b>⏳ ${payFmt(payPending + payProc)}</b> pending</div>
@@ -292,6 +300,15 @@ function showDashTabDetail() {
 
 renderDashboardKPIs();
 setTimeout(initFleetMap, 100);
+
+// Update "last updated" pill timestamp
+(function updateLastUpdated() {
+  const el = document.getElementById('dash-last-updated');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = '🟢 Updated ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  setTimeout(updateLastUpdated, 60000);
+})();
 </script>
 </body>
 </html>

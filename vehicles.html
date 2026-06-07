@@ -26,8 +26,13 @@
       <button class="filter-btn"        id="vf-online"  onclick="setFilter('online', this)">🟢 Online</button>
       <button class="filter-btn"        id="vf-idle"    onclick="setFilter('idle', this)">🟡 Idle</button>
       <button class="filter-btn"        id="vf-offline" onclick="setFilter('offline', this)">🔴 Offline</button>
-      <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem;padding:6px 12px">📥 Export</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px">📥 Export</button>
+      <div class="view-toggle" style="margin-left:auto" title="Toggle view">
+        <button class="layout-btn active" id="view-list-btn" onclick="setVehicleView('list',this)" title="List view">☰</button>
+        <button class="layout-btn" id="view-map-btn" onclick="setVehicleView('map',this)" title="Map view">🗺️</button>
+      </div>
     </div>
+    <div id="vehicles-map-view" style="display:none;height:480px"></div>
     <table>
       <thead><tr><th>Vehicle</th><th>Driver</th><th>Status</th><th>Speed</th><th>Location</th><th>Energy</th><th>Signal</th><th>Immobilization</th><th></th></tr></thead>
       <tbody id="vehicles-tbody"></tbody>
@@ -273,15 +278,17 @@ function renderVehicles() {
       <td><div class="signal-bars">${[1,2,3,4].map(i=>`<span class="${i<=v.signal?'active':''}"></span>`).join('')}</div></td>
       <td>
         <span class="immob-badge ${v.immobilized ? 'immobilized' : 'mobile'}">${v.immobilized ? '🔒 Immobilized' : '🔓 Mobilized'}</span>
-        ${!v.immobilized && v.speed > 0
-          ? `<button style="margin-top:5px;display:block;background:#F1F5F9;color:#94A3B8;border:none;padding:3px 10px;border-radius:5px;font-size:0.72rem;font-weight:600;cursor:not-allowed;font-family:inherit;" disabled>🚫 Moving</button>`
-          : `<button style="margin-top:5px;display:block;${v.immobilized ? 'background:#10B981;color:white;border:none;' : 'background:#FEE2E2;color:#991B1B;border:none;'}padding:3px 10px;border-radius:5px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;"
-            onclick="event.stopPropagation();${v.immobilized ? `openUnlockModal('${v.id}')` : `openImmobModal('${v.id}')`}">
-            ${v.immobilized ? '🔓 Unlock' : '🔒 Lock'}
-          </button>`
-        }
       </td>
-      <td><button class="btn btn-outline" style="font-size:0.75rem;padding:5px 10px" onclick="event.stopPropagation();showVehicleDetail('${v.id}')">Details →</button></td>
+      <td onclick="event.stopPropagation()" style="position:relative">
+        <button class="btn btn-outline" style="font-size:1rem;padding:4px 10px;letter-spacing:0.05em" onclick="toggleRowMenu('${v.id}',this)" title="Actions">⋯</button>
+        <div id="row-menu-${v.id}" style="display:none;position:absolute;right:0;top:100%;z-index:200;background:white;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:170px;padding:4px 0">
+          <div style="padding:8px 14px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:8px" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="showVehicleDetail('${v.id}')">🔍 View Details</div>
+          ${v.speed === 0 ? `<div style="padding:8px 14px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:8px;color:${v.immobilized?'#10B981':'#EF4444'}" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="${v.immobilized?`openUnlockModal('${v.id}')`:`openImmobModal('${v.id}')`}">${v.immobilized?'🔓 Unlock Vehicle':'🔒 Immobilize'}</div>` : `<div style="padding:8px 14px;font-size:0.82rem;color:#94A3B8;display:flex;align-items:center;gap:8px">🚫 Moving — Lock unavailable</div>`}
+          <div style="height:1px;background:var(--border);margin:4px 0"></div>
+          <div style="padding:8px 14px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:8px" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="showToast('📹 Opening live stream…','#3B82F6')">📹 Live Stream</div>
+          <div style="padding:8px 14px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:8px" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''" onclick="showToast('📊 Opening telematics…','#00B14F')">📊 Telematics</div>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -770,6 +777,57 @@ function closeModal() {
 }
 
 document.getElementById('immob-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+// ── 3-DOT ROW MENU ────────────────────────────────────────────────────────
+let openMenuId = null;
+function toggleRowMenu(id, btn) {
+  const menu = document.getElementById('row-menu-' + id);
+  if (!menu) return;
+  if (openMenuId && openMenuId !== id) {
+    const prev = document.getElementById('row-menu-' + openMenuId);
+    if (prev) prev.style.display = 'none';
+  }
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  openMenuId = isOpen ? null : id;
+}
+document.addEventListener('click', function(e) {
+  if (openMenuId && !e.target.closest('[id^="row-menu-"]') && !e.target.closest('.btn')) {
+    const menu = document.getElementById('row-menu-' + openMenuId);
+    if (menu) menu.style.display = 'none';
+    openMenuId = null;
+  }
+});
+
+// ── VIEW TOGGLE (List / Map) ──────────────────────────────────────────────
+let vehicleMapInstance = null;
+
+function setVehicleView(mode, el) {
+  document.querySelectorAll('#view-vehicles .view-toggle .layout-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const tableEl  = document.querySelector('#view-vehicles table');
+  const mapEl    = document.getElementById('vehicles-map-view');
+  if (mode === 'map') {
+    tableEl.style.display  = 'none';
+    mapEl.style.display    = 'block';
+    if (!vehicleMapInstance) {
+      vehicleMapInstance = L.map('vehicles-map-view', { zoomControl: true }).setView([3.5, 108], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(vehicleMapInstance);
+      vehicles.forEach(v => {
+        const color = v.status === 'online' ? '#10B981' : v.status === 'idle' ? '#F97316' : '#EF4444';
+        const icon = L.divIcon({ className: '', html: `<div style="background:white;border:2px solid ${color};border-radius:6px;padding:2px 7px;font-size:0.68rem;font-weight:700;color:#111;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer">${v.plate}</div>`, iconAnchor: [30, 10] });
+        L.marker([v.lat, v.lng], { icon }).addTo(vehicleMapInstance)
+          .bindPopup(`<b>${v.plate}</b><br>${v.driver}<br>${v.city}<br>Status: ${v.status}`)
+          .on('click', () => showVehicleDetail(v.id));
+      });
+    } else {
+      vehicleMapInstance.invalidateSize();
+    }
+  } else {
+    tableEl.style.display  = '';
+    mapEl.style.display    = 'none';
+  }
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 renderVehicles();
