@@ -84,11 +84,11 @@ function injectLayout(activeNav) {
     <div class="nav-label">Fleet</div>
     <a class="nav-item${activeNav==='vehicles.html'?' active':''}" href="vehicles.html"><span class="nav-icon">🚗</span> Vehicles <span class="nav-badge" id="online-count">51,240</span></a>
     <a class="nav-item${activeNav==='livestream.html'?' active':''}" href="livestream.html"><span class="nav-icon">📹</span> Live Streams</a>
-    <a class="nav-item${activeNav==='telematics.html'?' active':''}" href="telematics.html"><span class="nav-icon">⚡</span> Telematics <span class="nav-badge" id="tel-count-badge">12</span></a>
     <div class="nav-label">Operations</div>
     <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> DAX Management <span class="nav-badge" id="dax-alert-badge"></span></a>
     <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments <span class="nav-badge" id="pay-alert-badge"></span></a>
     <div class="nav-label" data-require-role="fleet_admin super_admin">Safety &amp; Control</div>
+    <a class="nav-item${activeNav==='telematics.html'?' active':''}" href="telematics.html"><span class="nav-icon">⚡</span> Telematics <span class="nav-badge" id="tel-count-badge">12</span></a>
     <a class="nav-item${activeNav==='immobilization.html'?' active':''}" href="immobilization.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔒</span> Immobilization <span class="nav-badge" id="immob-count-badge">23</span></a>
     <a class="nav-item" href="dashboard.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🏁</span> Geofences</a>
     <div class="nav-label" data-require-role="fleet_admin super_admin">Hardware</div>
