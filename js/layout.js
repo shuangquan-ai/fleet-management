@@ -94,7 +94,6 @@ function injectLayout(activeNav) {
     <div class="nav-label" data-require-role="fleet_admin super_admin">Device Management</div>
     <a class="nav-item${activeNav==='iot.html'?' active':''}" href="iot.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">📡</span> IoT Devices</a>
     <a class="nav-item${activeNav==='ota.html'?' active':''}" href="ota.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔄</span> OTA Updates <span class="nav-badge" id="ota-count-badge"></span></a>
-    <a class="nav-item${activeNav==='simdata.html'?' active':''}" href="simdata.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">📶</span> SIM Data Management <span class="nav-badge" id="sim-alert-badge"></span></a>
     <div class="nav-label">Analytics</div>
     <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> History & Reports</a>
     <div class="nav-label">Account</div>
