@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAVE - Fleet and Vehicle Ecosystem</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/white.css">
+<style>
+  :root {
+    --grab-green: #00B14F;
+    --grab-dark: #005339;
+    --grab-light: #E8F7EF;
+  }
+  .reveal { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .reveal h1, .reveal h2, .reveal h3 { color: var(--grab-dark); font-weight: 700; }
+  .reveal h1 { font-size: 2.2em; }
+  .reveal h2 { font-size: 1.6em; border-bottom: 3px solid var(--grab-green); padding-bottom: 10px; display: inline-block; }
+  .reveal h3 { font-size: 1.2em; color: var(--grab-green); }
+  .reveal p, .reveal li { font-size: 0.75em; line-height: 1.6; }
+  .reveal ul { margin-left: 0; }
+  .reveal li { margin-bottom: 12px; }
+  .grab-green { color: var(--grab-green); }
+  .grab-dark { color: var(--grab-dark); }
+  .highlight-box { background: var(--grab-light); border-left: 4px solid var(--grab-green); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; }
+  .two-col { display: flex; gap: 40px; text-align: left; }
+  .two-col > div { flex: 1; }
+  .three-col { display: flex; gap: 30px; text-align: left; }
+  .three-col > div { flex: 1; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: left; }
+  .card h4 { margin: 0 0 10px 0; color: var(--grab-dark); font-size: 0.9em; }
+  .card p { margin: 0; font-size: 0.7em; color: #666; }
+  .icon-large { font-size: 2em; margin-bottom: 10px; }
+  .timeline { display: flex; gap: 20px; margin-top: 30px; }
+  .timeline-item { flex: 1; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: left; border-top: 4px solid var(--grab-green); }
+  .timeline-item h4 { margin: 0 0 8px 0; font-size: 0.85em; color: var(--grab-dark); }
+  .timeline-item p { margin: 0; font-size: 0.65em; color: #666; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.6em; font-weight: 600; margin-right: 8px; }
+  .badge-green { background: var(--grab-light); color: var(--grab-dark); }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+  .badge-orange { background: #FEF3C7; color: #92400E; }
+  .badge-red { background: #FEE2E2; color: #991B1B; }
+  .pain-point { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 15px 20px; border-radius: 8px; margin: 15px 0; text-align: left; }
+  .pain-point h4 { margin: 0 0 8px 0; color: #92400E; font-size: 0.85em; }
+  .pain-point p { margin: 0; font-size: 0.7em; color: #78350F; }
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+  .feature-item { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); text-align: center; }
+  .feature-item .icon { font-size: 1.5em; margin-bottom: 8px; }
+  .feature-item h5 { margin: 0 0 5px 0; font-size: 0.75em; color: var(--grab-dark); }
+  .feature-item p { margin: 0; font-size: 0.6em; color: #666; }
+  .table-compare { width: 100%; border-collapse: collapse; font-size: 0.65em; margin-top: 20px; }
+  .table-compare th { background: var(--grab-green); color: white; padding: 12px; text-align: left; }
+  .table-compare td { padding: 10px 12px; border-bottom: 1px solid #E5E7EB; }
+  .table-compare tr:nth-child(even) { background: #F9FAFB; }
+  .check { color: var(--grab-green); font-weight: bold; }
+  .cross { color: #EF4444; }
+  .title-slide { background: linear-gradient(135deg, var(--grab-green) 0%, var(--grab-dark) 100%); }
+  .title-slide h1, .title-slide p { color: white !important; }
+  .title-slide h1 { border: none; font-size: 2.8em; }
+  .section-slide { background: var(--grab-dark); }
+  .section-slide h2 { color: white !important; border-bottom-color: white; }
+  .user-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: left; }
+  .user-card .emoji { font-size: 2em; margin-bottom: 10px; }
+  .user-card h4 { margin: 0 0 8px 0; font-size: 0.85em; }
+  .user-card p { margin: 0; font-size: 0.65em; color: #666; }
+  .stat-box { background: var(--grab-light); border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-box .number { font-size: 2em; font-weight: 700; color: var(--grab-green); }
+  .stat-box .label { font-size: 0.7em; color: #666; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- TITLE SLIDE -->
+<section class="title-slide">
+  <h1>FAVE</h1>
+  <p style="font-size:1.2em; opacity:0.9">Fleet and Vehicle Ecosystem</p>
+  <p style="font-size:0.8em; margin-top:40px; opacity:0.7">Product Strategy & Specifications</p>
+  <p style="font-size:0.6em; margin-top:60px; opacity:0.5">Grab Mobility · June 2026</p>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section>
+  <h2>Executive Summary</h2>
+  <div class="highlight-box">
+    <p><strong>FAVE</strong> aims to transition Grab from an <span class="grab-green">asset-heavy</span> model to an <span class="grab-green">asset-light partnership</span>, leveraging third-party (3P) fleets to solve ride-hail supply constraints.</p>
+  </div>
+  <div class="three-col" style="margin-top:30px">
+    <div class="card">
+      <div class="icon-large">📡</div>
+      <h4>KartaDashcam (KDC)</h4>
+      <p>In-vehicle IoT hardware for telemetry, immobilization, and video evidence</p>
+    </div>
+    <div class="card">
+      <div class="icon-large">🖥️</div>
+      <h4>FAVE Portal</h4>
+      <p>Centralized fleet management software for operations and workflows</p>
+    </div>
+    <div class="card">
+      <div class="icon-large">🔗</div>
+      <h4>Integration</h4>
+      <p>Unified identity framework connecting hardware signals to business workflows</p>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN POINTS -->
+<section>
+  <h2>Fleet Partner Pain Points</h2>
+  <div class="two-col">
+    <div>
+      <div class="pain-point">
+        <h4>A. Onboarding Friction</h4>
+        <p>Offline matching via spreadsheets, slow vehicle-driver pairing, repeated operational touchpoints</p>
+      </div>
+      <div class="pain-point">
+        <h4>B. Visibility Gap</h4>
+        <p>Where are my vehicles? Are they working? Are drivers generating risk? Are they actually working for Grab?</p>
+      </div>
+    </div>
+    <div>
+      <div class="pain-point">
+        <h4>C. Asset Recovery</h4>
+        <p>Painful repossession when drivers abscond; need credible remote immobilization and location trace</p>
+      </div>
+      <div class="pain-point">
+        <h4>D. Trust & Governance</h4>
+        <p>Fleet concerns about data boundaries, separation vs rental commercial teams, contractual-grade access controls</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: PRODUCT STRATEGY -->
+<section class="section-slide">
+  <h2>Product Strategy</h2>
+</section>
+
+<!-- KDC DEVICE TRACK -->
+<section>
+  <h2>KDC — Device Track</h2>
+  <p style="text-align:left; margin-bottom:20px">Hardware + Immobilization + Video (including Live Streaming)</p>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="icon">📍</div>
+      <h5>GPS Tracking</h5>
+      <p>Real-time location and historical trace</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">🔒</div>
+      <h5>Immobilization</h5>
+      <p>Remote lock/unlock with governance & audit</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">📹</div>
+      <h5>Video Capture</h5>
+      <p>Incident-oriented recording for disputes</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">📡</div>
+      <h5>Live Streaming</h5>
+      <p>Real-time video for incident verification</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">⚡</div>
+      <h5>Telematics</h5>
+      <p>Collision, harsh braking, speeding detection</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">😴</div>
+      <h5>Risk Detection</h5>
+      <p>Fatigue, distraction, weapon alerts (Advanced)</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAVE PORTAL -->
+<section>
+  <h2>FAVE Portal — Software Track</h2>
+  <p style="text-align:left; margin-bottom:20px">Fleet Operating System: IoT signals → Operator workflows</p>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="icon">🗺️</div>
+      <h5>Map View</h5>
+      <p>Real-time vehicle clustering & status</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">🚗</div>
+      <h5>Vehicle Management</h5>
+      <p>Onboarding, device bind, lifecycle</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">🏢</div>
+      <h5>Fleet Management</h5>
+      <p>Fleet creation, geofences, operators</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">🔔</div>
+      <h5>Alerts & Logs</h5>
+      <p>Real-time notifications, audit trails</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">📊</div>
+      <h5>Reports</h5>
+      <p>Daily, safety, geofence, utilization</p>
+    </div>
+    <div class="feature-item">
+      <div class="icon">👥</div>
+      <h5>User Access</h5>
+      <p>Role-based permissions, org scoping</p>
+    </div>
+  </div>
+</section>
+
+<!-- BASIC VS ADVANCED -->
+<section>
+  <h2>Basic vs Advanced Packages</h2>
+  <table class="table-compare">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Basic</th>
+        <th>Advanced</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>GPS Tracking (Real-time & Historical)</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Geofence Alerts</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Collision & Harsh Driving Detection</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Video Recording & Footage Access</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Vehicle & DAX Management</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td><strong>Immobilization</strong></td><td class="cross">✗</td><td class="check">✓</td></tr>
+      <tr><td><strong>SOS Emergency Service</strong></td><td class="cross">✗</td><td class="check">✓</td></tr>
+      <tr><td><strong>Risk Detection (Fatigue, Distraction)</strong></td><td class="cross">✗</td><td class="check">✓</td></tr>
+      <tr><td><strong>Live Video Streaming</strong></td><td class="cross">✗</td><td class="check">✓</td></tr>
+      <tr><td><strong>Extended Storage (up to 1TB)</strong></td><td class="cross">✗</td><td class="check">✓</td></tr>
+      <tr><td>Cloud Data Retention</td><td>1 Year</td><td>≥3 Years</td></tr>
+      <tr><td>OTA Service</td><td>Minimal</td><td>Strategic (staged rollout)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- TARGET USERS -->
+<section>
+  <h2>Target Users</h2>
+  <div class="three-col" style="margin-top:30px">
+    <div class="user-card">
+      <div class="emoji">👔</div>
+      <h4>Grab Fleet Managers</h4>
+      <p>Org-level dashboards, reporting, operational control across regions</p>
+      <div style="margin-top:12px">
+        <span class="badge badge-green">Full Access</span>
+      </div>
+    </div>
+    <div class="user-card">
+      <div class="emoji">🤝</div>
+      <h4>External Fleet Partners</h4>
+      <p>Fleet-scoped dashboards, operator management, geofence & vehicle lifecycle</p>
+      <div style="margin-top:12px">
+        <span class="badge badge-blue">Org Scoped</span>
+      </div>
+    </div>
+    <div class="user-card">
+      <div class="emoji">🔧</div>
+      <h4>Workshop Installers</h4>
+      <p>Device installation, vehicle/device binding, technical support (replace/repair)</p>
+      <div style="margin-top:12px">
+        <span class="badge badge-orange">Limited</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:30px; text-align:left">
+    <h3>Vehicle Types Supported</h3>
+    <span class="badge badge-green">Petrol/ICE</span>
+    <span class="badge badge-green">4W EV</span>
+    <span class="badge badge-green">2W EV</span>
+    <span class="badge badge-blue">Hybrid</span>
+    <span class="badge badge-orange">AV (Future)</span>
+  </div>
+</section>
+
+<!-- KEY USER FLOWS -->
+<section>
+  <h2>Key User Flows</h2>
+  <div class="two-col" style="margin-top:20px">
+    <div>
+      <div class="card" style="margin-bottom:15px">
+        <h4>1. Vehicle Onboarding</h4>
+        <p>Register vehicle → Bind device → Assign to fleet → Start tracking</p>
+      </div>
+      <div class="card" style="margin-bottom:15px">
+        <h4>2. Real-time Monitoring</h4>
+        <p>Map view → Filter by status/fleet → Click vehicle → View details/trace/video</p>
+      </div>
+      <div class="card">
+        <h4>3. Alert Handling</h4>
+        <p>Receive alert → Acknowledge → Investigate → Take action → Resolve</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:15px">
+        <h4>4. Fleet Configuration</h4>
+        <p>Create fleet → Draw geofences → Assign operators → Set alert rules</p>
+      </div>
+      <div class="card" style="margin-bottom:15px">
+        <h4>5. Immobilization</h4>
+        <p>Locate vehicle → Safety check → Confirm action → Execute → Audit log</p>
+      </div>
+      <div class="card">
+        <h4>6. Video Evidence</h4>
+        <p>Select event → Pull footage → Review → Export for dispute</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <span class="badge badge-green">Phase 1</span>
+      <h4>Q2-Q3 2026</h4>
+      <p><strong>KDC-led Modular Delivery</strong></p>
+      <p style="margin-top:8px">• Fleet overview + Map view<br>• Vehicle-device onboarding<br>• Immobilization (priority)<br>• Basic telematics & video</p>
+    </div>
+    <div class="timeline-item">
+      <span class="badge badge-blue">Phase 2</span>
+      <h4>Q3-Q4 2026</h4>
+      <p><strong>Multi-source Aggregation</strong></p>
+      <p style="margin-top:8px">• Integrate KDC, KD, EV datasets<br>• Data lineage & confidence labels<br>• Enhanced reporting<br>• Fuel card integration</p>
+    </div>
+    <div class="timeline-item">
+      <span class="badge badge-orange">Phase 3</span>
+      <h4>2027</h4>
+      <p><strong>Operational Excellence</strong></p>
+      <p style="margin-top:8px">• Driver gamification<br>• Predictive maintenance AI<br>• EV fleet orchestration<br>• Gen-AI fleet assistant</p>
+    </div>
+  </div>
+</section>
+
+<!-- P0 PRIORITIES -->
+<section>
+  <h2>P0 Feature Priorities</h2>
+  <div class="two-col" style="margin-top:20px">
+    <div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>🗺️ Real-time Map View</h4>
+        <p>Vehicle clustering, status filters, vehicle cards, 10s refresh</p>
+      </div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>🚗 Vehicle Management</h4>
+        <p>Bulk onboarding, device binding, vehicle list with filters</p>
+      </div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>🏢 Fleet Management</h4>
+        <p>Fleet creation, geofence drawing, operator assignment</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>📊 Dashboard Metrics</h4>
+        <p>Utilization, performance, safety KPIs with time filters</p>
+      </div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>🔔 Alerts & Logs</h4>
+        <p>Real-time alerts, ACK workflow, audit trail</p>
+      </div>
+      <div class="card" style="margin-bottom:12px; border-left: 4px solid var(--grab-green);">
+        <h4>🔒 Immobilization</h4>
+        <p>Remote lock/unlock with safety checks & governance</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUTURE VISION -->
+<section>
+  <h2>Future Vision</h2>
+  <div class="three-col" style="margin-top:30px">
+    <div class="card">
+      <div class="icon-large">🔧</div>
+      <h4>Predictive Maintenance</h4>
+      <p>Shift from odometer-only schedules to proactive maintenance based on real-time engine health and fault codes</p>
+    </div>
+    <div class="card">
+      <div class="icon-large">🔋</div>
+      <h4>EV Efficiency Suite</h4>
+      <p>Battery SOC monitoring, charging alerts ("Forgot to plug-in"), range predictions</p>
+    </div>
+    <div class="card">
+      <div class="icon-large">🤖</div>
+      <h4>Gen-AI Fleet Assistant</h4>
+      <p>Natural language queries: "Which vehicles have highest idling costs this week?"</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:30px">
+    <p><strong>Sustainability & CO2:</strong> Automated emissions reporting per vehicle, helping B2B clients meet regulatory compliance</p>
+  </div>
+</section>
+
+<!-- THANK YOU -->
+<section class="title-slide">
+  <h1>Thank You</h1>
+  <p style="font-size:1em; opacity:0.9; margin-top:40px">FAVE — Powering Fleet Partnerships</p>
+  <div style="margin-top:60px; display:flex; justify-content:center; gap:40px">
+    <div class="stat-box" style="background:rgba(255,255,255,0.15); min-width:120px">
+      <div class="number" style="color:white">50K+</div>
+      <div class="label" style="color:rgba(255,255,255,0.7)">Vehicles</div>
+    </div>
+    <div class="stat-box" style="background:rgba(255,255,255,0.15); min-width:120px">
+      <div class="number" style="color:white">6</div>
+      <div class="label" style="color:rgba(255,255,255,0.7)">Countries</div>
+    </div>
+    <div class="stat-box" style="background:rgba(255,255,255,0.15); min-width:120px">
+      <div class="number" style="color:white">24/7</div>
+      <div class="label" style="color:rgba(255,255,255,0.7)">Monitoring</div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: true,
+  transition: 'slide',
+  backgroundTransition: 'fade',
+  center: true,
+  width: 1280,
+  height: 720
+});
+</script>
+</body>
+</html>
