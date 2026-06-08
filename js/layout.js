@@ -75,30 +75,30 @@ function injectLayout(activeNav) {
   </div>
 </aside>`;
 
-    // Re-build sidebar with proper nav items (cleaner approach)
+    // Re-build sidebar with proper nav items (Option C: Grab App Style - minimal sections)
     sidebarEl.innerHTML = `
 <aside class="sidebar">
   <div class="nav-section">
-    <div class="nav-label">Overview</div>
-    <a class="nav-item${activeNav==='dashboard.html'?' active':''}" href="dashboard.html"><span class="nav-icon">🗺️</span> Dashboard</a>
+    <div class="nav-label">Home</div>
+    <a class="nav-item${activeNav==='dashboard.html'?' active':''}" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+
     <div class="nav-label">Fleet</div>
     <a class="nav-item${activeNav==='vehicles.html'?' active':''}" href="vehicles.html"><span class="nav-icon">🚗</span> Vehicles <span class="nav-badge" id="online-count">51,240</span></a>
     <a class="nav-item${activeNav==='livestream.html'?' active':''}" href="livestream.html"><span class="nav-icon">📹</span> Live Streams</a>
-    <div class="nav-label">Operations</div>
-    <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> DAX Management <span class="nav-badge" id="dax-alert-badge"></span></a>
-    <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments <span class="nav-badge" id="pay-alert-badge"></span></a>
-    <div class="nav-label" data-require-role="fleet_admin super_admin">Safety &amp; Control</div>
     <a class="nav-item${activeNav==='telematics.html'?' active':''}" href="telematics.html"><span class="nav-icon">⚡</span> Telematics <span class="nav-badge" id="tel-count-badge">12</span></a>
-    <a class="nav-item${activeNav==='immobilization.html'?' active':''}" href="immobilization.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔒</span> Immobilization <span class="nav-badge" id="immob-count-badge">23</span></a>
+    <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> DAX Management</a>
+    <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+
+    <div class="nav-label" data-require-role="fleet_admin super_admin">Control</div>
+    <a class="nav-item${activeNav==='immobilization.html'?' active':''}" href="immobilization.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔒</span> Immobilization</a>
     <a class="nav-item" href="dashboard.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🏁</span> Geofences</a>
-    <div class="nav-label" data-require-role="fleet_admin super_admin">Hardware</div>
     <a class="nav-item${activeNav==='iot.html'?' active':''}" href="iot.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">📡</span> IoT Devices</a>
-    <a class="nav-item${activeNav==='ota.html'?' active':''}" href="ota.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔄</span> OTA Updates <span class="nav-badge" id="ota-count-badge"></span></a>
-    <div class="nav-label">Analytics</div>
-    <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> History &amp; Reports</a>
-    <div class="nav-label">Admin</div>
-    <a class="nav-item${activeNav==='users.html'?' active':''}" href="users.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">👥</span> User Management</a>
-    <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> My Profile</a>
+    <a class="nav-item${activeNav==='ota.html'?' active':''}" href="ota.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔄</span> OTA Updates</a>
+
+    <div class="nav-label">Account</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item${activeNav==='users.html'?' active':''}" href="users.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">👥</span> Users</a>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Profile</a>
   </div>
 </aside>`;
   }
