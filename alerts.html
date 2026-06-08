@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Alerts & Logs</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.alerts-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+.alerts-main { display: flex; flex-direction: column; gap: 16px; }
+.alerts-summary { display: flex; gap: 12px; }
+.alert-summary-card { flex: 1; background: white; border-radius: var(--radius-card); padding: 18px 20px; box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 14px; }
+.alert-summary-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.alert-summary-icon.critical { background: #FEE2E2; }
+.alert-summary-icon.warning { background: #FEF3C7; }
+.alert-summary-icon.info { background: #DBEAFE; }
+.alert-summary-icon.resolved { background: #DCFCE7; }
+.alert-summary-count { font-size: 1.8rem; font-weight: 700; }
+.alert-summary-label { font-size: 0.78rem; color: var(--text-secondary); }
+.alerts-table-card { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); overflow: hidden; }
+.alerts-toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.alerts-toolbar input { flex: 1; min-width: 200px; max-width: 300px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; }
+.alerts-toolbar input:focus { border-color: var(--primary); }
+.alert-filter-chip { padding: 5px 12px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 0.78rem; font-weight: 500; cursor: pointer; background: white; transition: all 0.15s; }
+.alert-filter-chip:hover { border-color: var(--primary); }
+.alert-filter-chip.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.alerts-table { width: 100%; }
+.alerts-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; background: #F8FAFB; border-bottom: 1px solid var(--border); }
+.alerts-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+.alerts-table tr:hover { background: #F5FBF7; }
+.alert-type-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
+.alert-type-badge.collision { background: #FEE2E2; color: #991B1B; }
+.alert-type-badge.sos { background: #FEE2E2; color: #991B1B; }
+.alert-type-badge.harsh { background: #FEF3C7; color: #92400E; }
+.alert-type-badge.geofence { background: #DBEAFE; color: #1E40AF; }
+.alert-type-badge.speeding { background: #FEF3C7; color: #92400E; }
+.alert-type-badge.fatigue { background: #EDE9FE; color: #5B21B6; }
+.alert-type-badge.offline { background: #F3F4F6; color: #6B7280; }
+.alert-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+.alert-status.new { background: #FEE2E2; color: #991B1B; }
+.alert-status.acknowledged { background: #FEF3C7; color: #92400E; }
+.alert-status.in-progress { background: #DBEAFE; color: #1E40AF; }
+.alert-status.resolved { background: #DCFCE7; color: #15803D; }
+.alert-actions { display: flex; gap: 6px; }
+.alert-action-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 5px; background: white; font-size: 0.72rem; cursor: pointer; transition: all 0.15s; }
+.alert-action-btn:hover { border-color: var(--primary); color: var(--primary); }
+.realtime-panel { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); overflow: hidden; }
+.realtime-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.realtime-title { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.realtime-dot { width: 8px; height: 8px; border-radius: 50%; background: #EF4444; animation: blink 1s infinite; }
+.realtime-list { max-height: 500px; overflow-y: auto; }
+.realtime-item { padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.realtime-item:hover { background: var(--bg); }
+.realtime-item.unread { background: #FEF3C7; border-left: 3px solid #F97316; }
+.realtime-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.realtime-item-time { font-size: 0.7rem; color: var(--text-secondary); margin-left: auto; }
+.realtime-item-title { font-weight: 600; font-size: 0.85rem; }
+.realtime-item-desc { font-size: 0.78rem; color: var(--text-secondary); }
+.realtime-item-vehicle { font-size: 0.72rem; color: var(--primary); font-weight: 600; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Alerts & Logs</div>
+      <div class="page-subtitle">Real-time alerts, historical logs, and alert configuration</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="showToast('Alert settings...','#3B82F6')">⚙️ Configure</button>
+      <button class="btn btn-outline" onclick="showToast('Export alerts...','#3B82F6')">📥 Export</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="alerts-summary">
+    <div class="alert-summary-card">
+      <div class="alert-summary-icon critical">🚨</div>
+      <div>
+        <div class="alert-summary-count" id="critical-count">12</div>
+        <div class="alert-summary-label">Critical</div>
+      </div>
+    </div>
+    <div class="alert-summary-card">
+      <div class="alert-summary-icon warning">⚠️</div>
+      <div>
+        <div class="alert-summary-count" id="warning-count">47</div>
+        <div class="alert-summary-label">Warnings</div>
+      </div>
+    </div>
+    <div class="alert-summary-card">
+      <div class="alert-summary-icon info">ℹ️</div>
+      <div>
+        <div class="alert-summary-count" id="info-count">89</div>
+        <div class="alert-summary-label">Info</div>
+      </div>
+    </div>
+    <div class="alert-summary-card">
+      <div class="alert-summary-icon resolved">✅</div>
+      <div>
+        <div class="alert-summary-count" id="resolved-count">234</div>
+        <div class="alert-summary-label">Resolved Today</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerts-grid">
+    <!-- Main: Alerts Table -->
+    <div class="alerts-main">
+      <div class="alerts-table-card">
+        <div class="alerts-toolbar">
+          <input type="text" placeholder="Search alerts..." id="alert-search" />
+          <span class="alert-filter-chip active" data-type="all">All</span>
+          <span class="alert-filter-chip" data-type="collision">Collision</span>
+          <span class="alert-filter-chip" data-type="sos">SOS</span>
+          <span class="alert-filter-chip" data-type="harsh">Harsh Driving</span>
+          <span class="alert-filter-chip" data-type="geofence">Geofence</span>
+          <span class="alert-filter-chip" data-type="speeding">Speeding</span>
+        </div>
+        <table class="alerts-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Vehicle</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="alerts-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right: Real-time Feed -->
+    <div class="realtime-panel">
+      <div class="realtime-header">
+        <span class="realtime-title"><span class="realtime-dot"></span> Live Feed</span>
+        <span style="font-size:0.72rem;color:var(--text-secondary)">Auto-refresh: 10s</span>
+      </div>
+      <div class="realtime-list" id="realtime-list"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('alerts.html');
+
+const alertTypes = ['collision', 'sos', 'harsh', 'geofence', 'speeding', 'fatigue', 'offline'];
+const alertStatuses = ['new', 'acknowledged', 'in-progress', 'resolved'];
+const alertDescriptions = {
+  collision: 'Collision detected',
+  sos: 'SOS button pressed',
+  harsh: 'Harsh braking detected',
+  geofence: 'Exited geofence zone',
+  speeding: 'Speed exceeded 80 km/h',
+  fatigue: 'Driver fatigue detected',
+  offline: 'Vehicle went offline'
+};
+
+// Generate mock alerts
+const alertsData = [];
+for (let i = 0; i < 50; i++) {
+  const type = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+  const vehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
+  const hoursAgo = Math.floor(Math.random() * 48);
+  const status = hoursAgo < 2 ? (Math.random() > 0.5 ? 'new' : 'acknowledged') : alertStatuses[Math.floor(Math.random() * alertStatuses.length)];
+
+  alertsData.push({
+    id: i + 1,
+    type,
+    vehicle: vehicle.plate,
+    city: vehicle.city,
+    description: alertDescriptions[type],
+    status,
+    time: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
+    severity: ['collision', 'sos'].includes(type) ? 'critical' : ['harsh', 'speeding', 'fatigue'].includes(type) ? 'warning' : 'info'
+  });
+}
+alertsData.sort((a, b) => b.time - a.time);
+
+function formatTime(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return date.toLocaleDateString();
+}
+
+function renderAlertsTable(filter = 'all', search = '') {
+  const tbody = document.getElementById('alerts-table-body');
+  const filtered = alertsData.filter(a => {
+    const typeMatch = filter === 'all' || a.type === filter;
+    const searchMatch = !search || a.vehicle.toLowerCase().includes(search.toLowerCase()) || a.description.toLowerCase().includes(search.toLowerCase());
+    return typeMatch && searchMatch;
+  });
+
+  tbody.innerHTML = filtered.slice(0, 20).map(a => `
+    <tr>
+      <td style="white-space:nowrap">${formatTime(a.time)}</td>
+      <td><span class="alert-type-badge ${a.type}">${a.type.toUpperCase()}</span></td>
+      <td><strong>${a.vehicle}</strong><br><span style="font-size:0.72rem;color:var(--text-secondary)">${a.city}</span></td>
+      <td>${a.description}</td>
+      <td><span class="alert-status ${a.status}">${a.status.replace('-', ' ')}</span></td>
+      <td>
+        <div class="alert-actions">
+          <button class="alert-action-btn" onclick="showToast('Acknowledged','#00B14F')">ACK</button>
+          <button class="alert-action-btn" onclick="showToast('View details...','#3B82F6')">View</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderRealtimeList() {
+  const list = document.getElementById('realtime-list');
+  const recent = alertsData.filter(a => (Date.now() - a.time) < 6 * 60 * 60 * 1000).slice(0, 15);
+
+  list.innerHTML = recent.map((a, i) => `
+    <div class="realtime-item${a.status === 'new' ? ' unread' : ''}">
+      <div class="realtime-item-header">
+        <span class="alert-type-badge ${a.type}">${a.type.toUpperCase()}</span>
+        <span class="realtime-item-time">${formatTime(a.time)}</span>
+      </div>
+      <div class="realtime-item-title">${a.description}</div>
+      <div class="realtime-item-vehicle">🚗 ${a.vehicle} · ${a.city}</div>
+    </div>
+  `).join('');
+}
+
+function updateCounts() {
+  document.getElementById('critical-count').textContent = alertsData.filter(a => a.severity === 'critical' && a.status !== 'resolved').length;
+  document.getElementById('warning-count').textContent = alertsData.filter(a => a.severity === 'warning' && a.status !== 'resolved').length;
+  document.getElementById('info-count').textContent = alertsData.filter(a => a.severity === 'info' && a.status !== 'resolved').length;
+  document.getElementById('resolved-count').textContent = alertsData.filter(a => a.status === 'resolved').length;
+}
+
+// Filter chip click
+document.querySelectorAll('.alert-filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.alert-filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    renderAlertsTable(this.dataset.type, document.getElementById('alert-search').value);
+  });
+});
+
+document.getElementById('alert-search').addEventListener('input', e => {
+  const activeFilter = document.querySelector('.alert-filter-chip.active').dataset.type;
+  renderAlertsTable(activeFilter, e.target.value);
+});
+
+// Simulate new alerts
+setInterval(() => {
+  if (Math.random() > 0.7) {
+    const type = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+    const vehicle = vehicles[Math.floor(Math.random() * vehicles.length)];
+    alertsData.unshift({
+      id: alertsData.length + 1,
+      type,
+      vehicle: vehicle.plate,
+      city: vehicle.city,
+      description: alertDescriptions[type],
+      status: 'new',
+      time: new Date(),
+      severity: ['collision', 'sos'].includes(type) ? 'critical' : ['harsh', 'speeding', 'fatigue'].includes(type) ? 'warning' : 'info'
+    });
+    renderRealtimeList();
+    updateCounts();
+  }
+}, 10000);
+
+renderAlertsTable();
+renderRealtimeList();
+updateCounts();
+</script>
+</body>
+</html>

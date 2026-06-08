@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Reports</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.reports-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.report-card { background: white; border-radius: var(--radius-card); padding: 20px; box-shadow: var(--card-shadow); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.report-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); border-color: var(--primary); }
+.report-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 14px; }
+.report-card-icon.green { background: var(--primary-light); }
+.report-card-icon.blue { background: #DBEAFE; }
+.report-card-icon.purple { background: #EDE9FE; }
+.report-card-icon.orange { background: #FEF3C7; }
+.report-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+.report-card-desc { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+.report-card-meta { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-secondary); }
+.scheduled-reports { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); overflow: hidden; }
+.scheduled-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.scheduled-title { font-size: 0.95rem; font-weight: 700; }
+.scheduled-table { width: 100%; }
+.scheduled-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; background: #F8FAFB; }
+.scheduled-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+.scheduled-table tr:hover { background: #F5FBF7; }
+.freq-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+.freq-badge.daily { background: #DCFCE7; color: #15803D; }
+.freq-badge.weekly { background: #DBEAFE; color: #1E40AF; }
+.freq-badge.monthly { background: #EDE9FE; color: #5B21B6; }
+.recent-downloads { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); padding: 20px; margin-top: 20px; }
+.recent-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; }
+.download-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.download-item:last-child { border-bottom: none; }
+.download-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.download-info { flex: 1; }
+.download-name { font-weight: 600; font-size: 0.875rem; }
+.download-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+.download-btn { padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: white; font-size: 0.78rem; cursor: pointer; }
+.download-btn:hover { border-color: var(--primary); color: var(--primary); }
+</style>
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Reports</div>
+      <div class="page-subtitle">Generate fleet reports, analytics, and insights</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="showToast('Schedule report...','#3B82F6')">📅 Schedule</button>
+      <button class="btn btn-primary" onclick="showToast('Create custom report...','#00B14F')">➕ New Report</button>
+    </div>
+  </div>
+
+  <!-- Report Types -->
+  <div class="reports-grid">
+    <div class="report-card" onclick="generateReport('daily')">
+      <div class="report-card-icon green">📊</div>
+      <div class="report-card-title">Daily Fleet Report</div>
+      <div class="report-card-desc">Overview of fleet utilization, online hours, and trip counts for the day.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~30 sec</span>
+      </div>
+    </div>
+    <div class="report-card" onclick="generateReport('safety')">
+      <div class="report-card-icon orange">⚠️</div>
+      <div class="report-card-title">Safety Report</div>
+      <div class="report-card-desc">Telematics events: collisions, harsh braking, speeding incidents, and driver scores.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~45 sec</span>
+      </div>
+    </div>
+    <div class="report-card" onclick="generateReport('geofence')">
+      <div class="report-card-icon blue">🏁</div>
+      <div class="report-card-title">Geofence Report</div>
+      <div class="report-card-desc">Entry/exit logs, time spent in zones, and boundary violation alerts.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~20 sec</span>
+      </div>
+    </div>
+    <div class="report-card" onclick="generateReport('vehicle')">
+      <div class="report-card-icon green">🚗</div>
+      <div class="report-card-title">Vehicle Report</div>
+      <div class="report-card-desc">Detailed vehicle information: mileage, status, device health, and maintenance.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~30 sec</span>
+      </div>
+    </div>
+    <div class="report-card" onclick="generateReport('driver')">
+      <div class="report-card-icon purple">🏅</div>
+      <div class="report-card-title">Driver Performance</div>
+      <div class="report-card-desc">DAX scores, trip history, working hours, and behavior analytics.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~40 sec</span>
+      </div>
+    </div>
+    <div class="report-card" onclick="generateReport('immob')">
+      <div class="report-card-icon orange">🔒</div>
+      <div class="report-card-title">Immobilization Log</div>
+      <div class="report-card-desc">Audit trail of all lock/unlock actions with timestamps and operators.</div>
+      <div class="report-card-meta">
+        <span>📄 PDF / CSV</span>
+        <span>⏱️ ~15 sec</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scheduled Reports -->
+  <div class="scheduled-reports">
+    <div class="scheduled-header">
+      <span class="scheduled-title">📅 Scheduled Reports</span>
+      <button class="btn btn-outline" style="font-size:0.8rem;padding:6px 12px" onclick="showToast('Add schedule...','#3B82F6')">+ Add Schedule</button>
+    </div>
+    <table class="scheduled-table">
+      <thead>
+        <tr>
+          <th>Report Name</th>
+          <th>Frequency</th>
+          <th>Recipients</th>
+          <th>Last Run</th>
+          <th>Next Run</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Daily Fleet Summary</strong></td>
+          <td><span class="freq-badge daily">Daily</span></td>
+          <td>fleet-team@grab.com</td>
+          <td>Today, 06:00</td>
+          <td>Tomorrow, 06:00</td>
+          <td><span class="status-badge online">Active</span></td>
+        </tr>
+        <tr>
+          <td><strong>Weekly Safety Digest</strong></td>
+          <td><span class="freq-badge weekly">Weekly</span></td>
+          <td>safety@grab.com, ops@grab.com</td>
+          <td>Mon, 08:00</td>
+          <td>Next Mon, 08:00</td>
+          <td><span class="status-badge online">Active</span></td>
+        </tr>
+        <tr>
+          <td><strong>Monthly Performance</strong></td>
+          <td><span class="freq-badge monthly">Monthly</span></td>
+          <td>management@grab.com</td>
+          <td>1 Jun, 09:00</td>
+          <td>1 Jul, 09:00</td>
+          <td><span class="status-badge online">Active</span></td>
+        </tr>
+        <tr>
+          <td><strong>Geofence Violations</strong></td>
+          <td><span class="freq-badge daily">Daily</span></td>
+          <td>ops@grab.com</td>
+          <td>Today, 07:00</td>
+          <td>Tomorrow, 07:00</td>
+          <td><span class="status-badge idle">Paused</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Downloads -->
+  <div class="recent-downloads">
+    <div class="recent-title">📥 Recent Downloads</div>
+    <div class="download-item">
+      <div class="download-icon">📄</div>
+      <div class="download-info">
+        <div class="download-name">Daily_Fleet_Report_2026-06-08.pdf</div>
+        <div class="download-meta">Generated today at 06:00 · 2.4 MB</div>
+      </div>
+      <button class="download-btn" onclick="showToast('Downloading...','#00B14F')">⬇️ Download</button>
+    </div>
+    <div class="download-item">
+      <div class="download-icon">📄</div>
+      <div class="download-info">
+        <div class="download-name">Safety_Report_Week23.csv</div>
+        <div class="download-meta">Generated Mon at 08:00 · 1.1 MB</div>
+      </div>
+      <button class="download-btn" onclick="showToast('Downloading...','#00B14F')">⬇️ Download</button>
+    </div>
+    <div class="download-item">
+      <div class="download-icon">📄</div>
+      <div class="download-info">
+        <div class="download-name">Vehicle_Report_SG_Central.xlsx</div>
+        <div class="download-meta">Generated yesterday at 14:30 · 856 KB</div>
+      </div>
+      <button class="download-btn" onclick="showToast('Downloading...','#00B14F')">⬇️ Download</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('reports.html');
+
+function generateReport(type) {
+  const names = {
+    daily: 'Daily Fleet Report',
+    safety: 'Safety Report',
+    geofence: 'Geofence Report',
+    vehicle: 'Vehicle Report',
+    driver: 'Driver Performance Report',
+    immob: 'Immobilization Log'
+  };
+  showToast('Generating ' + names[type] + '...', '#00B14F');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>GrabFleet — Fleets & Geofences</title>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.fleets-layout { display: grid; grid-template-columns: 380px 1fr; gap: 20px; height: calc(100vh - var(--topbar-height) - 120px); }
+.fleets-list-panel { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); display: flex; flex-direction: column; overflow: hidden; }
+.fleets-list-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.fleets-list-title { font-size: 0.95rem; font-weight: 700; }
+.fleets-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.fleets-search input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; }
+.fleets-search input:focus { border-color: var(--primary); }
+.fleets-list { flex: 1; overflow-y: auto; }
+.fleet-item { padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.fleet-item:hover { background: var(--bg); }
+.fleet-item.active { background: var(--primary-light); border-left: 3px solid var(--primary); }
+.fleet-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.fleet-item-name { font-weight: 700; font-size: 0.9rem; }
+.fleet-item-count { font-size: 0.72rem; color: var(--text-secondary); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+.fleet-item-meta { font-size: 0.78rem; color: var(--text-secondary); display: flex; gap: 12px; }
+.geofence-map-panel { background: white; border-radius: var(--radius-card); box-shadow: var(--card-shadow); display: flex; flex-direction: column; overflow: hidden; }
+.geofence-map-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+#geofence-map { flex: 1; min-height: 400px; }
+.geofence-info-bar { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; gap: 20px; }
+.geofence-stat { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; }
+.geofence-stat-label { color: var(--text-secondary); }
+.geofence-stat-value { font-weight: 700; }
+.tabs-bar { display: flex; gap: 4px; }
+.tab-btn { padding: 6px 14px; border-radius: 6px; border: none; background: none; font-family: inherit; font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { background: var(--bg); color: var(--text); }
+.tab-btn.active { background: var(--primary); color: white; }
+.geofence-list { padding: 16px 20px; }
+.geofence-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg); border-radius: 10px; margin-bottom: 10px; }
+.geofence-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.geofence-name { font-weight: 600; font-size: 0.875rem; flex: 1; }
+.geofence-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.geofence-badge.active { background: #DCFCE7; color: #15803D; }
+.geofence-badge.inactive { background: #F3F4F6; color: #6B7280; }
+</style>
+</head>
+<body>
+<div id="app-topbar"></div>
+<div class="layout">
+<div id="app-sidebar"></div>
+<main class="main">
+
+<div class="view active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Fleets & Geofences</div>
+      <div class="page-subtitle">Manage fleet groups, operators, and geofence boundaries</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="showToast('Export fleet data...','#3B82F6')">📥 Export</button>
+      <button class="btn btn-primary" onclick="openCreateFleetModal()">➕ Create Fleet</button>
+    </div>
+  </div>
+
+  <div class="fleets-layout">
+    <!-- Left: Fleet List -->
+    <div class="fleets-list-panel">
+      <div class="fleets-list-header">
+        <span class="fleets-list-title">Fleets</span>
+        <span style="font-size:0.78rem;color:var(--text-secondary)" id="fleet-total">4 fleets</span>
+      </div>
+      <div class="fleets-search">
+        <input type="text" placeholder="Search fleet name..." id="fleet-search" />
+      </div>
+      <div class="fleets-list" id="fleets-list"></div>
+    </div>
+
+    <!-- Right: Map + Geofences -->
+    <div class="geofence-map-panel">
+      <div class="geofence-map-header">
+        <div class="tabs-bar">
+          <button class="tab-btn active" onclick="showGeofenceTab('map',this)">🗺️ Map</button>
+          <button class="tab-btn" onclick="showGeofenceTab('list',this)">📋 Geofences</button>
+          <button class="tab-btn" onclick="showGeofenceTab('operators',this)">👥 Operators</button>
+        </div>
+        <button class="btn btn-outline" style="font-size:0.8rem;padding:6px 12px" onclick="showToast('Draw geofence tool...','#00B14F')">✏️ Draw Geofence</button>
+      </div>
+      <div id="geofence-tab-map" class="geofence-tab-content" style="flex:1;display:flex;flex-direction:column">
+        <div id="geofence-map"></div>
+        <div class="geofence-info-bar">
+          <div class="geofence-stat"><span class="geofence-stat-label">Vehicles in zone:</span><span class="geofence-stat-value" id="vehicles-in-zone">24</span></div>
+          <div class="geofence-stat"><span class="geofence-stat-label">Active geofences:</span><span class="geofence-stat-value" id="active-geofences">3</span></div>
+          <div class="geofence-stat"><span class="geofence-stat-label">Alerts today:</span><span class="geofence-stat-value" id="geofence-alerts">7</span></div>
+        </div>
+      </div>
+      <div id="geofence-tab-list" class="geofence-tab-content" style="display:none;flex:1;overflow-y:auto">
+        <div class="geofence-list" id="geofence-list"></div>
+      </div>
+      <div id="geofence-tab-operators" class="geofence-tab-content" style="display:none;flex:1;overflow-y:auto">
+        <div style="padding:20px" id="operators-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/layout.js"></script>
+<script>
+const currentUser = checkAuth();
+injectLayout('fleets.html');
+
+const fleetsData = [
+  { id: 1, name: 'Singapore Central', country: 'Singapore', city: 'Central', vehicles: 156, operators: 4, geofences: ['CBD Zone', 'Orchard Belt'], center: [1.2897, 103.8501], color: '#00B14F' },
+  { id: 2, name: 'Singapore East', country: 'Singapore', city: 'East', vehicles: 89, operators: 2, geofences: ['Changi Area', 'Tampines Hub'], center: [1.3644, 103.9915], color: '#3B82F6' },
+  { id: 3, name: 'Singapore West', country: 'Singapore', city: 'West', vehicles: 67, operators: 2, geofences: ['Jurong Zone'], center: [1.3329, 103.7436], color: '#F97316' },
+  { id: 4, name: 'Johor Bahru', country: 'Malaysia', city: 'JB', vehicles: 234, operators: 5, geofences: ['JB Central', 'CIQ Area'], center: [1.4927, 103.7414], color: '#8B5CF6' }
+];
+
+const geofencesData = [
+  { id: 1, name: 'CBD Zone', fleet: 'Singapore Central', status: 'active', vehicles: 45, color: '#00B14F', coords: [[1.28, 103.84], [1.28, 103.86], [1.30, 103.86], [1.30, 103.84]] },
+  { id: 2, name: 'Orchard Belt', fleet: 'Singapore Central', status: 'active', vehicles: 32, color: '#10B981', coords: [[1.30, 103.82], [1.30, 103.84], [1.32, 103.84], [1.32, 103.82]] },
+  { id: 3, name: 'Changi Area', fleet: 'Singapore East', status: 'active', vehicles: 28, color: '#3B82F6', coords: [[1.35, 103.98], [1.35, 104.01], [1.38, 104.01], [1.38, 103.98]] },
+  { id: 4, name: 'Jurong Zone', fleet: 'Singapore West', status: 'inactive', vehicles: 15, color: '#F97316', coords: [[1.32, 103.72], [1.32, 103.76], [1.35, 103.76], [1.35, 103.72]] },
+  { id: 5, name: 'JB Central', fleet: 'Johor Bahru', status: 'active', vehicles: 67, color: '#8B5CF6', coords: [[1.47, 103.73], [1.47, 103.77], [1.51, 103.77], [1.51, 103.73]] }
+];
+
+const operatorsData = [
+  { name: 'Ahmad Rizal', email: 'ahmad.r@grab.com', role: 'Fleet Manager', fleets: ['Singapore Central', 'Singapore East'] },
+  { name: 'Sarah Tan', email: 'sarah.t@grab.com', role: 'Operator', fleets: ['Singapore Central'] },
+  { name: 'Michael Lee', email: 'michael.l@grab.com', role: 'Operator', fleets: ['Singapore West'] },
+  { name: 'Nurul Aisyah', email: 'nurul.a@grab.com', role: 'Fleet Manager', fleets: ['Johor Bahru'] }
+];
+
+let selectedFleet = fleetsData[0];
+let geoMap;
+
+function renderFleetList(search = '') {
+  const list = document.getElementById('fleets-list');
+  const filtered = fleetsData.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+  document.getElementById('fleet-total').textContent = filtered.length + ' fleets';
+
+  list.innerHTML = filtered.map(f => `
+    <div class="fleet-item${f.id === selectedFleet.id ? ' active' : ''}" onclick="selectFleet(${f.id})">
+      <div class="fleet-item-header">
+        <span class="fleet-item-name" style="color:${f.color}">● ${f.name}</span>
+        <span class="fleet-item-count">${f.vehicles} vehicles</span>
+      </div>
+      <div class="fleet-item-meta">
+        <span>📍 ${f.country}</span>
+        <span>👥 ${f.operators} operators</span>
+        <span>🏁 ${f.geofences.length} geofences</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectFleet(id) {
+  selectedFleet = fleetsData.find(f => f.id === id);
+  renderFleetList(document.getElementById('fleet-search').value);
+  renderGeofenceList();
+  renderOperatorsList();
+  if (geoMap) geoMap.setView(selectedFleet.center, 12);
+  document.getElementById('vehicles-in-zone').textContent = selectedFleet.vehicles;
+  document.getElementById('active-geofences').textContent = selectedFleet.geofences.length;
+}
+
+function renderGeofenceList() {
+  const list = document.getElementById('geofence-list');
+  const filtered = geofencesData.filter(g => selectedFleet.geofences.includes(g.name));
+
+  list.innerHTML = filtered.length ? filtered.map(g => `
+    <div class="geofence-item">
+      <span class="geofence-color" style="background:${g.color}"></span>
+      <span class="geofence-name">${g.name}</span>
+      <span style="font-size:0.75rem;color:var(--text-secondary)">${g.vehicles} vehicles</span>
+      <span class="geofence-badge ${g.status}">${g.status}</span>
+    </div>
+  `).join('') : '<div style="text-align:center;color:var(--text-secondary);padding:40px">No geofences for this fleet</div>';
+}
+
+function renderOperatorsList() {
+  const list = document.getElementById('operators-list');
+  const filtered = operatorsData.filter(o => o.fleets.includes(selectedFleet.name));
+
+  list.innerHTML = filtered.length ? filtered.map(o => `
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:10px;margin-bottom:10px">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem">${o.name.split(' ').map(n=>n[0]).join('')}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:0.9rem">${o.name}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary)">${o.email}</div>
+      </div>
+      <span class="geofence-badge active">${o.role}</span>
+    </div>
+  `).join('') : '<div style="text-align:center;color:var(--text-secondary);padding:40px">No operators for this fleet</div>';
+}
+
+function showGeofenceTab(tab, el) {
+  document.querySelectorAll('.geofence-tab-content').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('geofence-tab-' + tab).style.display = 'flex';
+  el.classList.add('active');
+  if (tab === 'map' && geoMap) geoMap.invalidateSize();
+}
+
+function initGeofenceMap() {
+  geoMap = L.map('geofence-map').setView(selectedFleet.center, 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(geoMap);
+
+  // Draw geofence polygons
+  geofencesData.forEach(g => {
+    L.polygon(g.coords, { color: g.color, fillColor: g.color, fillOpacity: 0.2, weight: 2 })
+      .addTo(geoMap)
+      .bindPopup(`<b>${g.name}</b><br>${g.vehicles} vehicles`);
+  });
+}
+
+function openCreateFleetModal() {
+  showToast('Create Fleet modal...', '#00B14F');
+}
+
+document.getElementById('fleet-search').addEventListener('input', e => renderFleetList(e.target.value));
+
+renderFleetList();
+renderGeofenceList();
+renderOperatorsList();
+setTimeout(initGeofenceMap, 100);
+</script>
+</body>
+</html>

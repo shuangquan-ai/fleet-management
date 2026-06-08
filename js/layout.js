@@ -37,68 +37,34 @@ function injectLayout(activeNav) {
 </div>`;
   }
 
-  // ── Sidebar ──────────────────────────────────────────────────────────────
+  // ── Sidebar (FAVE Product Spec aligned) ─────────────────────────────────
   const sidebarEl = document.getElementById('app-sidebar');
   if (sidebarEl) {
-    const navItem = (href, icon, label, id, badge, requireRole) => {
-      const active = activeNav === href ? ' active' : '';
-      const dataReq = requireRole ? ` data-require-role="${requireRole}"` : '';
-      const badgeHtml = badge ? `<span class="nav-badge" id="${badge.id}">${badge.text}</span>` : '';
-      return `<a class="nav-item${active}" href="${href}"${dataReq}><span class="nav-icon">${icon}</span>${label}${badgeHtml}</a>`;
-    };
-
-    sidebarEl.innerHTML = `
-<aside class="sidebar">
-  <div class="nav-section">
-    <div class="nav-label">Overview</div>
-    ${navItem('dashboard.html','🗺️','Dashboard')}
-    <div class="nav-label">Fleet Monitoring</div>
-    ${navItem('vehicles.html','🚗','Vehicles','','','')} <span style="display:none" id="online-count-placeholder"></span>
-    ${navItem('livestream.html','📹','Live Streams')}
-    ${navItem('iot.html','📡','IoT Devices')}
-    ${navItem('telematics.html','⚡','Telematics','','','')} <span style="display:none" id="tel-count-placeholder"></span>
-    <div class="nav-label">Operations</div>
-    ${navItem('dax.html','🏅','DAX Management')}
-    ${navItem('payments.html','💳','Payments')}
-    <div class="nav-label" data-require-role="fleet_admin super_admin">Remote Control</div>
-    ${navItem('immobilization.html','🔒','Immobilization','','','')}
-    <a class="nav-item" href="immobilization.html" data-require-role="fleet_admin super_admin" style="display:none"></a>
-    ${navItem('dashboard.html','🏁','Geofences')}
-    <div class="nav-label" data-require-role="fleet_admin super_admin">Device Management</div>
-    ${navItem('ota.html','🔄','OTA Updates')}
-    ${navItem('simdata.html','📶','SIM Data Management')}
-    <div class="nav-label">Analytics</div>
-    ${navItem('dashboard.html','📊','History & Reports')}
-    <div class="nav-label">Account</div>
-    ${navItem('users.html','👥','User Management','','','fleet_admin super_admin')}
-    ${navItem('dashboard.html','👤','My Profile')}
-  </div>
-</aside>`;
-
-    // Re-build sidebar with proper nav items (Option C: Grab App Style - minimal sections)
     sidebarEl.innerHTML = `
 <aside class="sidebar">
   <div class="nav-section">
     <div class="nav-label">Home</div>
-    <a class="nav-item${activeNav==='dashboard.html'?' active':''}" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item${activeNav==='dashboard.html'?' active':''}" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item${activeNav==='mapview.html'?' active':''}" href="mapview.html"><span class="nav-icon">🗺️</span> Map View</a>
 
     <div class="nav-label">Fleet</div>
-    <a class="nav-item${activeNav==='vehicles.html'?' active':''}" href="vehicles.html"><span class="nav-icon">🚗</span> Vehicles <span class="nav-badge" id="online-count">51,240</span></a>
+    <a class="nav-item${activeNav==='vehicles.html'?' active':''}" href="vehicles.html"><span class="nav-icon">🚗</span> Vehicles</a>
+    <a class="nav-item${activeNav==='fleets.html'?' active':''}" href="fleets.html"><span class="nav-icon">🏢</span> Fleets & Geofences</a>
+    <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> Drivers</a>
+
+    <div class="nav-label">Monitor</div>
     <a class="nav-item${activeNav==='livestream.html'?' active':''}" href="livestream.html"><span class="nav-icon">📹</span> Live Streams</a>
-    <a class="nav-item${activeNav==='telematics.html'?' active':''}" href="telematics.html"><span class="nav-icon">⚡</span> Telematics <span class="nav-badge" id="tel-count-badge">12</span></a>
-    <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> DAX Management</a>
-    <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+    <a class="nav-item${activeNav==='alerts.html'?' active':''}" href="alerts.html"><span class="nav-icon">🔔</span> Alerts & Logs</a>
+    <a class="nav-item${activeNav==='telematics.html'?' active':''}" href="telematics.html"><span class="nav-icon">⚡</span> Telematics</a>
 
     <div class="nav-label" data-require-role="fleet_admin super_admin">Control</div>
     <a class="nav-item${activeNav==='immobilization.html'?' active':''}" href="immobilization.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔒</span> Immobilization</a>
-    <a class="nav-item" href="dashboard.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🏁</span> Geofences</a>
-    <a class="nav-item${activeNav==='iot.html'?' active':''}" href="iot.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">📡</span> IoT Devices</a>
-    <a class="nav-item${activeNav==='ota.html'?' active':''}" href="ota.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">🔄</span> OTA Updates</a>
+    <a class="nav-item${activeNav==='iot.html'?' active':''}" href="iot.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">📡</span> Devices</a>
 
     <div class="nav-label">Account</div>
-    <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item${activeNav==='reports.html'?' active':''}" href="reports.html"><span class="nav-icon">📈</span> Reports</a>
     <a class="nav-item${activeNav==='users.html'?' active':''}" href="users.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">👥</span> Users</a>
-    <a class="nav-item" href="dashboard.html"><span class="nav-icon">👤</span> Profile</a>
+    <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments</a>
   </div>
 </aside>`;
   }
