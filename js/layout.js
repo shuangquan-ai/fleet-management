@@ -50,7 +50,7 @@ function injectLayout(activeNav) {
     <div class="nav-label">Fleet</div>
     <a class="nav-item${activeNav==='vehicles.html'?' active':''}" href="vehicles.html"><span class="nav-icon">🚗</span> Vehicles</a>
     <a class="nav-item${activeNav==='fleets.html'?' active':''}" href="fleets.html"><span class="nav-icon">🏢</span> Fleets & Geofences</a>
-    <a class="nav-item${activeNav==='dax.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> Drivers</a>
+    <a class="nav-item${activeNav==='dax.html'||activeNav==='payments.html'?' active':''}" href="dax.html"><span class="nav-icon">🏅</span> Drivers & Payments</a>
 
     <div class="nav-label">Monitor</div>
     <a class="nav-item${activeNav==='livestream.html'?' active':''}" href="livestream.html"><span class="nav-icon">📹</span> Live Streams</a>
@@ -64,7 +64,6 @@ function injectLayout(activeNav) {
     <div class="nav-label">Account</div>
     <a class="nav-item${activeNav==='reports.html'?' active':''}" href="reports.html"><span class="nav-icon">📈</span> Reports</a>
     <a class="nav-item${activeNav==='users.html'?' active':''}" href="users.html" data-require-role="fleet_admin super_admin"><span class="nav-icon">👥</span> Users</a>
-    <a class="nav-item${activeNav==='payments.html'?' active':''}" href="payments.html"><span class="nav-icon">💳</span> Payments</a>
   </div>
 </aside>`;
   }

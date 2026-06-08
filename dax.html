@@ -15,8 +15,8 @@
 <div class="view active" id="view-dax">
   <div class="page-header">
     <div>
-      <div class="page-title">🏅 DAX Management</div>
-      <div class="page-subtitle">Driver Activity Index · Performance, Compliance &amp; Scoring</div>
+      <div class="page-title">Drivers & Payments</div>
+      <div class="page-subtitle">Driver management, DAX scoring, and payment disbursements</div>
     </div>
     <div style="display:flex;gap:8px">
       <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none" id="dax-period-select" onchange="renderDaxView()">
@@ -25,15 +25,21 @@
         <option value="mar">March 2026</option>
       </select>
       <button class="btn btn-outline">📥 Export</button>
-      <button class="btn btn-outline">📋 Generate Report</button>
       <button class="btn btn-primary" data-hide-viewer onclick="openDaxOnboard()">➕ Onboard Driver</button>
     </div>
   </div>
 
-  <div class="kpi-grid" id="dax-kpi-grid"></div>
-  <div class="dax-dist-row" id="dax-dist-row"></div>
+  <!-- Main Tabs: Drivers | Payments -->
+  <div class="tabs" style="margin-bottom:20px">
+    <div class="tab active" onclick="showMainTab('drivers',this)">🏅 Drivers</div>
+    <div class="tab" onclick="showMainTab('payments',this)">💳 Payments</div>
+  </div>
 
-  <div class="table-card">
+  <!-- DRIVERS TAB -->
+  <div id="main-tab-drivers">
+    <div class="kpi-grid" id="dax-kpi-grid"></div>
+    <div class="dax-dist-row" id="dax-dist-row"></div>
+    <div class="table-card">
     <div class="table-toolbar">
       <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or plate…" oninput="filterDax(this.value)" /></div>
       <button class="filter-btn active" id="dax-f-all"       onclick="setDaxFilter('all',this)">All</button>
@@ -60,6 +66,39 @@
       </thead>
       <tbody id="dax-tbody"></tbody>
     </table>
+    </div>
+  </div>
+
+  <!-- PAYMENTS TAB -->
+  <div id="main-tab-payments" style="display:none">
+    <div class="kpi-grid" id="pay-kpi-grid"></div>
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="table-search"><span class="si">🔍</span><input type="text" placeholder="Search driver or transaction…" oninput="filterPayments(this.value)" /></div>
+        <button class="filter-btn active" onclick="setPayFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setPayFilter('completed',this)">✅ Completed</button>
+        <button class="filter-btn" onclick="setPayFilter('pending',this)">⏳ Pending</button>
+        <button class="filter-btn" onclick="setPayFilter('processing',this)">🔄 Processing</button>
+        <button class="filter-btn" onclick="setPayFilter('failed',this)">❌ Failed</button>
+        <button class="btn btn-outline" style="margin-left:auto;font-size:0.78rem;padding:6px 12px">📥 Export</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Driver</th>
+            <th>Period</th>
+            <th>Trips</th>
+            <th>Gross Earnings</th>
+            <th>Deductions</th>
+            <th>Net Payout</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="pay-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -512,6 +551,74 @@ function showDpTab(tabId, el) {
 document.getElementById('dp-modal').addEventListener('click', function(e) { if (e.target===this) closeDpModal(); });
 
 renderDaxView();
+
+// ─── MAIN TABS (DRIVERS / PAYMENTS) ────────────────────────────────────────
+function showMainTab(tab, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('main-tab-drivers').style.display = tab === 'drivers' ? 'block' : 'none';
+  document.getElementById('main-tab-payments').style.display = tab === 'payments' ? 'block' : 'none';
+  if (tab === 'payments') renderPayments();
+}
+
+// ─── PAYMENTS TAB ──────────────────────────────────────────────────────────
+let payFilter = 'all';
+let paySearch = '';
+
+function renderPayments() {
+  const pd = paymentData;
+  const payGross = pd.reduce((a,p) => a + p.gross, 0);
+  const payDisbursed = pd.filter(p=>p.status==='completed').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payPending = pd.filter(p=>p.status==='pending'||p.status==='processing').reduce((a,p)=>a+(p.gross-p.deductions),0);
+  const payFailed = pd.filter(p=>p.status==='failed').length;
+  const payFmt = v => '$' + v.toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  document.getElementById('pay-kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon green">💰</div><div class="kpi-label">Gross Earnings MTD</div><div class="kpi-value">${payFmt(payGross)}</div><div class="kpi-change"><span>+4.7%</span> vs last month</div></div>
+    <div class="kpi-card"><div class="kpi-icon green">✅</div><div class="kpi-label">Disbursed</div><div class="kpi-value green">${payFmt(payDisbursed)}</div><div class="kpi-change"><span>${pd.filter(p=>p.status==='completed').length}</span> transactions</div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow">⏳</div><div class="kpi-label">Pending</div><div class="kpi-value yellow">${payFmt(payPending)}</div><div class="kpi-change">${pd.filter(p=>p.status==='pending'||p.status==='processing').length} transactions</div></div>
+    <div class="kpi-card"><div class="kpi-icon red">❌</div><div class="kpi-label">Failed</div><div class="kpi-value ${payFailed>0?'red':'green'}">${payFailed}</div><div class="kpi-change" style="color:${payFailed>0?'#EF4444':'#10B981'}">${payFailed>0?'Requires attention':'All clear'}</div></div>
+  `;
+  renderPayTable();
+}
+
+function renderPayTable() {
+  const statusColors = { completed:'#10B981', processing:'#3B82F6', pending:'#F97316', failed:'#EF4444' };
+  const statusLabels = { completed:'Completed', processing:'Processing', pending:'Pending', failed:'Failed' };
+  const q = paySearch.toLowerCase();
+
+  const rows = paymentData
+    .filter(p => payFilter === 'all' || p.status === payFilter)
+    .filter(p => !q || p.driver.toLowerCase().includes(q));
+
+  document.getElementById('pay-tbody').innerHTML = rows.map(p => {
+    const net = p.gross - p.deductions;
+    return `
+    <tr>
+      <td><div class="vehicle-info">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">${p.driver.split(' ').map(n=>n[0]).join('')}</div>
+        <div><div class="vehicle-plate">${p.driver}</div><div class="vehicle-model">${p.flag} ${p.city}</div></div>
+      </div></td>
+      <td>${p.period}</td>
+      <td>${p.trips}</td>
+      <td style="font-weight:600">$${p.gross.toLocaleString()}</td>
+      <td style="color:#EF4444">-$${p.deductions.toLocaleString()}</td>
+      <td style="font-weight:700;color:var(--primary)">$${net.toLocaleString()}</td>
+      <td><span class="pay-method-badge">${p.method}</span></td>
+      <td><span class="pay-status-badge ${p.status}">${statusLabels[p.status]}</span></td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${p.date}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-secondary)">No payments match filter</td></tr>';
+}
+
+function setPayFilter(f, el) {
+  payFilter = f;
+  document.querySelectorAll('#main-tab-payments .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPayTable();
+}
+
+function filterPayments(q) { paySearch = q; renderPayTable(); }
 </script>
 </body>
 </html>
